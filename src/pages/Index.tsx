@@ -15,16 +15,14 @@ import { UINavigationView } from '@/components/evyra/views/UINavigationView';
 import { UIOverlaysView } from '@/components/evyra/views/UIOverlaysView';
 import { UIMiscView } from '@/components/evyra/views/UIMiscView';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 
 const Index = () => {
   const [currentView, setCurrentView] = useState('marketplace');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [modalType, setModalType] = useState<string | null>(null);
 
-  const handleAction = (type: string) => {
-    setModalType(type);
-  };
+  const handleAction = (type: string) => setModalType(type);
 
   const renderView = () => {
     switch (currentView) {
@@ -52,14 +50,21 @@ const Index = () => {
         setCurrentView={setCurrentView}
         isOpen={sidebarOpen}
         setIsOpen={setSidebarOpen}
+        isMobileOpen={mobileMenuOpen}
+        setIsMobileOpen={setMobileMenuOpen}
       />
 
       <main className={cn(
         "transition-all duration-500 min-h-screen",
-        sidebarOpen ? 'pl-72' : 'pl-20'
+        "md:pl-72",
+        sidebarOpen ? 'md:pl-72' : 'md:pl-20',
+        "pl-0"
       )}>
-        <EvyraHeader sidebarOpen={sidebarOpen} />
-        <div className="p-6 md:p-10 max-w-7xl mx-auto">
+        <EvyraHeader
+          sidebarOpen={sidebarOpen}
+          onMobileMenuToggle={() => setMobileMenuOpen(true)}
+        />
+        <div className="p-4 md:p-6 lg:p-10 max-w-7xl mx-auto">
           {renderView()}
         </div>
       </main>

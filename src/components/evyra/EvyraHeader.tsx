@@ -1,17 +1,26 @@
 import React from 'react';
-import { Search, Activity } from 'lucide-react';
+import { Search, Activity, Moon, Sun, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/hooks/use-theme';
 
 interface EvyraHeaderProps {
   sidebarOpen: boolean;
+  onMobileMenuToggle?: () => void;
 }
 
-export const EvyraHeader: React.FC<EvyraHeaderProps> = ({ sidebarOpen }) => {
+export const EvyraHeader: React.FC<EvyraHeaderProps> = ({ sidebarOpen, onMobileMenuToggle }) => {
+  const { theme, toggleTheme } = useTheme();
+
   return (
-    <header className={cn(
-      "h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40 px-8 flex items-center justify-between"
-    )}>
-      <div className="flex items-center gap-6 flex-1">
+    <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 flex items-center justify-between">
+      <div className="flex items-center gap-4 flex-1">
+        {/* Mobile menu button */}
+        <button
+          onClick={onMobileMenuToggle}
+          className="p-2 text-muted-foreground hover:bg-accent rounded-xl transition-colors md:hidden"
+        >
+          <Menu size={22} />
+        </button>
         <div className="relative w-full max-w-md hidden md:block">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -20,7 +29,15 @@ export const EvyraHeader: React.FC<EvyraHeaderProps> = ({ sidebarOpen }) => {
           />
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 md:gap-3">
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="p-2.5 text-muted-foreground hover:bg-accent rounded-xl transition-colors"
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
         <button className="p-2.5 text-muted-foreground hover:bg-accent rounded-xl relative transition-colors">
           <Activity size={20} />
           <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border-2 border-card" />
