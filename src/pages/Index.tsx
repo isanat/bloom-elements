@@ -15,6 +15,37 @@ import { UINavigationView } from '@/components/evyra/views/UINavigationView';
 import { UIOverlaysView } from '@/components/evyra/views/UIOverlaysView';
 import { UIMiscView } from '@/components/evyra/views/UIMiscView';
 import { cn } from '@/lib/utils';
+import { X, ShieldCheck, Trash2, Briefcase } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+
+// Global Modal Controller for hire/delete/form actions
+const ModalController = ({ type, onClose }: { type: string; onClose: () => void }) => {
+  const content: Record<string, { title: string; desc: string; icon: React.ElementType; variant: 'primary' | 'destructive' | 'dark' }> = {
+    hire: { title: 'Propor Recrutamento', desc: 'Ao clicar em confirmar, os fundos serão colocados em Escrow seguro até a conclusão do projeto.', icon: ShieldCheck, variant: 'primary' },
+    delete: { title: 'Remover Candidato?', desc: 'Esta ação irá cancelar o processo de recrutamento em curso. Tem a certeza?', icon: Trash2, variant: 'destructive' },
+    form: { title: 'Publicar Nova Vaga', desc: 'Defina o orçamento e os requisitos para atrair os melhores talentos da rede.', icon: Briefcase, variant: 'dark' },
+  };
+  const c = content[type] || content.hire;
+  const Icon = c.icon;
+  const bgMap = { primary: 'bg-primary/10 text-primary', destructive: 'bg-destructive/10 text-destructive', dark: 'bg-secondary text-foreground' };
+  const btnMap = { primary: 'default' as const, destructive: 'destructive' as const, dark: 'dark' as const };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-foreground/50 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+      <div className="bg-card w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-elevated p-8 sm:p-10 relative animate-scale-in border border-border text-center" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-6 right-6 text-muted-foreground hover:text-foreground transition-all"><X size={20} /></button>
+        <div className={`w-16 h-16 ${bgMap[c.variant]} rounded-2xl flex items-center justify-center mb-6 mx-auto`}><Icon size={32} /></div>
+        <h2 className="text-2xl font-display font-black text-foreground tracking-tighter mb-2 uppercase">{c.title}</h2>
+        <p className="text-muted-foreground font-medium mb-8 leading-relaxed">{c.desc}</p>
+        <div className="flex gap-3">
+          <Button variant={btnMap[c.variant]} size="lg" className="flex-1" onClick={() => { toast.success('Processo iniciado com sucesso!'); onClose(); }}>Confirmar</Button>
+          <Button variant="outline" size="lg" onClick={onClose}>Cancelar</Button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Index = () => {
   const [currentView, setCurrentView] = useState('marketplace');
@@ -56,7 +87,6 @@ const Index = () => {
 
       <main className={cn(
         "transition-all duration-500 min-h-screen",
-        "md:pl-72",
         sidebarOpen ? 'md:pl-72' : 'md:pl-20',
         "pl-0"
       )}>
@@ -64,10 +94,12 @@ const Index = () => {
           sidebarOpen={sidebarOpen}
           onMobileMenuToggle={() => setMobileMenuOpen(true)}
         />
-        <div className="p-4 md:p-6 lg:p-10 max-w-7xl mx-auto">
+        <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto">
           {renderView()}
         </div>
       </main>
+
+      {modalType && <ModalController type={modalType} onClose={() => setModalType(null)} />}
     </div>
   );
 };
