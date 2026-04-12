@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { X, ShieldCheck, Trash2, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Global Modal Controller for hire/delete/form actions
 const ModalController = ({ type, onClose }: { type: string; onClose: () => void }) => {
@@ -32,8 +33,21 @@ const ModalController = ({ type, onClose }: { type: string; onClose: () => void 
   const btnMap = { primary: 'default' as const, destructive: 'destructive' as const, dark: 'dark' as const };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-foreground/50 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div className="bg-card w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-elevated p-8 sm:p-10 relative animate-scale-in border border-border text-center" onClick={e => e.stopPropagation()}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-foreground/50 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 60, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 40, scale: 0.95 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="bg-card w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-elevated p-8 sm:p-10 relative border border-border text-center"
+        onClick={e => e.stopPropagation()}
+      >
         <button onClick={onClose} className="absolute top-6 right-6 text-muted-foreground hover:text-foreground transition-all"><X size={20} /></button>
         <div className={`w-16 h-16 ${bgMap[c.variant]} rounded-2xl flex items-center justify-center mb-6 mx-auto`}><Icon size={32} /></div>
         <h2 className="text-2xl font-display font-black text-foreground tracking-tighter mb-2 uppercase">{c.title}</h2>
@@ -42,8 +56,8 @@ const ModalController = ({ type, onClose }: { type: string; onClose: () => void 
           <Button variant={btnMap[c.variant]} size="lg" className="flex-1" onClick={() => { toast.success('Processo iniciado com sucesso!'); onClose(); }}>Confirmar</Button>
           <Button variant="outline" size="lg" onClick={onClose}>Cancelar</Button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -95,11 +109,23 @@ const Index = () => {
           onMobileMenuToggle={() => setMobileMenuOpen(true)}
         />
         <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto">
-          {renderView()}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentView}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+            >
+              {renderView()}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
 
-      {modalType && <ModalController type={modalType} onClose={() => setModalType(null)} />}
+      <AnimatePresence>
+        {modalType && <ModalController type={modalType} onClose={() => setModalType(null)} />}
+      </AnimatePresence>
     </div>
   );
 };
