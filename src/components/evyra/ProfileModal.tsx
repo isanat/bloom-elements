@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Star, MapPin, ShieldCheck, MessageSquare, Calendar, Clock, Award, Heart, Phone, Mail, ChevronRight, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProfileModalProps {
   open: boolean;
@@ -25,9 +26,19 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ open, onClose, profi
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-foreground/50 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div
-        className="bg-card w-full max-w-lg rounded-t-3xl md:rounded-3xl shadow-elevated border border-border relative animate-scale-in max-h-[90vh] overflow-y-auto"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-foreground/50 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 80, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 60, scale: 0.95 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="bg-card w-full max-w-lg rounded-t-3xl md:rounded-3xl shadow-elevated border border-border relative max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Header with cover */}
@@ -135,8 +146,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ open, onClose, profi
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -164,9 +175,19 @@ export const ProposalDetailModal: React.FC<ProposalDetailModalProps> = ({ open, 
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-foreground/50 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div
-        className="bg-card w-full max-w-lg rounded-t-3xl md:rounded-3xl shadow-elevated border border-border relative animate-scale-in max-h-[90vh] overflow-y-auto"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-foreground/50 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 80, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 60, scale: 0.95 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="bg-card w-full max-w-lg rounded-t-3xl md:rounded-3xl shadow-elevated border border-border relative max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <div className="p-6 space-y-6">
@@ -237,8 +258,8 @@ export const ProposalDetailModal: React.FC<ProposalDetailModalProps> = ({ open, 
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
