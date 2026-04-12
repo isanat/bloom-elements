@@ -258,8 +258,8 @@ export const ProposalDetailModal: React.FC<ProposalDetailModalProps> = ({ open, 
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
