@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Star, MapPin, ShieldCheck, Filter, Plus, Search } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { SectionHeader } from '@/components/evyra/EvyraShared';
 import { ProfileModal } from '@/components/evyra/ProfileModal';
@@ -112,7 +113,15 @@ export const MarketplaceView = ({ onAction }: { onAction: (type: string) => void
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {filteredTalents.map((talent, i) => (
-          <TalentCard key={i} index={i + 1} talent={talent} onViewProfile={() => setSelectedProfile(i)} />
+          <motion.div
+            key={talent.name}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: i * 0.07, ease: 'easeOut' }}
+            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+          >
+            <TalentCard index={i + 1} talent={talent} onViewProfile={() => setSelectedProfile(i)} />
+          </motion.div>
         ))}
       </div>
 
