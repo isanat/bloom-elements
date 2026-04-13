@@ -69,6 +69,9 @@ const SectionLabel = ({ label, isOpen }: { label: string; isOpen: boolean }) => 
 const navItems = {
   main: [
     { id: 'marketplace', icon: Search, label: 'Explorar Talentos' },
+    { id: 'demandas', icon: Briefcase, label: 'Demandas', count: '3' },
+    { id: 'search-cuidadores', icon: Users, label: 'Procurar Cuidadores' },
+    { id: 'entrevistas', icon: Zap, label: 'Entrevistas' },
     { id: 'propostas', icon: FileText, label: 'Propostas', count: '2' },
     { id: 'chat', icon: MessageSquare, label: 'Mensagens', count: '5' },
   ],

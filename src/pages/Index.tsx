@@ -6,6 +6,9 @@ import { ProposalsView } from '@/components/evyra/views/ProposalsView';
 import { DatabaseView } from '@/components/evyra/views/DatabaseView';
 import { ChatView } from '@/components/evyra/views/ChatView';
 import { PaymentsView } from '@/components/evyra/views/PaymentsView';
+import { DemandasView } from '@/components/evyra/views/DemandasView';
+import { SearchCuidadoresView } from '@/components/evyra/views/SearchCuidadoresView';
+import { EntrevistasView } from '@/components/evyra/views/EntrevistasView';
 import { UIButtonsView } from '@/components/evyra/views/UIButtonsView';
 import { UIFormsView } from '@/components/evyra/views/UIFormsView';
 import { UICardsView } from '@/components/evyra/views/UICardsView';
@@ -72,6 +75,9 @@ const Index = () => {
   const renderView = () => {
     switch (currentView) {
       case 'marketplace': return <MarketplaceView onAction={handleAction} />;
+      case 'demandas': return <DemandasView />;
+      case 'search-cuidadores': return <SearchCuidadoresView />;
+      case 'entrevistas': return <EntrevistasView />;
       case 'propostas': return <ProposalsView />;
       case 'database': return <DatabaseView onAction={handleAction} />;
       case 'chat': return <ChatView />;
