@@ -76,8 +76,10 @@ const navItems = {
     { id: 'chat', icon: MessageSquare, label: 'Mensagens', count: '5' },
   ],
   recruit: [
+    { id: 'contratos', icon: FileText, label: 'Contratos', count: '1' },
     { id: 'database', icon: Users, label: 'Base de Dados' },
     { id: 'payments', icon: Wallet, label: 'Pagamentos & Escrow' },
+    { id: 'verificacao', icon: Settings, label: 'Verificação KYC' },
   ],
   uikit: [
     { id: 'ui-buttons', icon: Layers, label: 'Botões' },

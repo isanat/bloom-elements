@@ -9,6 +9,8 @@ import { PaymentsView } from '@/components/evyra/views/PaymentsView';
 import { DemandasView } from '@/components/evyra/views/DemandasView';
 import { SearchCuidadoresView } from '@/components/evyra/views/SearchCuidadoresView';
 import { EntrevistasView } from '@/components/evyra/views/EntrevistasView';
+import { ContratosView } from '@/components/evyra/views/ContratosView';
+import { VerificacaoView } from '@/components/evyra/views/VerificacaoView';
 import { UIButtonsView } from '@/components/evyra/views/UIButtonsView';
 import { UIFormsView } from '@/components/evyra/views/UIFormsView';
 import { UICardsView } from '@/components/evyra/views/UICardsView';
@@ -78,6 +80,8 @@ const Index = () => {
       case 'demandas': return <DemandasView />;
       case 'search-cuidadores': return <SearchCuidadoresView />;
       case 'entrevistas': return <EntrevistasView />;
+      case 'contratos': return <ContratosView />;
+      case 'verificacao': return <VerificacaoView />;
       case 'propostas': return <ProposalsView />;
       case 'database': return <DatabaseView onAction={handleAction} />;
       case 'chat': return <ChatView />;
