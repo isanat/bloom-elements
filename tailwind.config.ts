@@ -112,8 +112,10 @@ export const bloomPreset: Partial<Config> = {
   plugins: [require("tailwindcss-animate")],
 };
 
-// Default export for standalone usage
-export default {
+// Full config for standalone usage (used by this project's dev server)
+const config: Config = {
   ...bloomPreset,
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
-} satisfies Config;
+} as Config;
+
+export default config;
