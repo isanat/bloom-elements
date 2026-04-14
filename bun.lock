@@ -81,6 +81,12 @@
         "vite": "^5.4.19",
         "vitest": "^3.2.4",
       },
+      "peerDependencies": {
+        "react": ">=18.0.0",
+        "react-dom": ">=18.0.0",
+        "tailwindcss": ">=3.0.0",
+        "tailwindcss-animate": ">=1.0.0",
+      },
     },
   },
   "packages": {
@@ -1259,6 +1265,8 @@
     "@vue/compiler-core/estree-walker": ["estree-walker@2.0.2", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/estree-walker/-/estree-walker-2.0.2.tgz", {}, "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="],
 
     "@vue/language-core/minimatch": ["minimatch@9.0.5", "", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow=="],
+
+    "acorn-walk/acorn": ["acorn@8.16.0", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/acorn/-/acorn-8.16.0.tgz", { "bin": { "acorn": "bin/acorn" } }, "sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw=="],
 
     "agent-base/debug": ["debug@4.4.3", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/debug/-/debug-4.4.3.tgz", { "dependencies": { "ms": "^2.1.3" } }, "sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA=="],
 
