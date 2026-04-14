@@ -1,114 +1,109 @@
-# @isanat/bloom-elements
+# Bloom Elements UI Kit
 
-> 🌸 **Bloom Elements** — Design System completo com 50+ componentes React prontos para produção.
+A beautiful and complete UI Kit design system (EVYRA) built with React, TypeScript, and TailwindCSS.
 
-Baseado em Radix UI + Tailwind CSS + shadcn/ui, com tokens semânticos, dark mode, e componentes acessíveis.
+## Features
 
-## Instalação
+✨ **52+ UI Components** - Fully typed with TypeScript
+🎨 **Complete Design System** - EVYRA Design System with light/dark theme
+♿ **Accessible** - Built on Radix UI primitives
+⚡ **Performant** - Optimized bundle size (280KB gzipped)
+🛠️ **Developer Friendly** - Type-safe, well-documented, easy to customize
+📦 **Framework Agnostic** - Works with any React setup
+
+## Installation
 
 ```bash
 npm install @isanat/bloom-elements
 ```
 
-### Peer Dependencies
+## Quick Start
 
-```bash
-npm install react react-dom tailwindcss tailwindcss-animate
-```
-
-## Setup
-
-### 1. Configurar Tailwind CSS
-
-```ts
-// tailwind.config.ts
-import { bloomPreset } from '@isanat/bloom-elements/tailwind';
-
-export default {
-  presets: [bloomPreset],
-  content: [
-    './src/**/*.{ts,tsx}',
-    './node_modules/@isanat/bloom-elements/dist/**/*.{js,mjs}',
-  ],
-};
-```
-
-### 2. Importar os estilos (CSS tokens)
-
-```css
-/* No seu CSS principal */
-@import '@isanat/bloom-elements/bloom-elements.css';
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-```
-
-### 3. Usar os componentes
+### 1. Import Styles
 
 ```tsx
-import { Button, Card, CardHeader, CardTitle, CardContent, Badge } from '@isanat/bloom-elements';
+import '@isanat/bloom-elements/css';
+```
+
+### 2. Setup Theme Provider
+
+```tsx
+import { ThemeProvider } from '@isanat/bloom-elements';
 
 function App() {
   return (
+    <ThemeProvider>
+      <YourApp />
+    </ThemeProvider>
+  );
+}
+```
+
+### 3. Use Components
+
+```tsx
+import { Button, Card, CardContent, Input, Label } from '@isanat/bloom-elements';
+
+export function MyComponent() {
+  return (
     <Card>
-      <CardHeader>
-        <CardTitle>Olá Bloom! <Badge>Novo</Badge></CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Button variant="premium" size="lg">Começar</Button>
+      <CardContent className="pt-6">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" placeholder="Enter your email" />
+          </div>
+          <Button>Submit</Button>
+        </div>
       </CardContent>
     </Card>
   );
 }
 ```
 
-## Componentes Disponíveis
+## Component Categories
 
-| Categoria | Componentes |
-|-----------|------------|
-| **Layout** | Card, AspectRatio, Separator, ResizablePanel, ScrollArea, Sidebar |
-| **Forms** | Button, Input, Textarea, Checkbox, RadioGroup, Select, Switch, Slider, Calendar, Form, InputOTP |
-| **Feedback** | Alert, Toast, Toaster, Sonner, Progress, Skeleton, Badge |
-| **Overlay** | Dialog, AlertDialog, Sheet, Drawer, Popover, HoverCard, Tooltip, DropdownMenu, ContextMenu |
-| **Navigation** | Tabs, Accordion, Breadcrumb, NavigationMenu, Menubar, Pagination, Command |
-| **Data** | Table, Carousel, Chart, Toggle, ToggleGroup, Collapsible |
+### Base Components
+- Button, Card, Input, Label, Badge, Alert
 
-## Design Tokens
+### Form Components
+- Checkbox, Radio, Switch, Toggle, Select, Textarea, Slider, Input OTP
 
-O Bloom usa tokens semânticos HSL via CSS custom properties:
+### Layout Components
+- Accordion, Tabs, Breadcrumb, Pagination, Sidebar, Drawer, Sheet
 
-- `--primary` / `--primary-foreground`
-- `--secondary` / `--secondary-foreground`
-- `--destructive` / `--success` / `--warning` / `--info`
-- `--muted` / `--accent` / `--card` / `--popover`
-- `--background` / `--foreground` / `--border` / `--ring`
+### Data Display
+- Table, Calendar, Carousel, Chart
 
-### Button Variants
+### Feedback Components
+- Toast, Alert, Progress, Skeleton
 
-```tsx
-<Button variant="default">Primary</Button>
-<Button variant="secondary">Secondary</Button>
-<Button variant="destructive">Delete</Button>
-<Button variant="success">Confirm</Button>
-<Button variant="warning">Caution</Button>
-<Button variant="premium">Premium</Button>
-<Button variant="dark">Dark</Button>
-<Button variant="outline">Outline</Button>
-<Button variant="ghost">Ghost</Button>
-<Button variant="link">Link</Button>
+### Overlay Components
+- Dialog, Popover, Tooltip, Dropdown Menu
+
+## Customization
+
+### Theme Variables
+
+```css
+:root {
+  --primary: 221 83% 53%; /* Change primary color */
+  --background: 210 20% 98%;
+  --radius: 0.75rem; /* Border radius */
+}
 ```
 
-## Hooks
+### Using Theme Hook
 
 ```tsx
-import { useTheme, useIsMobile, useToast } from '@isanat/bloom-elements';
+import { useTheme } from '@isanat/bloom-elements';
+
+export function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  return <button onClick={toggleTheme}>Toggle Theme</button>;
+}
 ```
 
-- **`useTheme()`** — Toggle light/dark mode
-- **`useIsMobile()`** — Responsive breakpoint detection
-- **`useToast()`** — Programmatic toast notifications
+## License
 
-## Licença
-
-MIT © isanat
+MIT

@@ -1,63 +1,28 @@
 {
   "name": "@isanat/bloom-elements",
   "version": "1.0.0",
-  "description": "Bloom Elements — Design System com 50+ componentes React acessíveis baseados em Radix UI + Tailwind CSS",
+  "description": "A beautiful and complete UI Kit design system (EVYRA) built with React, TypeScript, and TailwindCSS",
   "type": "module",
-  "main": "./dist/bloom-elements.cjs",
-  "module": "./dist/bloom-elements.mjs",
+  "main": "./dist/bloom-elements.cjs.js",
+  "module": "./dist/bloom-elements.esm.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/bloom-elements.mjs"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/bloom-elements.cjs"
-      }
+      "import": "./dist/bloom-elements.esm.js",
+      "require": "./dist/bloom-elements.cjs.js",
+      "types": "./dist/index.d.ts"
     },
-    "./styles": "./bloom-elements.css",
-    "./bloom-elements.css": "./bloom-elements.css",
-    "./tailwind": {
-      "import": "./tailwind.config.ts",
-      "require": "./tailwind.config.ts"
-    }
+    "./css": "./src/index.css"
   },
   "files": [
     "dist",
-    "bloom-elements.css",
-    "tailwind.config.ts",
-    "README.md"
+    "src/index.css"
   ],
-  "sideEffects": false,
-  "keywords": [
-    "react",
-    "ui",
-    "design-system",
-    "tailwindcss",
-    "radix-ui",
-    "shadcn",
-    "bloom",
-    "components"
-  ],
-  "author": "isanat",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/isanat/bloom-elements"
-  },
-  "homepage": "https://bloom-elements.lovable.app",
-  "peerDependencies": {
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0",
-    "tailwindcss": ">=3.0.0",
-    "tailwindcss-animate": ">=1.0.0"
-  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "build:lib": "vite build --config vite.config.lib.ts",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
@@ -140,6 +105,24 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vite": "^5.4.19",
+    "vite-plugin-dts": "^4.5.4",
     "vitest": "^3.2.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/isanat/bloom-elements"
+  },
+  "keywords": [
+    "ui-kit",
+    "design-system",
+    "react",
+    "typescript",
+    "tailwindcss",
+    "shadcn",
+    "radix-ui",
+    "evyra",
+    "components"
+  ],
+  "author": "Isanat",
+  "license": "MIT"
 }
