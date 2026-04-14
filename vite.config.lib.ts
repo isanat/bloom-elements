@@ -1,10 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
-import { glob } from 'glob'
 import dts from 'vite-plugin-dts'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
@@ -17,20 +15,41 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'BloomElements',
-      fileName: (format) => `bloom-elements.${format === 'es' ? 'esm' : 'cjs'}.js`,
+      entry: {
+        'bloom-elements': path.resolve(__dirname, 'src/index.ts'),
+        'tailwind.config': path.resolve(__dirname, 'tailwind.config.ts'),
+      },
       formats: ['es', 'cjs'],
+      fileName: (format, entryName) => {
+        const ext = format === 'es' ? 'js' : 'cjs'
+        if (entryName === 'bloom-elements') {
+          return `bloom-elements.${format === 'es' ? 'esm' : 'cjs'}.js`
+        }
+        return `${entryName}.${ext}`
+      },
     },
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: [
+        'react',
+        'react-dom',
+        'react/jsx-runtime',
+        // Don't bundle these — consumer's project provides them
+        'framer-motion',
+        'react-hook-form',
+        '@hookform/resolvers',
+        '@hookform/resolvers/zod',
+        'zod',
+        'next-themes',
+        'react-router-dom',
+        '@tanstack/react-query',
+      ],
       output: {
-        // Provide global variables to use in the UMD build
-        // for externalized deps
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
         },
+        // Preserve module structure for tree-shaking
+        preserveModules: false,
       },
     },
     minify: 'esbuild',
