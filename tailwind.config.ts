@@ -1,9 +1,15 @@
 import type { Config } from "tailwindcss";
 
-export default {
+/**
+ * Bloom Elements — Tailwind CSS Preset
+ * Use this preset in your tailwind.config to get all Bloom design tokens.
+ *
+ * Usage:
+ *   import { bloomPreset } from '@isanat/bloom-elements/tailwind';
+ *   export default { presets: [bloomPreset], content: [...] }
+ */
+export const bloomPreset: Partial<Config> = {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
-  prefix: "",
   theme: {
     container: {
       center: true,
@@ -104,4 +110,10 @@ export default {
     },
   },
   plugins: [require("tailwindcss-animate")],
+};
+
+// Default export for standalone usage
+export default {
+  ...bloomPreset,
+  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
 } satisfies Config;
