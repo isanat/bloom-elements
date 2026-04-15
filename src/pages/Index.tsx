@@ -85,6 +85,7 @@ const Index = () => {
       case 'entrevistas': return <EntrevistasView />;
       case 'contratos': return <ContratosView />;
       case 'verificacao': return <VerificacaoView />;
+      case 'profile': return <ProfileView />;
       case 'propostas': return <ProposalsView />;
       case 'database': return <DatabaseView onAction={handleAction} />;
       case 'chat': return <ChatView />;
