@@ -68,6 +68,7 @@ const SectionLabel = ({ label, isOpen }: { label: string; isOpen: boolean }) => 
 
 const navItems = {
   main: [
+    { id: 'dashboard', icon: BarChart3, label: 'Dashboard' },
     { id: 'marketplace', icon: Search, label: 'Explorar Talentos' },
     { id: 'demandas', icon: Briefcase, label: 'Demandas', count: '3' },
     { id: 'search-cuidadores', icon: Users, label: 'Procurar Cuidadores' },
@@ -80,6 +81,7 @@ const navItems = {
     { id: 'database', icon: Users, label: 'Base de Dados' },
     { id: 'payments', icon: Wallet, label: 'Pagamentos & Escrow' },
     { id: 'verificacao', icon: Settings, label: 'Verificação KYC' },
+    { id: 'profile', icon: Users, label: 'Meu Perfil' },
   ],
   uikit: [
     { id: 'ui-buttons', icon: Layers, label: 'Botões' },

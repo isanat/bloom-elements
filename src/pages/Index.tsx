@@ -11,6 +11,8 @@ import { SearchCuidadoresView } from '@/components/evyra/views/SearchCuidadoresV
 import { EntrevistasView } from '@/components/evyra/views/EntrevistasView';
 import { ContratosView } from '@/components/evyra/views/ContratosView';
 import { VerificacaoView } from '@/components/evyra/views/VerificacaoView';
+import { DashboardView } from '@/components/evyra/views/DashboardView';
+import { ProfileView } from '@/components/evyra/views/ProfileView';
 import { UIButtonsView } from '@/components/evyra/views/UIButtonsView';
 import { UIFormsView } from '@/components/evyra/views/UIFormsView';
 import { UICardsView } from '@/components/evyra/views/UICardsView';
@@ -67,7 +69,7 @@ const ModalController = ({ type, onClose }: { type: string; onClose: () => void 
 };
 
 const Index = () => {
-  const [currentView, setCurrentView] = useState('marketplace');
+  const [currentView, setCurrentView] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [modalType, setModalType] = useState<string | null>(null);
@@ -76,12 +78,14 @@ const Index = () => {
 
   const renderView = () => {
     switch (currentView) {
+      case 'dashboard': return <DashboardView />;
       case 'marketplace': return <MarketplaceView onAction={handleAction} />;
       case 'demandas': return <DemandasView />;
       case 'search-cuidadores': return <SearchCuidadoresView />;
       case 'entrevistas': return <EntrevistasView />;
       case 'contratos': return <ContratosView />;
       case 'verificacao': return <VerificacaoView />;
+      case 'profile': return <ProfileView />;
       case 'propostas': return <ProposalsView />;
       case 'database': return <DatabaseView onAction={handleAction} />;
       case 'chat': return <ChatView />;
