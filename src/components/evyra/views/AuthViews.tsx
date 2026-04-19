@@ -1,1 +1,2 @@
-// FORMAT_TEST_XYZ
+// TEST DIRECT COMMIT
+const test = true;
