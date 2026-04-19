@@ -1,2 +1,2 @@
-// TEST
-console.log("hello");
+// TEST2
+const x = 42;
