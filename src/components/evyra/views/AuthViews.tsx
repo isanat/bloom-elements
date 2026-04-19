@@ -1,2 +1,1 @@
-// TEST2
-const x = 42;
+// CAPTURE_TEST_MARKER
