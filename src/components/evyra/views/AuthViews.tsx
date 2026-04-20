@@ -10,16 +10,34 @@ const LOGO = () => (
 );
 
 // ── LOGIN ────────────────────────────────────────────────────
-export const LoginView = ({ onNavigate }: { onNavigate?: (v: string) => void }) => {
+export const LoginView = ({
+  onNavigate,
+  onSubmit,
+}: {
+  onNavigate?: (v: string) => void;
+  onSubmit?: (email: string, password: string) => Promise<void>;
+}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => { setLoading(false); toast.success('Login efetuado!'); onNavigate?.('dashboard'); }, 1200);
+    try {
+      if (onSubmit) {
+        await onSubmit(email, password);
+      } else {
+        await new Promise(r => setTimeout(r, 1200));
+        toast.success('Login efetuado!');
+        onNavigate?.('dashboard');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -99,7 +117,13 @@ export const LoginView = ({ onNavigate }: { onNavigate?: (v: string) => void }) 
 // ── REGISTER ─────────────────────────────────────────────────
 type Role = 'FAMILY' | 'CAREGIVER';
 
-export const RegisterView = ({ onNavigate }: { onNavigate?: (v: string) => void }) => {
+export const RegisterView = ({
+  onNavigate,
+  onSubmitRegister,
+}: {
+  onNavigate?: (v: string) => void;
+  onSubmitRegister?: (data: { name: string; email: string; phone: string; password: string; role: 'FAMILY' | 'CAREGIVER' }) => Promise<void>;
+}) => {
   const [step, setStep]       = useState(1);
   const [role, setRole]       = useState<Role>('FAMILY');
   const [showPass, setShowPass] = useState(false);
@@ -108,16 +132,24 @@ export const RegisterView = ({ onNavigate }: { onNavigate?: (v: string) => void 
   const [form, setForm]       = useState({ name: '', email: '', phone: '', password: '', confirm: '' });
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => setForm(p => ({ ...p, [k]: e.target.value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!acceptTerms) { toast.error('Aceite os termos para continuar'); return; }
     if (form.password !== form.confirm) { toast.error('As palavras-passe não coincidem'); return; }
     setLoading(true);
-    setTimeout(() => {
+    try {
+      if (onSubmitRegister) {
+        await onSubmitRegister({ name: form.name, email: form.email, phone: form.phone, password: form.password, role });
+      } else {
+        await new Promise(r => setTimeout(r, 1200));
+        toast.success('Conta criada!');
+        onNavigate?.(role === 'FAMILY' ? 'family-setup' : 'profile-setup');
+      }
+    } catch (error) {
+      console.error('Register error:', error);
+    } finally {
       setLoading(false);
-      toast.success('Conta criada!');
-      onNavigate?.(role === 'FAMILY' ? 'family-setup' : 'profile-setup');
-    }, 1200);
+    }
   };
 
   const roles: { id: Role; icon: React.ElementType; title: string; desc: string; tag: string; tagClass: string }[] = [
