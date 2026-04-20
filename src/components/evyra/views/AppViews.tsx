@@ -21,13 +21,18 @@ const MOCK_TX: Transaction[] = [
   { id:7, type:'credit', desc:'Pagamento recebido — Contrato #1035', amount:400, date:'2026-04-08', status:'COMPLETED' },
 ];
 
-export const WalletView = () => {
+export const WalletView = ({
+  transactions,
+}: {
+  transactions?: Transaction[];
+} = {}) => {
   const [filter, setFilter] = useState<'all' | 'credit' | 'debit'>('all');
-  const filtered = filter === 'all' ? MOCK_TX : MOCK_TX.filter(t => t.type === filter);
-  const available = MOCK_TX.filter(t => t.status === 'COMPLETED' && t.type === 'credit').reduce((s,t) => s+t.amount, 0)
-                  - MOCK_TX.filter(t => t.status === 'COMPLETED' && t.type === 'debit').reduce((s,t) => s+t.amount, 0);
-  const escrow    = MOCK_TX.filter(t => t.status === 'PENDING').reduce((s,t) => s+t.amount, 0);
-  const total     = MOCK_TX.filter(t => t.type === 'credit').reduce((s,t) => s+t.amount, 0);
+  const data = transactions || MOCK_TX;
+  const filtered = filter === 'all' ? data : data.filter(t => t.type === filter);
+  const available = data.filter(t => t.status === 'COMPLETED' && t.type === 'credit').reduce((s,t) => s+t.amount, 0)
+                  - data.filter(t => t.status === 'COMPLETED' && t.type === 'debit').reduce((s,t) => s+t.amount, 0);
+  const escrow    = data.filter(t => t.status === 'PENDING').reduce((s,t) => s+t.amount, 0);
+  const total     = data.filter(t => t.type === 'credit').reduce((s,t) => s+t.amount, 0);
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in">
@@ -133,11 +138,23 @@ const MOCK_NOTIFS: Notification[] = [
   { id:6, type:'contract_created',  title:'Nova Proposta',         msg:'Família Moreira propôs um contrato. Clique para ver.', read:true, date:'2026-04-11T09:15:00' },
 ];
 
-export const NotificacoesView = () => {
-  const [notifs, setNotifs] = useState(MOCK_NOTIFS);
+export const NotificacoesView = ({
+  notifications,
+  onMarkAsRead,
+}: {
+  notifications?: Notification[];
+  onMarkAsRead?: (id?: number) => void;
+} = {}) => {
+  const [notifs, setNotifs] = useState(notifications || MOCK_NOTIFS);
   const unread = notifs.filter(n => !n.read).length;
-  const markAll = () => setNotifs(ns => ns.map(n => ({ ...n, read: true })));
-  const markOne = (id: number) => setNotifs(ns => ns.map(n => n.id === id ? { ...n, read: true } : n));
+  const markAll = () => {
+    setNotifs(ns => ns.map(n => ({ ...n, read: true })));
+    onMarkAsRead?.();
+  };
+  const markOne = (id: number) => {
+    setNotifs(ns => ns.map(n => n.id === id ? { ...n, read: true } : n));
+    onMarkAsRead?.(id);
+  };
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in">
