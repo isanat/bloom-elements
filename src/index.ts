@@ -71,9 +71,6 @@ export { WalletView, NotificacoesView, CuidadorDetailView } from "./components/e
 export { FamilySetupView, KYCView } from "./components/evyra/views/OnboardingViews";
 export { AdminDashboardView, HelpCenterView, NovaDemandaView, NovoContratoView, ProposalFlowView } from "./components/evyra/views/FlowViews";
 
-// Navigation
-export { NavLink } from "./components/NavLink";
-
 // Hooks
 export { useTheme, ThemeProvider } from "./hooks/use-theme";
 export { useToast, toast } from "./hooks/use-toast";
