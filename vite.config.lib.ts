@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     dts({
       include: ['src'],
-      exclude: ['src/main.tsx', 'src/App.tsx', 'src/pages/**', 'src/components/evyra/views/**'],
+      exclude: ['src/main.tsx', 'src/App.tsx', 'src/pages/**'],
       outDir: 'dist',
       tsconfigPath: './tsconfig.json',
     }),

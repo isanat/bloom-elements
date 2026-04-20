@@ -65,6 +65,12 @@ export { EvyraSidebar } from "./components/evyra/EvyraSidebar";
 export { ProfileModal } from "./components/evyra/ProfileModal";
 export { SectionHeader, DocCard, StatBlock } from "./components/evyra/EvyraShared";
 
+// Evyra Views (full page components)
+export { LoginView, RegisterView } from "./components/evyra/views/AuthViews";
+export { WalletView, NotificacoesView, CuidadorDetailView } from "./components/evyra/views/AppViews";
+export { FamilySetupView, KYCView } from "./components/evyra/views/OnboardingViews";
+export { AdminDashboardView, HelpCenterView, NovaDemandaView, NovoContratoView, ProposalFlowView } from "./components/evyra/views/FlowViews";
+
 // Navigation
 export { NavLink } from "./components/NavLink";
 
