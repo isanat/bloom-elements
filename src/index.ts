@@ -70,6 +70,10 @@ export { LoginView, RegisterView } from "./components/evyra/views/AuthViews";
 export { WalletView, NotificacoesView, CuidadorDetailView } from "./components/evyra/views/AppViews";
 export { FamilySetupView, KYCView } from "./components/evyra/views/OnboardingViews";
 export { AdminDashboardView, HelpCenterView, NovaDemandaView, NovoContratoView, ProposalFlowView } from "./components/evyra/views/FlowViews";
+export { ChatView } from "./components/evyra/views/ChatView";
+export { DashboardView } from "./components/evyra/views/DashboardView";
+export { ContratosView } from "./components/evyra/views/ContratosView";
+export { EntrevistasView } from "./components/evyra/views/EntrevistasView";
 
 // Hooks
 export { useTheme, ThemeProvider } from "./hooks/use-theme";
