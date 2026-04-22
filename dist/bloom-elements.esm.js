@@ -26648,27 +26648,33 @@ const RX = ({ open: e, onClose: t, profile: r }) => {
   { label: "Ativar conta (pagamento)", href: "#", icon: ga },
   { label: "Completar verificação KYC", href: "#", icon: wn },
   { label: "Completar perfil do familiar", href: "#", icon: er }
-], HX = () => {
-  const [e, t] = le("caregiver"), r = e === "caregiver" ? Ym.caregiver : Ym.family, n = e === "caregiver" ? tq : rq, o = e === "caregiver" ? nq : oq;
+], HX = ({
+  role: e = "caregiver",
+  showRoleToggle: t = !1,
+  onRoleChange: r
+} = {}) => {
+  const [n, o] = le(e), a = (d) => {
+    o(d), r == null || r(d);
+  }, i = n === "caregiver" ? Ym.caregiver : Ym.family, s = n === "caregiver" ? tq : rq, c = n === "caregiver" ? nq : oq;
   return /* @__PURE__ */ w("div", { className: "space-y-6 sm:space-y-8 animate-fade-in", children: [
     /* @__PURE__ */ l("div", { className: "flex items-center gap-3", children: /* @__PURE__ */ l(hr, { title: "Dashboard", desc: "Visão geral da sua atividade na plataforma." }) }),
-    /* @__PURE__ */ l("div", { className: "flex gap-2", children: ["caregiver", "family"].map((a) => /* @__PURE__ */ l(
+    t && /* @__PURE__ */ l("div", { className: "flex gap-2", children: ["caregiver", "family"].map((d) => /* @__PURE__ */ l(
       "button",
       {
-        onClick: () => t(a),
-        className: `px-4 py-2 rounded-2xl text-[10px] font-display font-bold uppercase tracking-widest transition-all ${e === a ? "bg-primary text-primary-foreground shadow-md" : "bg-card border border-border text-muted-foreground hover:border-primary/40"}`,
-        children: a === "caregiver" ? "👨‍⚕️ Cuidador" : "👨‍👩‍👧 Família"
+        onClick: () => a(d),
+        className: `px-4 py-2 rounded-2xl text-[10px] font-display font-bold uppercase tracking-widest transition-all ${n === d ? "bg-primary text-primary-foreground shadow-md" : "bg-card border border-border text-muted-foreground hover:border-primary/40"}`,
+        children: d === "caregiver" ? "👨‍⚕️ Cuidador" : "👨‍👩‍👧 Família"
       },
-      a
+      d
     )) }),
     /* @__PURE__ */ w(Se.div, { variants: JY, initial: "hidden", animate: "show", children: [
       /* @__PURE__ */ l(Se.div, { variants: Ln, className: "bg-card rounded-3xl p-5 sm:p-7 border border-border shadow-card", children: /* @__PURE__ */ w("div", { className: "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3", children: [
         /* @__PURE__ */ w("div", { children: [
           /* @__PURE__ */ w("h2", { className: "text-2xl sm:text-3xl font-display font-black text-foreground tracking-tighter leading-none uppercase", children: [
             "Olá, ",
-            e === "caregiver" ? "Helena" : "João"
+            n === "caregiver" ? "Helena" : "João"
           ] }),
-          /* @__PURE__ */ l("p", { className: "text-sm text-muted-foreground font-medium mt-1", children: e === "caregiver" ? "Enfermeira Especializada" : "Gestor Familiar" })
+          /* @__PURE__ */ l("p", { className: "text-sm text-muted-foreground font-medium mt-1", children: n === "caregiver" ? "Enfermeira Especializada" : "Gestor Familiar" })
         ] }),
         /* @__PURE__ */ w("span", { className: "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-display font-bold uppercase tracking-widest bg-success/10 text-success border border-success/30 w-fit", children: [
           /* @__PURE__ */ l(md, { size: 12 }),
@@ -26676,13 +26682,13 @@ const RX = ({ open: e, onClose: t, profile: r }) => {
         ] })
       ] }) }),
       /* @__PURE__ */ w(Se.div, { variants: Ln, className: "grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mt-5", children: [
-        /* @__PURE__ */ l(ii, { label: "Contratos Ativos", value: String(r.activeContracts), icon: pt, colorClass: "text-primary" }),
-        /* @__PURE__ */ l(ii, { label: "Horas Totais", value: `${r.totalHours}h`, icon: lo, colorClass: "text-warning" }),
-        /* @__PURE__ */ l(ii, { label: "Avaliação", value: String(r.rating), icon: ha, colorClass: "text-info" }),
-        /* @__PURE__ */ l(ii, { label: "Avaliações", value: String(r.totalReviews), icon: er, colorClass: "text-success" })
+        /* @__PURE__ */ l(ii, { label: "Contratos Ativos", value: String(i.activeContracts), icon: pt, colorClass: "text-primary" }),
+        /* @__PURE__ */ l(ii, { label: "Horas Totais", value: `${i.totalHours}h`, icon: lo, colorClass: "text-warning" }),
+        /* @__PURE__ */ l(ii, { label: "Avaliação", value: String(i.rating), icon: ha, colorClass: "text-info" }),
+        /* @__PURE__ */ l(ii, { label: "Avaliações", value: String(i.totalReviews), icon: er, colorClass: "text-success" })
       ] }),
       /* @__PURE__ */ w(Se.div, { variants: Ln, className: "grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5", children: [
-        e === "family" ? /* @__PURE__ */ l(
+        n === "family" ? /* @__PURE__ */ l(
           "div",
           {
             className: "bg-card rounded-3xl p-5 sm:p-7 border border-border shadow-card hover:shadow-elevated hover:border-primary/30 transition-all cursor-pointer group",
@@ -26738,45 +26744,45 @@ const RX = ({ open: e, onClose: t, profile: r }) => {
           }
         )
       ] }),
-      o.length > 0 && /* @__PURE__ */ l(Se.div, { variants: Ln, className: "mt-5", children: /* @__PURE__ */ l(Yl, { title: "Próximos Passos", children: /* @__PURE__ */ l("div", { className: "space-y-3", children: o.map((a, i) => /* @__PURE__ */ w(
+      c.length > 0 && /* @__PURE__ */ l(Se.div, { variants: Ln, className: "mt-5", children: /* @__PURE__ */ l(Yl, { title: "Próximos Passos", children: /* @__PURE__ */ l("div", { className: "space-y-3", children: c.map((d, f) => /* @__PURE__ */ w(
         "div",
         {
           className: "flex items-center justify-between p-4 bg-secondary rounded-2xl border border-border/50 hover:border-warning/30 transition-all cursor-pointer group",
-          onClick: () => ye.info(a.label),
+          onClick: () => ye.info(d.label),
           children: [
             /* @__PURE__ */ w("div", { className: "flex items-center gap-3", children: [
-              /* @__PURE__ */ l("div", { className: "w-9 h-9 bg-warning/10 rounded-xl flex items-center justify-center text-warning", children: /* @__PURE__ */ l(a.icon, { size: 16 }) }),
-              /* @__PURE__ */ l("span", { className: "text-sm font-display font-bold text-foreground", children: a.label })
+              /* @__PURE__ */ l("div", { className: "w-9 h-9 bg-warning/10 rounded-xl flex items-center justify-center text-warning", children: /* @__PURE__ */ l(d.icon, { size: 16 }) }),
+              /* @__PURE__ */ l("span", { className: "text-sm font-display font-bold text-foreground", children: d.label })
             ] }),
             /* @__PURE__ */ l(Gr, { size: 16, className: "text-muted-foreground group-hover:text-warning transition-colors" })
           ]
         },
-        i
+        f
       )) }) }) }),
-      /* @__PURE__ */ l(Se.div, { variants: Ln, className: "mt-5", children: /* @__PURE__ */ l(Yl, { title: "Benefícios da Plataforma", children: /* @__PURE__ */ l("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4", children: n.map((a, i) => /* @__PURE__ */ w("div", { className: "bg-secondary rounded-2xl p-4 sm:p-5 text-center hover:bg-primary/5 transition-all group", children: [
-        /* @__PURE__ */ l("div", { className: "w-10 h-10 rounded-2xl bg-card flex items-center justify-center text-primary mx-auto mb-3 group-hover:scale-110 transition-transform border border-border", children: /* @__PURE__ */ l(a.icon, { size: 18 }) }),
-        /* @__PURE__ */ l("p", { className: "text-xs font-display font-black text-foreground uppercase", children: a.title }),
-        /* @__PURE__ */ l("p", { className: "text-[10px] text-muted-foreground font-medium mt-1", children: a.sub })
-      ] }, i)) }) }) }),
+      /* @__PURE__ */ l(Se.div, { variants: Ln, className: "mt-5", children: /* @__PURE__ */ l(Yl, { title: "Benefícios da Plataforma", children: /* @__PURE__ */ l("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4", children: s.map((d, f) => /* @__PURE__ */ w("div", { className: "bg-secondary rounded-2xl p-4 sm:p-5 text-center hover:bg-primary/5 transition-all group", children: [
+        /* @__PURE__ */ l("div", { className: "w-10 h-10 rounded-2xl bg-card flex items-center justify-center text-primary mx-auto mb-3 group-hover:scale-110 transition-transform border border-border", children: /* @__PURE__ */ l(d.icon, { size: 18 }) }),
+        /* @__PURE__ */ l("p", { className: "text-xs font-display font-black text-foreground uppercase", children: d.title }),
+        /* @__PURE__ */ l("p", { className: "text-[10px] text-muted-foreground font-medium mt-1", children: d.sub })
+      ] }, f)) }) }) }),
       /* @__PURE__ */ l(Se.div, { variants: Ln, className: "mt-5", children: /* @__PURE__ */ w(Yl, { title: "Atividade Recente", children: [
         /* @__PURE__ */ w("div", { className: "flex justify-between items-center mb-4", children: [
           /* @__PURE__ */ l("p", { className: "text-[10px] font-display font-black text-muted-foreground uppercase tracking-widest", children: "Últimos movimentos" }),
           /* @__PURE__ */ l(ve, { variant: "link", size: "sm", onClick: () => ye.info("Ver todo o histórico"), children: "Ver Todos" })
         ] }),
-        /* @__PURE__ */ l("div", { className: "space-y-3", children: eq.map((a, i) => /* @__PURE__ */ w("div", { className: "flex items-center justify-between p-3 sm:p-4 bg-secondary rounded-2xl border border-border/50", children: [
+        /* @__PURE__ */ l("div", { className: "space-y-3", children: eq.map((d, f) => /* @__PURE__ */ w("div", { className: "flex items-center justify-between p-3 sm:p-4 bg-secondary rounded-2xl border border-border/50", children: [
           /* @__PURE__ */ w("div", { className: "flex items-center gap-3", children: [
-            /* @__PURE__ */ l("div", { className: `w-9 h-9 rounded-xl flex items-center justify-center ${a.type === "credit" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`, children: a.type === "credit" ? /* @__PURE__ */ l(Oh, { size: 16 }) : /* @__PURE__ */ l(Dh, { size: 16 }) }),
+            /* @__PURE__ */ l("div", { className: `w-9 h-9 rounded-xl flex items-center justify-center ${d.type === "credit" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`, children: d.type === "credit" ? /* @__PURE__ */ l(Oh, { size: 16 }) : /* @__PURE__ */ l(Dh, { size: 16 }) }),
             /* @__PURE__ */ w("div", { children: [
-              /* @__PURE__ */ l("p", { className: "text-sm font-display font-bold text-foreground", children: a.description }),
-              /* @__PURE__ */ l("p", { className: "text-[10px] text-muted-foreground font-medium", children: new Date(a.date).toLocaleDateString("pt-PT") })
+              /* @__PURE__ */ l("p", { className: "text-sm font-display font-bold text-foreground", children: d.description }),
+              /* @__PURE__ */ l("p", { className: "text-[10px] text-muted-foreground font-medium", children: new Date(d.date).toLocaleDateString("pt-PT") })
             ] })
           ] }),
-          /* @__PURE__ */ w("span", { className: `text-sm font-display font-black ${a.type === "credit" ? "text-success" : "text-destructive"}`, children: [
-            a.type === "credit" ? "+" : "-",
-            a.amount,
+          /* @__PURE__ */ w("span", { className: `text-sm font-display font-black ${d.type === "credit" ? "text-success" : "text-destructive"}`, children: [
+            d.type === "credit" ? "+" : "-",
+            d.amount,
             "€"
           ] })
-        ] }, i)) })
+        ] }, f)) })
       ] }) })
     ] })
   ] });
