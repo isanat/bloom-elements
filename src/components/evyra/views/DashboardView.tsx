@@ -65,16 +65,17 @@ export const DashboardView = ({
   showRoleToggle?: boolean
   onRoleChange?: (role: 'caregiver' | 'family') => void
 } = {}) => {
-  const [selectedRole, setSelectedRole] = useState<'caregiver' | 'family'>(role);
+  const [selectedRole, setSelectedRole] = useState<'caregiver' | 'family'>(showRoleToggle ? role : 'caregiver');
+  const displayRole = showRoleToggle ? selectedRole : role;
 
   const handleRoleChange = (newRole: 'caregiver' | 'family') => {
     setSelectedRole(newRole);
     onRoleChange?.(newRole);
   };
 
-  const stats = selectedRole === 'caregiver' ? mockStats.caregiver : mockStats.family;
-  const benefits = selectedRole === 'caregiver' ? caregiverBenefits : familyBenefits;
-  const pendingSteps = selectedRole === 'caregiver' ? pendingStepsCuidador : pendingStepsFamily;
+  const stats = displayRole === 'caregiver' ? mockStats.caregiver : mockStats.family;
+  const benefits = displayRole === 'caregiver' ? caregiverBenefits : familyBenefits;
+  const pendingSteps = displayRole === 'caregiver' ? pendingStepsCuidador : pendingStepsFamily;
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in">
@@ -90,7 +91,7 @@ export const DashboardView = ({
               key={r}
               onClick={() => handleRoleChange(r)}
               className={`px-4 py-2 rounded-2xl text-[10px] font-display font-bold uppercase tracking-widest transition-all ${
-                selectedRole === r
+                displayRole === r
                   ? 'bg-primary text-primary-foreground shadow-md'
                   : 'bg-card border border-border text-muted-foreground hover:border-primary/40'
               }`}
@@ -107,10 +108,10 @@ export const DashboardView = ({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-2xl sm:text-3xl font-display font-black text-foreground tracking-tighter leading-none uppercase">
-                Olá, {selectedRole === 'caregiver' ? 'Helena' : 'João'}
+                Olá, {displayRole === 'caregiver' ? 'Helena' : 'João'}
               </h2>
               <p className="text-sm text-muted-foreground font-medium mt-1">
-                {selectedRole === 'caregiver' ? 'Enfermeira Especializada' : 'Gestor Familiar'}
+                {displayRole === 'caregiver' ? 'Enfermeira Especializada' : 'Gestor Familiar'}
               </p>
             </div>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-display font-bold uppercase tracking-widest bg-success/10 text-success border border-success/30 w-fit">
@@ -129,7 +130,7 @@ export const DashboardView = ({
 
         {/* Quick Actions */}
         <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5">
-          {selectedRole === 'family' ? (
+          {displayRole === 'family' ? (
             <div
               className="bg-card rounded-3xl p-5 sm:p-7 border border-border shadow-card hover:shadow-elevated hover:border-primary/30 transition-all cursor-pointer group"
               onClick={() => toast.info('Navegar para pesquisa de cuidadores')}
