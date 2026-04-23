@@ -21,10 +21,35 @@ export const LoginView = ({
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  const validateEmail = (e: string) => {
+    if (!e) return 'Email é obrigatório';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return 'Email inválido';
+    return '';
+  };
+
+  const validatePassword = (p: string) => {
+    if (!p) return 'Palavra-passe é obrigatória';
+    if (p.length < 6) return 'Mínimo 6 caracteres';
+    return '';
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate
+    const emailError = validateEmail(email);
+    const passwordError = validatePassword(password);
+
+    if (emailError || passwordError) {
+      setErrors({ email: emailError, password: passwordError });
+      toast.error('Por favor, verifique os dados');
+      return;
+    }
+
     setLoading(true);
+    setErrors({});
     try {
       if (onSubmit) {
         await onSubmit(email, password);
@@ -34,6 +59,7 @@ export const LoginView = ({
         onNavigate?.('dashboard');
       }
     } catch (error) {
+      setErrors({ email: 'Email ou palavra-passe incorretos' });
       console.error('Login error:', error);
     } finally {
       setLoading(false);
@@ -80,34 +106,47 @@ export const LoginView = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <label htmlFor="login-email" className="text-[10px] font-display font-black uppercase tracking-widest text-foreground">Email</label>
-              <div className="relative">
-                <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <div className={`relative rounded-2xl ${errors.email ? 'ring-2 ring-red-500/30' : ''}`}>
+                <Mail size={15} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${errors.email ? 'text-red-500' : 'text-muted-foreground'}`} aria-hidden="true" />
                 <input
                   id="login-email"
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={e => {
+                    setEmail(e.target.value);
+                    if (errors.email) setErrors(p => ({ ...p, email: '' }));
+                  }}
                   placeholder="email@exemplo.com"
                   required
                   aria-label="Endereço de email"
                   aria-required="true"
-                  className="w-full pl-10 pr-4 py-3 bg-secondary border border-border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                  aria-invalid={!!errors.email}
+                  className={`w-full pl-10 pr-4 py-3 bg-secondary border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:border-primary transition-all ${
+                    errors.email ? 'border-red-500 focus:ring-red-500/20' : 'border-border focus:ring-primary/20'
+                  }`} />
               </div>
+              {errors.email && <p className="text-xs text-red-500 font-medium mt-1">{errors.email}</p>}
             </div>
             <div className="space-y-1.5">
               <label htmlFor="login-password" className="text-[10px] font-display font-black uppercase tracking-widest text-foreground">Palavra-passe</label>
-              <div className="relative">
-                <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <div className={`relative rounded-2xl ${errors.password ? 'ring-2 ring-red-500/30' : ''}`}>
+                <Lock size={15} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${errors.password ? 'text-red-500' : 'text-muted-foreground'}`} aria-hidden="true" />
                 <input
                   id="login-password"
                   type={showPass ? 'text' : 'password'}
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  onChange={e => {
+                    setPassword(e.target.value);
+                    if (errors.password) setErrors(p => ({ ...p, password: '' }));
+                  }}
                   placeholder="••••••••"
                   required
                   aria-label="Palavra-passe"
                   aria-required="true"
-                  className="w-full pl-10 pr-12 py-3 bg-secondary border border-border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                  aria-invalid={!!errors.password}
+                  className={`w-full pl-10 pr-12 py-3 bg-secondary border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:border-primary transition-all ${
+                    errors.password ? 'border-red-500 focus:ring-red-500/20' : 'border-border focus:ring-primary/20'
+                  }`} />
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
@@ -116,6 +155,7 @@ export const LoginView = ({
                   {showPass ? <EyeOff size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
                 </button>
               </div>
+              {errors.password && <p className="text-xs text-red-500 font-medium mt-1">{errors.password}</p>}
             </div>
             <div className="flex justify-end">
               <button type="button" className="text-xs text-primary font-display font-bold hover:underline" aria-label="Recuperar palavra-passe esquecida">Esqueci a palavra-passe</button>
