@@ -41,7 +41,8 @@ export const LoginView = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex items-center justify-center px-4 py-12" role="main">
+      <a href="#login-form" className="sr-only focus:not-sr-only">Ir para formulário de login</a>
       <div className="w-full max-w-md space-y-8">
         {/* Logo */}
         <div className="text-center space-y-4">
@@ -53,15 +54,15 @@ export const LoginView = ({
         </div>
 
         {/* Card */}
-        <div className="bg-card rounded-3xl border border-border shadow-elevated p-8 space-y-6">
+        <div className="bg-card rounded-3xl border border-border shadow-elevated p-8 space-y-6" id="login-form">
           <div>
             <h2 className="text-xl font-display font-black uppercase tracking-tighter text-foreground">Entrar na Conta</h2>
             <p className="text-sm text-muted-foreground mt-1">Bem-vindo de volta</p>
           </div>
 
           {/* Google */}
-          <Button variant="outline" className="w-full rounded-2xl" onClick={() => toast.info('Google login...')}>
-            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+          <Button variant="outline" className="w-full rounded-2xl" onClick={() => toast.info('Google login...')} aria-label="Continuar login com Google">
+            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" role="img" aria-hidden="true">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -78,35 +79,55 @@ export const LoginView = ({
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-display font-black uppercase tracking-widest text-foreground">Email</label>
+              <label htmlFor="login-email" className="text-[10px] font-display font-black uppercase tracking-widest text-foreground">Email</label>
               <div className="relative">
-                <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="email@exemplo.com" required
+                <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <input
+                  id="login-email"
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="email@exemplo.com"
+                  required
+                  aria-label="Endereço de email"
+                  aria-required="true"
                   className="w-full pl-10 pr-4 py-3 bg-secondary border border-border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-display font-black uppercase tracking-widest text-foreground">Palavra-passe</label>
+              <label htmlFor="login-password" className="text-[10px] font-display font-black uppercase tracking-widest text-foreground">Palavra-passe</label>
               <div className="relative">
-                <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required
+                <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <input
+                  id="login-password"
+                  type={showPass ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  aria-label="Palavra-passe"
+                  aria-required="true"
                   className="w-full pl-10 pr-12 py-3 bg-secondary border border-border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
-                <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                  {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  aria-label={showPass ? 'Ocultar palavra-passe' : 'Mostrar palavra-passe'}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                  {showPass ? <EyeOff size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
                 </button>
               </div>
             </div>
             <div className="flex justify-end">
-              <button type="button" className="text-xs text-primary font-display font-bold hover:underline">Esqueci a palavra-passe</button>
+              <button type="button" className="text-xs text-primary font-display font-bold hover:underline" aria-label="Recuperar palavra-passe esquecida">Esqueci a palavra-passe</button>
             </div>
-            <Button type="submit" size="lg" className="w-full rounded-2xl" disabled={loading}>
+            <Button type="submit" size="lg" className="w-full rounded-2xl" disabled={loading} aria-busy={loading}>
               {loading ? <><Loader2 size={16} className="animate-spin mr-2" />A entrar...</> : 'Entrar'}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground">
             Sem conta?{' '}
-            <button onClick={() => onNavigate?.('register')} className="text-primary font-display font-bold hover:underline">Registar</button>
+            <button onClick={() => onNavigate?.('register')} className="text-primary font-display font-bold hover:underline" aria-label="Ir para página de registo">Registar</button>
           </p>
         </div>
       </div>
@@ -158,7 +179,8 @@ export const RegisterView = ({
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex items-center justify-center px-4 py-12" role="main">
+      <a href="#register-form" className="sr-only focus:not-sr-only">Ir para formulário de registo</a>
       <div className="w-full max-w-lg space-y-6">
         <div className="text-center space-y-4">
           <LOGO />
@@ -166,7 +188,7 @@ export const RegisterView = ({
         </div>
 
         {/* Step indicator */}
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-3" role="progressbar" aria-valuenow={step} aria-valuemin={1} aria-valuemax={2}>
           {[1, 2].map(s => (
             <React.Fragment key={s}>
               <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-display font-black transition-all ${s <= step ? 'bg-primary text-primary-foreground shadow-md' : 'bg-secondary text-muted-foreground border border-border'}`}>
@@ -177,7 +199,7 @@ export const RegisterView = ({
           ))}
         </div>
 
-        <div className="bg-card rounded-3xl border border-border shadow-elevated p-8 space-y-6">
+        <div className="bg-card rounded-3xl border border-border shadow-elevated p-8 space-y-6" id="register-form">
           {/* Step 1: Role */}
           {step === 1 && (
             <div className="space-y-5">
@@ -185,10 +207,12 @@ export const RegisterView = ({
                 <h2 className="text-lg font-display font-black uppercase tracking-tighter">Qual é o seu papel?</h2>
                 <p className="text-sm text-muted-foreground mt-1">Escolha o tipo de conta a criar</p>
               </div>
-              <div className="space-y-3">
+              <fieldset className="space-y-3" role="radiogroup" aria-label="Selecione o tipo de conta">
                 {roles.map(r => (
                   <label key={r.id} onClick={() => setRole(r.id)}
-                    className={`flex items-center gap-4 p-5 border-2 rounded-2xl cursor-pointer transition-all ${role === r.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}>
+                    className={`flex items-center gap-4 p-5 border-2 rounded-2xl cursor-pointer transition-all ${role === r.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}
+                    role="radio"
+                    aria-checked={role === r.id}>
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${role === r.id ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}>
                       <r.icon size={22} />
                     </div>
@@ -204,7 +228,7 @@ export const RegisterView = ({
                     </div>
                   </label>
                 ))}
-              </div>
+              </fieldset>
               <Button size="lg" className="w-full rounded-2xl" onClick={() => setStep(2)}>Continuar</Button>
             </div>
           )}
@@ -225,8 +249,15 @@ export const RegisterView = ({
                 { label: 'Confirmar Palavra-passe', key: 'confirm', type: 'password', placeholder: '••••••••' },
               ].map(f => (
                 <div key={f.key} className="space-y-1.5">
-                  <label className="text-[10px] font-display font-black uppercase tracking-widest text-foreground">{f.label}</label>
-                  <input type={f.type} value={form[f.key as keyof typeof form]} onChange={set(f.key)} placeholder={f.placeholder}
+                  <label htmlFor={`register-${f.key}`} className="text-[10px] font-display font-black uppercase tracking-widest text-foreground">{f.label}</label>
+                  <input
+                    id={`register-${f.key}`}
+                    type={f.type}
+                    value={form[f.key as keyof typeof form]}
+                    onChange={set(f.key)}
+                    placeholder={f.placeholder}
+                    aria-label={f.label}
+                    aria-required="true"
                     className="w-full px-4 py-3 bg-secondary border border-border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
                 </div>
               ))}
