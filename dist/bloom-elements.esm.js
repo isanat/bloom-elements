@@ -26653,8 +26653,8 @@ const RX = ({ open: e, onClose: t, profile: r }) => {
   showRoleToggle: t = !1,
   onRoleChange: r
 } = {}) => {
-  const [n, o] = le(t ? e : "caregiver"), a = t ? n : e, i = (f) => {
-    o(f), r == null || r(f);
+  const [n, o] = le("caregiver"), a = t ? n : e, i = (f) => {
+    t && (o(f), r == null || r(f));
   }, s = a === "caregiver" ? Ym.caregiver : Ym.family, c = a === "caregiver" ? tq : rq, d = a === "caregiver" ? nq : oq;
   return /* @__PURE__ */ w("div", { className: "space-y-6 sm:space-y-8 animate-fade-in", children: [
     /* @__PURE__ */ l("div", { className: "flex items-center gap-3", children: /* @__PURE__ */ l(hr, { title: "Dashboard", desc: "Visão geral da sua atividade na plataforma." }) }),

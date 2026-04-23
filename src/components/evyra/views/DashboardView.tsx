@@ -65,12 +65,17 @@ export const DashboardView = ({
   showRoleToggle?: boolean
   onRoleChange?: (role: 'caregiver' | 'family') => void
 } = {}) => {
-  const [selectedRole, setSelectedRole] = useState<'caregiver' | 'family'>(showRoleToggle ? role : 'caregiver');
+  const [selectedRole, setSelectedRole] = useState<'caregiver' | 'family'>('caregiver');
+
+  // In production (showRoleToggle=false), always use the role prop directly
+  // In demo mode (showRoleToggle=true), allow local role toggling
   const displayRole = showRoleToggle ? selectedRole : role;
 
   const handleRoleChange = (newRole: 'caregiver' | 'family') => {
-    setSelectedRole(newRole);
-    onRoleChange?.(newRole);
+    if (showRoleToggle) {
+      setSelectedRole(newRole);
+      onRoleChange?.(newRole);
+    }
   };
 
   const stats = displayRole === 'caregiver' ? mockStats.caregiver : mockStats.family;
