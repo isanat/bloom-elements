@@ -79,7 +79,7 @@ export const DashboardView = ({
   const pendingSteps = displayRole === 'caregiver' ? pendingStepsCuidador : pendingStepsFamily;
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-in">
+    <div className="space-y-8 sm:space-y-10 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3">
         <SectionHeader title="Dashboard" desc="Visão geral da sua atividade na plataforma." />
@@ -104,7 +104,7 @@ export const DashboardView = ({
         </motion.div>
 
         {/* Stats */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mt-5">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mt-8">
           <StatBlock label="Contratos Ativos" value={String(stats.activeContracts)} icon={FileText} colorClass="text-primary" />
           <StatBlock label="Horas Totais" value={`${stats.totalHours}h`} icon={Clock} colorClass="text-warning" />
           <StatBlock label="Avaliação" value={String(stats.rating)} icon={Star} colorClass="text-info" />
@@ -112,7 +112,7 @@ export const DashboardView = ({
         </motion.div>
 
         {/* Quick Actions */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5">
+        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-8">
           {displayRole === 'family' ? (
             <div
               className="bg-card rounded-3xl p-5 sm:p-7 border border-border shadow-card hover:shadow-elevated hover:border-primary/30 transition-all cursor-pointer group"
@@ -178,7 +178,7 @@ export const DashboardView = ({
 
         {/* Pending Steps */}
         {pendingSteps.length > 0 && (
-          <motion.div variants={itemVariants} className="mt-5">
+          <motion.div variants={itemVariants} className="mt-8">
             <DocCard title="Próximos Passos">
               <div className="space-y-3">
                 {pendingSteps.map((step, i) => (
@@ -202,7 +202,7 @@ export const DashboardView = ({
         )}
 
         {/* Benefits */}
-        <motion.div variants={itemVariants} className="mt-5">
+        <motion.div variants={itemVariants} className="mt-8">
           <DocCard title="Benefícios da Plataforma">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               {benefits.map((item, i) => (
@@ -219,7 +219,7 @@ export const DashboardView = ({
         </motion.div>
 
         {/* Recent Activity */}
-        <motion.div variants={itemVariants} className="mt-5">
+        <motion.div variants={itemVariants} className="mt-8">
           <DocCard title="Atividade Recente">
             <div className="flex justify-between items-center mb-4">
               <p className="text-[10px] font-display font-black text-muted-foreground uppercase tracking-widest">Últimos movimentos</p>
