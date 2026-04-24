@@ -56,19 +56,25 @@ const pendingStepsFamily = [
   { label: 'Completar perfil do familiar', href: '#', icon: Users },
 ];
 
+interface DashboardViewProps {
+  role?: 'caregiver' | 'family'
+  userName?: string
+  userTitle?: string
+  stats?: { activeContracts: number; totalHours: number; rating: number; totalReviews: number }
+  activity?: Array<{ type: 'credit' | 'debit'; description: string; amount: number; date: string }>
+}
+
 export const DashboardView = ({
   role = 'caregiver',
   userName = 'Usuário',
   userTitle = 'Membro da Plataforma',
-}: {
-  role?: 'caregiver' | 'family'
-  userName?: string
-  userTitle?: string
-} = {}) => {
-  // No production: role is determined by props, not internal state
+  stats: customStats,
+  activity: customActivity,
+}: DashboardViewProps = {}) => {
   const displayRole = role;
 
-  const stats = displayRole === 'caregiver' ? mockStats.caregiver : mockStats.family;
+  const stats = customStats || (displayRole === 'caregiver' ? mockStats.caregiver : mockStats.family);
+  const activity = customActivity || mockActivity;
   const benefits = displayRole === 'caregiver' ? caregiverBenefits : familyBenefits;
   const pendingSteps = displayRole === 'caregiver' ? pendingStepsCuidador : pendingStepsFamily;
 
@@ -220,25 +226,25 @@ export const DashboardView = ({
               <Button variant="link" size="sm" onClick={() => toast.info('Ver todo o histórico')}>Ver Todos</Button>
             </div>
             <div className="space-y-3">
-              {mockActivity.map((activity, i) => (
+              {activity.map((activityItem, i) => (
                 <div key={i} className="flex items-center justify-between p-3 sm:p-4 bg-secondary rounded-2xl border border-border/50">
                   <div className="flex items-center gap-3">
                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                      activity.type === 'credit' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
+                      activityItem.type === 'credit' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
                     }`}>
-                      {activity.type === 'credit' ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
+                      {activityItem.type === 'credit' ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
                     </div>
                     <div>
-                      <p className="text-sm font-display font-bold text-foreground">{activity.description}</p>
+                      <p className="text-sm font-display font-bold text-foreground">{activityItem.description}</p>
                       <p className="text-[10px] text-muted-foreground font-medium">
-                        {new Date(activity.date).toLocaleDateString('pt-PT')}
+                        {new Date(activityItem.date).toLocaleDateString('pt-PT')}
                       </p>
                     </div>
                   </div>
                   <span className={`text-sm font-display font-black ${
-                    activity.type === 'credit' ? 'text-success' : 'text-destructive'
+                    activityItem.type === 'credit' ? 'text-success' : 'text-destructive'
                   }`}>
-                    {activity.type === 'credit' ? '+' : '-'}{activity.amount}€
+                    {activityItem.type === 'credit' ? '+' : '-'}{activityItem.amount}€
                   </span>
                 </div>
               ))}
