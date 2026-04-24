@@ -26712,45 +26712,34 @@ const RX = ({ open: e, onClose: t, profile: r }) => {
   { label: "Completar perfil do familiar", href: "#", icon: er }
 ], HX = ({
   role: e = "caregiver",
-  showRoleToggle: t = !1,
-  onRoleChange: r
+  userName: t = "Usuário",
+  userTitle: r = "Membro da Plataforma"
 } = {}) => {
-  const [n, o] = le("caregiver"), a = t ? n : e, i = (f) => {
-    t && (o(f), r == null || r(f));
-  }, s = a === "caregiver" ? Ym.caregiver : Ym.family, c = a === "caregiver" ? tq : rq, d = a === "caregiver" ? nq : oq;
+  const n = e, o = n === "caregiver" ? Ym.caregiver : Ym.family, a = n === "caregiver" ? tq : rq, i = n === "caregiver" ? nq : oq;
   return /* @__PURE__ */ w("div", { className: "space-y-6 sm:space-y-8 animate-fade-in", children: [
     /* @__PURE__ */ l("div", { className: "flex items-center gap-3", children: /* @__PURE__ */ l(hr, { title: "Dashboard", desc: "Visão geral da sua atividade na plataforma." }) }),
-    t && /* @__PURE__ */ l("div", { className: "flex gap-2", children: ["caregiver", "family"].map((f) => /* @__PURE__ */ l(
-      "button",
-      {
-        onClick: () => i(f),
-        className: `px-4 py-2 rounded-2xl text-[10px] font-display font-bold uppercase tracking-widest transition-all ${a === f ? "bg-primary text-primary-foreground shadow-md" : "bg-card border border-border text-muted-foreground hover:border-primary/40"}`,
-        children: f === "caregiver" ? "👨‍⚕️ Cuidador" : "👨‍👩‍👧 Família"
-      },
-      f
-    )) }),
     /* @__PURE__ */ w(Se.div, { variants: JY, initial: "hidden", animate: "show", children: [
       /* @__PURE__ */ l(Se.div, { variants: Ln, className: "bg-card rounded-3xl p-5 sm:p-7 border border-border shadow-card", children: /* @__PURE__ */ w("div", { className: "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3", children: [
         /* @__PURE__ */ w("div", { children: [
           /* @__PURE__ */ w("h2", { className: "text-2xl sm:text-3xl font-display font-black text-foreground tracking-tighter leading-none uppercase", children: [
             "Olá, ",
-            a === "caregiver" ? "Helena" : "João"
+            t
           ] }),
-          /* @__PURE__ */ l("p", { className: "text-sm text-muted-foreground font-medium mt-1", children: a === "caregiver" ? "Enfermeira Especializada" : "Gestor Familiar" })
+          /* @__PURE__ */ l("p", { className: "text-sm text-muted-foreground font-medium mt-1", children: r })
         ] }),
         /* @__PURE__ */ w("span", { className: "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-display font-bold uppercase tracking-widest bg-success/10 text-success border border-success/30 w-fit", children: [
           /* @__PURE__ */ l(md, { size: 12 }),
           " Conta Ativa"
         ] })
       ] }) }),
-      /* @__PURE__ */ w(Se.div, { variants: Ln, className: "grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mt-5", children: [
-        /* @__PURE__ */ l(ii, { label: "Contratos Ativos", value: String(s.activeContracts), icon: pt, colorClass: "text-primary" }),
-        /* @__PURE__ */ l(ii, { label: "Horas Totais", value: `${s.totalHours}h`, icon: lo, colorClass: "text-warning" }),
-        /* @__PURE__ */ l(ii, { label: "Avaliação", value: String(s.rating), icon: ha, colorClass: "text-info" }),
-        /* @__PURE__ */ l(ii, { label: "Avaliações", value: String(s.totalReviews), icon: er, colorClass: "text-success" })
+      /* @__PURE__ */ w(Se.div, { variants: Ln, className: "grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mt-5", children: [
+        /* @__PURE__ */ l(ii, { label: "Contratos Ativos", value: String(o.activeContracts), icon: pt, colorClass: "text-primary" }),
+        /* @__PURE__ */ l(ii, { label: "Horas Totais", value: `${o.totalHours}h`, icon: lo, colorClass: "text-warning" }),
+        /* @__PURE__ */ l(ii, { label: "Avaliação", value: String(o.rating), icon: ha, colorClass: "text-info" }),
+        /* @__PURE__ */ l(ii, { label: "Avaliações", value: String(o.totalReviews), icon: er, colorClass: "text-success" })
       ] }),
       /* @__PURE__ */ w(Se.div, { variants: Ln, className: "grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5", children: [
-        a === "family" ? /* @__PURE__ */ l(
+        n === "family" ? /* @__PURE__ */ l(
           "div",
           {
             className: "bg-card rounded-3xl p-5 sm:p-7 border border-border shadow-card hover:shadow-elevated hover:border-primary/30 transition-all cursor-pointer group",
@@ -26806,45 +26795,45 @@ const RX = ({ open: e, onClose: t, profile: r }) => {
           }
         )
       ] }),
-      d.length > 0 && /* @__PURE__ */ l(Se.div, { variants: Ln, className: "mt-5", children: /* @__PURE__ */ l(Yl, { title: "Próximos Passos", children: /* @__PURE__ */ l("div", { className: "space-y-3", children: d.map((f, p) => /* @__PURE__ */ w(
+      i.length > 0 && /* @__PURE__ */ l(Se.div, { variants: Ln, className: "mt-5", children: /* @__PURE__ */ l(Yl, { title: "Próximos Passos", children: /* @__PURE__ */ l("div", { className: "space-y-3", children: i.map((s, c) => /* @__PURE__ */ w(
         "div",
         {
           className: "flex items-center justify-between p-4 bg-secondary rounded-2xl border border-border/50 hover:border-warning/30 transition-all cursor-pointer group",
-          onClick: () => ye.info(f.label),
+          onClick: () => ye.info(s.label),
           children: [
             /* @__PURE__ */ w("div", { className: "flex items-center gap-3", children: [
-              /* @__PURE__ */ l("div", { className: "w-9 h-9 bg-warning/10 rounded-xl flex items-center justify-center text-warning", children: /* @__PURE__ */ l(f.icon, { size: 16 }) }),
-              /* @__PURE__ */ l("span", { className: "text-sm font-display font-bold text-foreground", children: f.label })
+              /* @__PURE__ */ l("div", { className: "w-9 h-9 bg-warning/10 rounded-xl flex items-center justify-center text-warning", children: /* @__PURE__ */ l(s.icon, { size: 16 }) }),
+              /* @__PURE__ */ l("span", { className: "text-sm font-display font-bold text-foreground", children: s.label })
             ] }),
             /* @__PURE__ */ l(Gr, { size: 16, className: "text-muted-foreground group-hover:text-warning transition-colors" })
           ]
         },
-        p
+        c
       )) }) }) }),
-      /* @__PURE__ */ l(Se.div, { variants: Ln, className: "mt-5", children: /* @__PURE__ */ l(Yl, { title: "Benefícios da Plataforma", children: /* @__PURE__ */ l("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4", children: c.map((f, p) => /* @__PURE__ */ w("div", { className: "bg-secondary rounded-2xl p-4 sm:p-5 text-center hover:bg-primary/5 transition-all group", children: [
-        /* @__PURE__ */ l("div", { className: "w-10 h-10 rounded-2xl bg-card flex items-center justify-center text-primary mx-auto mb-3 group-hover:scale-110 transition-transform border border-border", children: /* @__PURE__ */ l(f.icon, { size: 18 }) }),
-        /* @__PURE__ */ l("p", { className: "text-xs font-display font-black text-foreground uppercase", children: f.title }),
-        /* @__PURE__ */ l("p", { className: "text-[10px] text-muted-foreground font-medium mt-1", children: f.sub })
-      ] }, p)) }) }) }),
+      /* @__PURE__ */ l(Se.div, { variants: Ln, className: "mt-5", children: /* @__PURE__ */ l(Yl, { title: "Benefícios da Plataforma", children: /* @__PURE__ */ l("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4", children: a.map((s, c) => /* @__PURE__ */ w("div", { className: "bg-secondary rounded-2xl p-4 sm:p-5 text-center hover:bg-primary/5 transition-all group", children: [
+        /* @__PURE__ */ l("div", { className: "w-10 h-10 rounded-2xl bg-card flex items-center justify-center text-primary mx-auto mb-3 group-hover:scale-110 transition-transform border border-border", children: /* @__PURE__ */ l(s.icon, { size: 18 }) }),
+        /* @__PURE__ */ l("p", { className: "text-xs font-display font-black text-foreground uppercase", children: s.title }),
+        /* @__PURE__ */ l("p", { className: "text-[10px] text-muted-foreground font-medium mt-1", children: s.sub })
+      ] }, c)) }) }) }),
       /* @__PURE__ */ l(Se.div, { variants: Ln, className: "mt-5", children: /* @__PURE__ */ w(Yl, { title: "Atividade Recente", children: [
         /* @__PURE__ */ w("div", { className: "flex justify-between items-center mb-4", children: [
           /* @__PURE__ */ l("p", { className: "text-[10px] font-display font-black text-muted-foreground uppercase tracking-widest", children: "Últimos movimentos" }),
           /* @__PURE__ */ l(ve, { variant: "link", size: "sm", onClick: () => ye.info("Ver todo o histórico"), children: "Ver Todos" })
         ] }),
-        /* @__PURE__ */ l("div", { className: "space-y-3", children: eq.map((f, p) => /* @__PURE__ */ w("div", { className: "flex items-center justify-between p-3 sm:p-4 bg-secondary rounded-2xl border border-border/50", children: [
+        /* @__PURE__ */ l("div", { className: "space-y-3", children: eq.map((s, c) => /* @__PURE__ */ w("div", { className: "flex items-center justify-between p-3 sm:p-4 bg-secondary rounded-2xl border border-border/50", children: [
           /* @__PURE__ */ w("div", { className: "flex items-center gap-3", children: [
-            /* @__PURE__ */ l("div", { className: `w-9 h-9 rounded-xl flex items-center justify-center ${f.type === "credit" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`, children: f.type === "credit" ? /* @__PURE__ */ l(Oh, { size: 16 }) : /* @__PURE__ */ l(Dh, { size: 16 }) }),
+            /* @__PURE__ */ l("div", { className: `w-9 h-9 rounded-xl flex items-center justify-center ${s.type === "credit" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`, children: s.type === "credit" ? /* @__PURE__ */ l(Oh, { size: 16 }) : /* @__PURE__ */ l(Dh, { size: 16 }) }),
             /* @__PURE__ */ w("div", { children: [
-              /* @__PURE__ */ l("p", { className: "text-sm font-display font-bold text-foreground", children: f.description }),
-              /* @__PURE__ */ l("p", { className: "text-[10px] text-muted-foreground font-medium", children: new Date(f.date).toLocaleDateString("pt-PT") })
+              /* @__PURE__ */ l("p", { className: "text-sm font-display font-bold text-foreground", children: s.description }),
+              /* @__PURE__ */ l("p", { className: "text-[10px] text-muted-foreground font-medium", children: new Date(s.date).toLocaleDateString("pt-PT") })
             ] })
           ] }),
-          /* @__PURE__ */ w("span", { className: `text-sm font-display font-black ${f.type === "credit" ? "text-success" : "text-destructive"}`, children: [
-            f.type === "credit" ? "+" : "-",
-            f.amount,
+          /* @__PURE__ */ w("span", { className: `text-sm font-display font-black ${s.type === "credit" ? "text-success" : "text-destructive"}`, children: [
+            s.type === "credit" ? "+" : "-",
+            s.amount,
             "€"
           ] })
-        ] }, p)) })
+        ] }, c)) })
       ] }) })
     ] })
   ] });

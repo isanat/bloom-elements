@@ -58,25 +58,15 @@ const pendingStepsFamily = [
 
 export const DashboardView = ({
   role = 'caregiver',
-  showRoleToggle = false,
-  onRoleChange
+  userName = 'Usuário',
+  userTitle = 'Membro da Plataforma',
 }: {
   role?: 'caregiver' | 'family'
-  showRoleToggle?: boolean
-  onRoleChange?: (role: 'caregiver' | 'family') => void
+  userName?: string
+  userTitle?: string
 } = {}) => {
-  const [selectedRole, setSelectedRole] = useState<'caregiver' | 'family'>('caregiver');
-
-  // In production (showRoleToggle=false), always use the role prop directly
-  // In demo mode (showRoleToggle=true), allow local role toggling
-  const displayRole = showRoleToggle ? selectedRole : role;
-
-  const handleRoleChange = (newRole: 'caregiver' | 'family') => {
-    if (showRoleToggle) {
-      setSelectedRole(newRole);
-      onRoleChange?.(newRole);
-    }
-  };
+  // No production: role is determined by props, not internal state
+  const displayRole = role;
 
   const stats = displayRole === 'caregiver' ? mockStats.caregiver : mockStats.family;
   const benefits = displayRole === 'caregiver' ? caregiverBenefits : familyBenefits;
@@ -84,28 +74,10 @@ export const DashboardView = ({
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in">
-      {/* Role Toggle - for demo only */}
+      {/* Header */}
       <div className="flex items-center gap-3">
         <SectionHeader title="Dashboard" desc="Visão geral da sua atividade na plataforma." />
       </div>
-
-      {showRoleToggle && (
-        <div className="flex gap-2">
-          {(['caregiver', 'family'] as const).map(r => (
-            <button
-              key={r}
-              onClick={() => handleRoleChange(r)}
-              className={`px-4 py-2 rounded-2xl text-[10px] font-display font-bold uppercase tracking-widest transition-all ${
-                displayRole === r
-                  ? 'bg-primary text-primary-foreground shadow-md'
-                  : 'bg-card border border-border text-muted-foreground hover:border-primary/40'
-              }`}
-            >
-              {r === 'caregiver' ? '👨‍⚕️ Cuidador' : '👨‍👩‍👧 Família'}
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* Welcome */}
       <motion.div variants={containerVariants} initial="hidden" animate="show">
@@ -113,10 +85,10 @@ export const DashboardView = ({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-2xl sm:text-3xl font-display font-black text-foreground tracking-tighter leading-none uppercase">
-                Olá, {displayRole === 'caregiver' ? 'Helena' : 'João'}
+                Olá, {userName}
               </h2>
               <p className="text-sm text-muted-foreground font-medium mt-1">
-                {displayRole === 'caregiver' ? 'Enfermeira Especializada' : 'Gestor Familiar'}
+                {userTitle}
               </p>
             </div>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-display font-bold uppercase tracking-widest bg-success/10 text-success border border-success/30 w-fit">
@@ -126,7 +98,7 @@ export const DashboardView = ({
         </motion.div>
 
         {/* Stats */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mt-5">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mt-5">
           <StatBlock label="Contratos Ativos" value={String(stats.activeContracts)} icon={FileText} colorClass="text-primary" />
           <StatBlock label="Horas Totais" value={`${stats.totalHours}h`} icon={Clock} colorClass="text-warning" />
           <StatBlock label="Avaliação" value={String(stats.rating)} icon={Star} colorClass="text-info" />
