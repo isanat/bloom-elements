@@ -196,6 +196,12 @@ const SidebarContent: React.FC<{
             active={currentView === item.id} onClick={() => handleNav(item.id)} isOpen={isOpen} badge={item.badge} />
         ))}
 
+        <SectionLabel label="Família" isOpen={isOpen} />
+        {navItems.family.map(item => (
+          <SidebarLink key={item.id} icon={item.icon} label={item.label} desc={isOpen ? item.desc : undefined}
+            active={currentView === item.id} onClick={() => handleNav(item.id)} isOpen={isOpen} badge={item.badge} />
+        ))}
+
         <SectionLabel label="Admin & Suporte" isOpen={isOpen} />
         {navItems.admin.map(item => (
           <SidebarLink key={item.id} icon={item.icon} label={item.label} desc={isOpen ? item.desc : undefined}
