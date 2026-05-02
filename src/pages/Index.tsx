@@ -29,6 +29,11 @@ import { LoginView, RegisterView }                  from '@/components/evyra/vie
 import { FamilySetupView, KYCView }                 from '@/components/evyra/views/OnboardingViews';
 import { WalletView, NotificacoesView, CuidadorDetailView } from '@/components/evyra/views/AppViews';
 import { NovaDemandaView, NovoContratoView, ProposalFlowView, AdminDashboardView, HelpCenterView } from '@/components/evyra/views/FlowViews';
+import {
+  FamilyDashboardView, FamilyMemberView, FamilySearchView, FamilyDemandasView,
+  FamilyReviewView, FamilyAgendaView, FamilyCarePlanView, FamilyEmergencyView,
+  FamilyPaymentsView, FamilyContractsView, FamilyFavoritesView, FamilyChatView
+} from '@/components/evyra/views/FamilyViews';
 
 import { cn } from '@/lib/utils';
 import { X, ShieldCheck, Trash2, Briefcase } from 'lucide-react';
@@ -119,6 +124,20 @@ const Index = () => {
       case 'proposal-flow':      return <ProposalFlowView onNavigate={navigate} />;
       case 'admin':              return <AdminDashboardView />;
       case 'help':               return <HelpCenterView />;
+
+      // Família
+      case 'family-dashboard':   return <FamilyDashboardView />;
+      case 'family-member':      return <FamilyMemberView />;
+      case 'family-search':      return <FamilySearchView />;
+      case 'family-demandas':    return <FamilyDemandasView />;
+      case 'family-agenda':      return <FamilyAgendaView />;
+      case 'family-care-plan':   return <FamilyCarePlanView />;
+      case 'family-emergency':   return <FamilyEmergencyView />;
+      case 'family-payments':    return <FamilyPaymentsView />;
+      case 'family-contracts':   return <FamilyContractsView />;
+      case 'family-favorites':   return <FamilyFavoritesView />;
+      case 'family-review':      return <FamilyReviewView />;
+      case 'family-chat':        return <FamilyChatView />;
 
       // UI Kit
       case 'ui-buttons':    return <UIButtonsView />;
