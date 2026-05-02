@@ -3,7 +3,7 @@ import {
   Search, Menu, X, Users, Wallet, Zap, MessageSquare, CreditCard,
   BookOpen, Settings, LogOut, Briefcase, FileText, Bell, Globe,
   BarChart3, Layers, Key, UserPlus, Heart, Shield, ShieldCheck,
-  HelpCircle, LayoutDashboard
+  HelpCircle, LayoutDashboard, Calendar, Stethoscope, AlertTriangle, Star
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
