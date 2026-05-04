@@ -77,25 +77,126 @@ export const FamilyDashboardView = () => (
 // ═══════════════════════════════════════════════════════════
 // 2. GESTÃO DO FAMILIAR CUIDADO
 // ═══════════════════════════════════════════════════════════
+type InfoData = {
+  nomeCompleto: string;
+  dataNascimento: string;
+  morada: string;
+  contactoProximo: string;
+  medicoFamilia: string;
+  seguro: string;
+};
+type Condicao = { c: string; d: string };
+type RotinaItem = { h: string; a: string };
+
+const initialInfo: InfoData = {
+  nomeCompleto: 'Maria Fernanda Silva',
+  dataNascimento: '14 / 03 / 1947',
+  morada: 'Av. Marginal 234, Cascais',
+  contactoProximo: 'João Silva (filho) · 912 345 678',
+  medicoFamilia: 'Dr. Pedro Almeida',
+  seguro: 'Médis · Plano Sénior+',
+};
+const initialSaude: Condicao[] = [
+  { c: 'Diabetes Tipo 2', d: 'Diagnóstico em 2015 · Controlada' },
+  { c: 'Hipertensão Arterial', d: 'Em medicação contínua' },
+  { c: 'Artrose nos joelhos', d: 'Mobilidade reduzida com bengala' },
+];
+const initialRotina: RotinaItem[] = [
+  { h: '07:00', a: 'Acorda · medicação matinal' },
+  { h: '08:00', a: 'Pequeno-almoço · café com leite e torrada' },
+  { h: '10:30', a: 'Caminhada assistida no jardim' },
+  { h: '13:00', a: 'Almoço (dieta diabética)' },
+  { h: '15:00', a: 'Sesta' },
+  { h: '19:00', a: 'Jantar leve · medicação noturna' },
+];
+
+const InfoLabels: Array<[keyof InfoData, string]> = [
+  ['nomeCompleto', 'Nome Completo'],
+  ['dataNascimento', 'Data de Nascimento'],
+  ['morada', 'Morada'],
+  ['contactoProximo', 'Contacto Próximo'],
+  ['medicoFamilia', 'Médico de Família'],
+  ['seguro', 'Seguro'],
+];
+
 export const FamilyMemberView = () => {
   const [tab, setTab] = useState<'info' | 'saude' | 'rotina'>('info');
+  const [editing, setEditing] = useState(false);
+
+  // committed state
+  const [info, setInfo] = useState<InfoData>(initialInfo);
+  const [saude, setSaude] = useState<Condicao[]>(initialSaude);
+  const [rotina, setRotina] = useState<RotinaItem[]>(initialRotina);
+
+  // draft state (used while editing)
+  const [draftInfo, setDraftInfo] = useState<InfoData>(info);
+  const [draftSaude, setDraftSaude] = useState<Condicao[]>(saude);
+  const [draftRotina, setDraftRotina] = useState<RotinaItem[]>(rotina);
+
+  const startEdit = () => {
+    setDraftInfo(info);
+    setDraftSaude(saude);
+    setDraftRotina(rotina);
+    setEditing(true);
+  };
+  const cancelEdit = () => {
+    setEditing(false);
+    toast.info('Edição cancelada');
+  };
+  const saveEdit = () => {
+    if (!draftInfo.nomeCompleto.trim()) {
+      toast.error('Nome completo é obrigatório');
+      return;
+    }
+    setInfo(draftInfo);
+    setSaude(draftSaude.filter(s => s.c.trim()));
+    setRotina(draftRotina.filter(r => r.h.trim() && r.a.trim()));
+    setEditing(false);
+    toast.success('Alterações guardadas com sucesso');
+  };
+
+  const updateInfo = (k: keyof InfoData, v: string) => setDraftInfo(p => ({ ...p, [k]: v }));
+  const addCondicao = () => setDraftSaude(p => [...p, { c: '', d: '' }]);
+  const updateCondicao = (i: number, k: keyof Condicao, v: string) =>
+    setDraftSaude(p => p.map((it, idx) => idx === i ? { ...it, [k]: v } : it));
+  const removeCondicao = (i: number) => setDraftSaude(p => p.filter((_, idx) => idx !== i));
+
+  const addRotina = () => setDraftRotina(p => [...p, { h: '', a: '' }]);
+  const updateRotina = (i: number, k: keyof RotinaItem, v: string) =>
+    setDraftRotina(p => p.map((it, idx) => idx === i ? { ...it, [k]: v } : it));
+  const removeRotina = (i: number) => setDraftRotina(p => p.filter((_, idx) => idx !== i));
+
+  const initials = info.nomeCompleto
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(s => s[0]?.toUpperCase())
+    .join('') || 'MF';
+
   return (
     <div className="space-y-8">
-      <SectionHeader title="Familiar Cuidado" desc="Perfil completo de Maria Fernanda Silva, 78 anos." />
+      <SectionHeader title="Familiar Cuidado" desc={`Perfil completo de ${info.nomeCompleto}.`} />
 
       <motion.div {...fadeUp} className="bg-card rounded-3xl border border-border shadow-card overflow-hidden">
         <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-end gap-5">
-          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-primary text-primary-foreground flex items-center justify-center text-3xl font-display font-black shadow-glow shrink-0">MF</div>
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-primary text-primary-foreground flex items-center justify-center text-3xl font-display font-black shadow-glow shrink-0">{initials}</div>
           <div className="flex-1 text-center sm:text-left">
-            <h3 className="text-2xl sm:text-3xl font-display font-black text-foreground tracking-tighter">Maria Fernanda Silva</h3>
+            <h3 className="text-2xl sm:text-3xl font-display font-black text-foreground tracking-tighter">{info.nomeCompleto}</h3>
             <p className="text-sm text-muted-foreground font-medium mt-1">78 anos · Cascais · Mobilidade reduzida</p>
             <div className="flex gap-2 mt-3 justify-center sm:justify-start flex-wrap">
-              <Badge variant="secondary">Diabetes Tipo 2</Badge>
-              <Badge variant="secondary">Hipertensão</Badge>
-              <Badge variant="secondary">Mobilidade Reduzida</Badge>
+              {(editing ? draftSaude : saude).filter(s => s.c.trim()).slice(0, 4).map((s, i) => (
+                <Badge key={i} variant="secondary">{s.c}</Badge>
+              ))}
             </div>
           </div>
-          <Button variant="outline" onClick={() => toast.info('Editar perfil')}><Edit3 size={16} /> Editar</Button>
+          {editing ? (
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={cancelEdit}><XCircle size={16} /> Cancelar</Button>
+              <Button variant="default" onClick={saveEdit}><CheckCircle2 size={16} /> Guardar</Button>
+            </div>
+          ) : (
+            <Button variant="outline" onClick={startEdit}><Edit3 size={16} /> Editar</Button>
+          )}
         </div>
 
         <div className="border-b border-border px-6 flex gap-1 overflow-x-auto">
@@ -111,57 +212,117 @@ export const FamilyMemberView = () => {
         <div className="p-6 sm:p-8">
           {tab === 'info' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                ['Nome Completo', 'Maria Fernanda Silva'],
-                ['Data de Nascimento', '14 / 03 / 1947'],
-                ['Morada', 'Av. Marginal 234, Cascais'],
-                ['Contacto Próximo', 'João Silva (filho) · 912 345 678'],
-                ['Médico de Família', 'Dr. Pedro Almeida'],
-                ['Seguro', 'Médis · Plano Sénior+'],
-              ].map(([k, v]) => (
-                <div key={k} className="p-4 bg-secondary rounded-2xl">
-                  <p className="text-[9px] font-display font-black text-muted-foreground uppercase tracking-widest">{k}</p>
-                  <p className="text-sm font-medium text-foreground mt-1">{v}</p>
+              {InfoLabels.map(([key, label]) => (
+                <div key={key} className="p-4 bg-secondary rounded-2xl">
+                  <label className="text-[9px] font-display font-black text-muted-foreground uppercase tracking-widest block">{label}</label>
+                  {editing ? (
+                    <Input
+                      value={draftInfo[key]}
+                      onChange={(e) => updateInfo(key, e.target.value)}
+                      maxLength={150}
+                      className="mt-2 bg-card"
+                    />
+                  ) : (
+                    <p className="text-sm font-medium text-foreground mt-1">{info[key]}</p>
+                  )}
                 </div>
               ))}
             </div>
           )}
+
           {tab === 'saude' && (
             <div className="space-y-3">
-              {[
-                { c: 'Diabetes Tipo 2', d: 'Diagnóstico em 2015 · Controlada' },
-                { c: 'Hipertensão Arterial', d: 'Em medicação contínua' },
-                { c: 'Artrose nos joelhos', d: 'Mobilidade reduzida com bengala' },
-              ].map((c, i) => (
+              {(editing ? draftSaude : saude).map((c, i) => (
                 <div key={i} className="p-4 bg-secondary rounded-2xl flex items-center gap-4">
-                  <Stethoscope className="text-primary" size={20} />
-                  <div className="flex-1">
-                    <p className="font-display font-bold text-foreground">{c.c}</p>
-                    <p className="text-xs text-muted-foreground">{c.d}</p>
+                  <Stethoscope className="text-primary shrink-0" size={20} />
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {editing ? (
+                      <>
+                        <Input
+                          value={c.c}
+                          placeholder="Condição"
+                          onChange={(e) => updateCondicao(i, 'c', e.target.value)}
+                          maxLength={100}
+                          className="bg-card"
+                        />
+                        <Input
+                          value={c.d}
+                          placeholder="Detalhes"
+                          onChange={(e) => updateCondicao(i, 'd', e.target.value)}
+                          maxLength={200}
+                          className="bg-card"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-display font-bold text-foreground">{c.c}</p>
+                        <p className="text-xs text-muted-foreground self-center">{c.d}</p>
+                      </>
+                    )}
                   </div>
+                  {editing && (
+                    <Button variant="ghost" size="icon-sm" onClick={() => removeCondicao(i)} aria-label="Remover">
+                      <Trash2 size={16} className="text-destructive" />
+                    </Button>
+                  )}
                 </div>
               ))}
+              {editing && (
+                <Button variant="outline" onClick={addCondicao} className="w-full">
+                  <Plus size={16} /> Adicionar condição
+                </Button>
+              )}
             </div>
           )}
+
           {tab === 'rotina' && (
             <div className="space-y-3">
-              {[
-                { h: '07:00', a: 'Acorda · medicação matinal' },
-                { h: '08:00', a: 'Pequeno-almoço · café com leite e torrada' },
-                { h: '10:30', a: 'Caminhada assistida no jardim' },
-                { h: '13:00', a: 'Almoço (dieta diabética)' },
-                { h: '15:00', a: 'Sesta' },
-                { h: '19:00', a: 'Jantar leve · medicação noturna' },
-              ].map(r => (
-                <div key={r.h} className="flex items-center gap-4 p-3 bg-secondary rounded-2xl">
-                  <Clock size={16} className="text-primary" />
-                  <span className="text-xs font-display font-black text-muted-foreground uppercase tracking-widest w-12">{r.h}</span>
-                  <p className="text-sm font-medium text-foreground">{r.a}</p>
+              {(editing ? draftRotina : rotina).map((r, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 bg-secondary rounded-2xl">
+                  <Clock size={16} className="text-primary shrink-0" />
+                  {editing ? (
+                    <>
+                      <Input
+                        value={r.h}
+                        placeholder="07:00"
+                        onChange={(e) => updateRotina(i, 'h', e.target.value)}
+                        maxLength={5}
+                        className="w-24 bg-card"
+                      />
+                      <Input
+                        value={r.a}
+                        placeholder="Atividade"
+                        onChange={(e) => updateRotina(i, 'a', e.target.value)}
+                        maxLength={150}
+                        className="flex-1 bg-card"
+                      />
+                      <Button variant="ghost" size="icon-sm" onClick={() => removeRotina(i)} aria-label="Remover">
+                        <Trash2 size={16} className="text-destructive" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-xs font-display font-black text-muted-foreground uppercase tracking-widest w-12">{r.h}</span>
+                      <p className="text-sm font-medium text-foreground">{r.a}</p>
+                    </>
+                  )}
                 </div>
               ))}
+              {editing && (
+                <Button variant="outline" onClick={addRotina} className="w-full">
+                  <Plus size={16} /> Adicionar item de rotina
+                </Button>
+              )}
             </div>
           )}
         </div>
+
+        {editing && (
+          <div className="border-t border-border bg-secondary/40 px-6 sm:px-8 py-4 flex flex-col sm:flex-row sm:justify-end gap-2">
+            <Button variant="outline" onClick={cancelEdit}><XCircle size={16} /> Cancelar</Button>
+            <Button variant="default" onClick={saveEdit}><CheckCircle2 size={16} /> Guardar Alterações</Button>
+          </div>
+        )}
       </motion.div>
     </div>
   );
