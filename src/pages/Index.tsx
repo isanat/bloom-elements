@@ -23,6 +23,10 @@ import { UIDataView }           from '@/components/evyra/views/UIDataView';
 import { UINavigationView }     from '@/components/evyra/views/UINavigationView';
 import { UIOverlaysView }       from '@/components/evyra/views/UIOverlaysView';
 import { UIMiscView }           from '@/components/evyra/views/UIMiscView';
+import {
+  UIColorsView, UIHealthIconsView, UIBottomNavView, UISpecialtyModalsView,
+  UIBloomCustomView, UIStatusBadgeView, UISpecialInputsView
+} from '@/components/evyra/views/UIBloomViews';
 
 // ── NEW views (páginas faltantes) ─────────────────────────────
 import { LoginView, RegisterView }                  from '@/components/evyra/views/AuthViews';
@@ -148,6 +152,13 @@ const Index = () => {
       case 'ui-navigation': return <UINavigationView />;
       case 'ui-overlays':   return <UIOverlaysView />;
       case 'ui-misc':       return <UIMiscView />;
+      case 'ui-colors':           return <UIColorsView />;
+      case 'ui-health-icons':     return <UIHealthIconsView />;
+      case 'ui-bottom-nav':       return <UIBottomNavView />;
+      case 'ui-specialty-modals': return <UISpecialtyModalsView />;
+      case 'ui-bloom-custom':     return <UIBloomCustomView />;
+      case 'ui-status-badge':     return <UIStatusBadgeView />;
+      case 'ui-special-inputs':   return <UISpecialInputsView />;
 
       default: return <DashboardView />;
     }
