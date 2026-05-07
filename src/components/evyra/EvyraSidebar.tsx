@@ -3,7 +3,8 @@ import {
   Search, Menu, X, Users, Wallet, Zap, MessageSquare, CreditCard,
   BookOpen, Settings, LogOut, Briefcase, FileText, Bell, Globe,
   BarChart3, Layers, Key, UserPlus, Heart, Shield, ShieldCheck,
-  HelpCircle, LayoutDashboard, Calendar, Stethoscope, AlertTriangle, Star
+  HelpCircle, LayoutDashboard, Calendar, Stethoscope, AlertTriangle, Star,
+  Palette, Smartphone, Sparkles, Box, CircleDot, Type
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -127,6 +128,13 @@ const navItems = {
     { id: 'ui-navigation', icon: Globe,     label: 'Navegação' },
     { id: 'ui-overlays',   icon: Layers,    label: 'Overlays & Modais' },
     { id: 'ui-misc',       icon: Zap,       label: 'Utilitários' },
+    { id: 'ui-colors',         icon: Palette,    label: 'Paleta de Cores' },
+    { id: 'ui-health-icons',   icon: Heart,      label: 'Ícones Health' },
+    { id: 'ui-bottom-nav',     icon: Smartphone, label: 'Bottom Nav' },
+    { id: 'ui-specialty-modals',icon: Sparkles,  label: 'Modais Especiais' },
+    { id: 'ui-bloom-custom',   icon: Box,        label: 'Bloom Custom' },
+    { id: 'ui-status-badge',   icon: CircleDot,  label: 'Status Badges' },
+    { id: 'ui-special-inputs', icon: Type,       label: 'Inputs Especiais' },
   ],
 };
 
