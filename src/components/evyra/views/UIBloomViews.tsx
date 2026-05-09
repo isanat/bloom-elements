@@ -302,54 +302,164 @@ export const UIBloomCustomView = () => (
 );
 
 /* ───────────────── 6. STATUS BADGE ───────────────── */
-type StatusType = 'pending' | 'active' | 'completed' | 'cancelled' | 'review';
-const StatusBadge = ({ status }: { status: StatusType }) => {
-  const map: Record<StatusType, { label: string; cls: string }> = {
-    pending:   { label: 'Pendente',   cls: 'bg-warning/15 text-warning border-warning/30' },
-    active:    { label: 'Ativo',      cls: 'bg-info/15 text-info border-info/30' },
-    completed: { label: 'Concluído',  cls: 'bg-success/15 text-success border-success/30' },
-    cancelled: { label: 'Cancelado',  cls: 'bg-destructive/15 text-destructive border-destructive/30' },
-    review:    { label: 'Em revisão', cls: 'bg-muted text-foreground border-border' },
-  };
-  const s = map[status];
+type StatusType =
+  | 'pending' | 'active' | 'completed' | 'cancelled' | 'review'
+  | 'verified' | 'rejected' | 'expired' | 'draft' | 'paid' | 'refunded' | 'escrow';
+
+type StatusSize = 'sm' | 'md' | 'lg';
+
+const STATUS_MAP: Record<StatusType, { label: string; cls: string; icon?: React.ElementType }> = {
+  pending:   { label: 'Pendente',   cls: 'bg-warning/15 text-warning border-warning/30',           icon: Loader2 },
+  active:    { label: 'Ativo',      cls: 'bg-info/15 text-info border-info/30',                    icon: Sparkles },
+  completed: { label: 'Concluído',  cls: 'bg-success/15 text-success border-success/30',           icon: CheckCircle2 },
+  cancelled: { label: 'Cancelado',  cls: 'bg-destructive/15 text-destructive border-destructive/30', icon: X },
+  review:    { label: 'Em revisão', cls: 'bg-muted text-foreground border-border',                 icon: Eye },
+  verified:  { label: 'Verificado', cls: 'bg-success/15 text-success border-success/30',           icon: ShieldCheck },
+  rejected:  { label: 'Rejeitado',  cls: 'bg-destructive/15 text-destructive border-destructive/30', icon: X },
+  expired:   { label: 'Expirado',   cls: 'bg-muted text-muted-foreground border-border line-through' },
+  draft:     { label: 'Rascunho',   cls: 'bg-secondary/40 text-foreground border-border',          icon: FileText },
+  paid:      { label: 'Pago',       cls: 'bg-success/15 text-success border-success/30',           icon: CheckCircle2 },
+  refunded:  { label: 'Reembolsado',cls: 'bg-info/15 text-info border-info/30',                    icon: CreditCard },
+  escrow:    { label: 'Em Escrow',  cls: 'bg-primary/10 text-primary border-primary/30',           icon: Lock },
+};
+
+const SIZE_MAP: Record<StatusSize, string> = {
+  sm: 'px-2 py-0.5 text-[9px]',
+  md: 'px-3 py-1 text-[10px]',
+  lg: 'px-4 py-1.5 text-xs',
+};
+
+const StatusBadge = ({
+  status, size = 'md', withIcon = false, pulse = false, dotOnly = false,
+}: {
+  status: StatusType; size?: StatusSize; withIcon?: boolean; pulse?: boolean; dotOnly?: boolean;
+}) => {
+  const s = STATUS_MAP[status];
+  const Icon = s.icon;
+
+  if (dotOnly) {
+    return (
+      <span className={cn("inline-flex items-center gap-2", s.cls.replace(/bg-\S+/g, '').replace(/border-\S+/g, ''))}>
+        <span className="relative flex">
+          <span className={cn("w-2 h-2 rounded-full bg-current", pulse && "animate-pulse")} />
+          {pulse && <span className="absolute inset-0 w-2 h-2 rounded-full bg-current animate-ping opacity-60" />}
+        </span>
+        <span className="text-xs font-semibold">{s.label}</span>
+      </span>
+    );
+  }
+
   return (
     <span className={cn(
-      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-display font-black uppercase tracking-widest",
-      s.cls
+      "inline-flex items-center gap-1.5 rounded-full border font-display font-black uppercase tracking-widest",
+      SIZE_MAP[size],
+      s.cls,
     )}>
-      <span className="w-1.5 h-1.5 rounded-full bg-current" />
+      {withIcon && Icon ? (
+        <Icon size={size === 'lg' ? 14 : 11} className={status === 'pending' ? 'animate-spin' : ''} />
+      ) : (
+        <span className={cn("w-1.5 h-1.5 rounded-full bg-current", pulse && "animate-pulse")} />
+      )}
       {s.label}
     </span>
   );
 };
 
+const ALL_STATUSES: StatusType[] = [
+  'pending', 'active', 'completed', 'cancelled', 'review',
+  'verified', 'rejected', 'expired', 'draft', 'paid', 'refunded', 'escrow',
+];
+
 export const UIStatusBadgeView = () => (
   <div className="space-y-12 animate-fade-in">
-    <SectionHeader title="Status Badges" desc="Indicadores de estado para contratos, propostas e processos." />
-    <DocCard title="Variantes">
+    <SectionHeader
+      title="Status Badges"
+      desc="Indicadores de estado para contratos, propostas, KYC, pagamentos e processos."
+    />
+
+    <DocCard title="Todas as Variantes">
       <div className="flex flex-wrap gap-3">
-        <StatusBadge status="pending" />
-        <StatusBadge status="active" />
-        <StatusBadge status="completed" />
-        <StatusBadge status="cancelled" />
-        <StatusBadge status="review" />
+        {ALL_STATUSES.map(s => <StatusBadge key={s} status={s} />)}
       </div>
     </DocCard>
-    <DocCard title="Em Contexto (linha de tabela)">
+
+    <DocCard title="Com Ícone">
+      <div className="flex flex-wrap gap-3">
+        {ALL_STATUSES.map(s => <StatusBadge key={s} status={s} withIcon />)}
+      </div>
+    </DocCard>
+
+    <DocCard title="Tamanhos">
+      <div className="flex flex-wrap items-center gap-3">
+        <StatusBadge status="active" size="sm" />
+        <StatusBadge status="active" size="md" />
+        <StatusBadge status="active" size="lg" />
+        <span className="mx-3 h-6 w-px bg-border" />
+        <StatusBadge status="paid" size="sm" withIcon />
+        <StatusBadge status="paid" size="md" withIcon />
+        <StatusBadge status="paid" size="lg" withIcon />
+      </div>
+    </DocCard>
+
+    <DocCard title="Dot-Only (compacto, em listas densas)">
+      <div className="flex flex-wrap gap-6">
+        <StatusBadge status="active"    dotOnly pulse />
+        <StatusBadge status="pending"   dotOnly pulse />
+        <StatusBadge status="completed" dotOnly />
+        <StatusBadge status="cancelled" dotOnly />
+        <StatusBadge status="escrow"    dotOnly pulse />
+      </div>
+    </DocCard>
+
+    <DocCard title="Animação Pulse (estados em tempo real)">
+      <div className="flex flex-wrap gap-3">
+        <StatusBadge status="active"  pulse />
+        <StatusBadge status="pending" pulse withIcon />
+        <StatusBadge status="escrow"  pulse withIcon />
+      </div>
+    </DocCard>
+
+    <DocCard title="Caso de Uso — Linha de Contratos">
       <div className="space-y-2">
         {[
-          { name: 'Contrato #1042', s: 'active' as const },
-          { name: 'Proposta #58',   s: 'pending' as const },
-          { name: 'Contrato #1031', s: 'completed' as const },
-          { name: 'Proposta #54',   s: 'cancelled' as const },
-          { name: 'KYC Maria S.',   s: 'review' as const },
+          { name: 'Contrato #1042 — Maria S.',  s: 'active'    as const, meta: 'Iniciado há 3 dias' },
+          { name: 'Proposta #58 — João P.',     s: 'pending'   as const, meta: 'Aguarda resposta' },
+          { name: 'Contrato #1031 — Ana C.',    s: 'completed' as const, meta: 'Finalizado 12/04' },
+          { name: 'Proposta #54 — Pedro M.',    s: 'cancelled' as const, meta: 'Cancelado pelo cliente' },
+          { name: 'Pagamento #882 — Escrow',    s: 'escrow'    as const, meta: '€450 retidos' },
+          { name: 'Pagamento #871 — Salário',   s: 'paid'      as const, meta: '€1 200 transferidos' },
         ].map(r => (
-          <Card key={r.name} className="p-4 flex items-center justify-between">
-            <span className="text-sm font-medium">{r.name}</span>
-            <StatusBadge status={r.s} />
+          <Card key={r.name} className="p-4 flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <div className="text-sm font-semibold truncate">{r.name}</div>
+              <div className="text-xs text-muted-foreground">{r.meta}</div>
+            </div>
+            <StatusBadge status={r.s} withIcon />
           </Card>
         ))}
       </div>
+    </DocCard>
+
+    <DocCard title="Caso de Uso — KYC / Verificação">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {[
+          { name: 'Documento de Identidade', s: 'verified' as const },
+          { name: 'Comprovativo de Morada',  s: 'review'   as const },
+          { name: 'Certificado Profissional',s: 'rejected' as const },
+        ].map(k => (
+          <Card key={k.name} className="p-4 space-y-2">
+            <div className="text-sm font-medium">{k.name}</div>
+            <StatusBadge status={k.s} withIcon size="sm" />
+          </Card>
+        ))}
+      </div>
+    </DocCard>
+
+    <DocCard title="Uso (snippet)">
+      <pre className="text-xs bg-muted p-4 rounded-xl overflow-x-auto font-mono leading-relaxed">{`<StatusBadge status="active" />
+<StatusBadge status="paid" withIcon size="lg" />
+<StatusBadge status="escrow" pulse withIcon />
+<StatusBadge status="active" dotOnly pulse />`}</pre>
     </DocCard>
   </div>
 );
