@@ -499,7 +499,7 @@ export const FamilyAgendaView = () => {
 export const FamilyCarePlanView = () => (
   <div className="space-y-8">
     <SectionHeader title="Plano de Cuidados" desc="Medicação, exercícios, alimentação e relatórios diários." />
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {[
         { t: 'Medicação', i: Pill, items: ['Sintrom 4mg · 08h', 'Metformina 500mg · 13h', 'Lisinopril · 20h'] },
         { t: 'Alimentação', i: Utensils, items: ['Dieta diabética', '1500 kcal/dia', 'Sem açúcar refinado'] },
