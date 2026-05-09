@@ -153,7 +153,7 @@ export const NovoContratoView = ({ onNavigate }: { onNavigate?: (v: string) => v
       </div>
 
       <SectionCard label="Termos do Contrato">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           {[['Valor/Hora (€)', 'rate'], ['Horas/Semana', 'hours'], ['Semanas', 'weeks']].map(([label, key]) => (
             <FieldBox key={key} label={label}>
               <input type="number" min={1} value={form[key as keyof typeof form] as number} onChange={e => setForm(p => ({ ...p, [key]: Number(e.target.value) }))} className={inputCls} />
@@ -235,7 +235,7 @@ export const ProposalFlowView = ({ onNavigate }: { onNavigate?: (v: string) => v
             <div className="p-4 bg-primary/5 border border-primary/20 rounded-2xl text-xs text-muted-foreground leading-relaxed">Ao aceitar, confirmo que li todos os termos. A aceitação fica registada com data, hora e IP.</div>
           </SectionCard>}
           {step === 3 && <SectionCard label="Depósito em Escrow">
-            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 text-center"><p className="text-[9px] font-display font-black uppercase tracking-widest text-muted-foreground">Valor a Depositar</p><p className="text-4xl font-display font-black text-primary tracking-tighter mt-2">€{p.total}</p><p className="text-xs text-muted-foreground mt-1">Libertado semanalmente após aprovação</p></div>
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 text-center"><p className="text-[9px] font-display font-black uppercase tracking-widest text-muted-foreground">Valor a Depositar</p><p className="text-3xl sm:text-4xl font-display font-black text-primary tracking-tighter mt-2 break-all">€{p.total}</p><p className="text-xs text-muted-foreground mt-1">Libertado semanalmente após aprovação</p></div>
             <div className="space-y-2.5">
               {[['📱','MB Way','+351 91X XXX XXX'],['🏧','Multibanco','Entidade: 11222 · Ref: 123 456 789'],['🏦','IBAN','PT50 0000 0000 0000 0000 0000 0']].map(([e,m,d]) => (
                 <div key={m} className="flex items-center gap-3 p-4 border border-border rounded-2xl cursor-pointer hover:border-primary/30 hover:bg-secondary/50 transition-all"><span className="text-2xl">{e}</span><div><p className="text-sm font-display font-black text-foreground uppercase">{m}</p><p className="text-xs text-muted-foreground font-mono">{d}</p></div></div>

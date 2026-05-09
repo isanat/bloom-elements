@@ -10,7 +10,7 @@ export const UIDataView = () => {
 
       {/* Table */}
       <DocCard title="Tabela Completa">
-        <div className="overflow-x-auto -mx-8 -my-8">
+        <div className="overflow-x-auto -mx-4 -my-4 sm:-mx-8 sm:-my-8">
           <div className="min-w-[600px]">
             <div className="p-4 border-b border-border flex justify-between items-center bg-secondary/30">
               <div className="flex items-center gap-3 bg-card px-4 py-2 rounded-xl border border-border">
