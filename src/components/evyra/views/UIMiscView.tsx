@@ -14,12 +14,12 @@ export const UIMiscView = () => {
         <div className="space-y-6">
           <div className="space-y-3">
             <p className="text-[10px] font-display font-bold text-muted-foreground uppercase tracking-widest mb-4">Font Display (Space Grotesk)</p>
-            <h1 className="text-5xl font-display font-black text-foreground tracking-tighter uppercase">Heading 1</h1>
-            <h2 className="text-4xl font-display font-black text-foreground tracking-tighter uppercase">Heading 2</h2>
-            <h3 className="text-3xl font-display font-bold text-foreground tracking-tight">Heading 3</h3>
-            <h4 className="text-2xl font-display font-bold text-foreground">Heading 4</h4>
-            <h5 className="text-xl font-display font-bold text-foreground">Heading 5</h5>
-            <h6 className="text-lg font-display font-bold text-foreground">Heading 6</h6>
+            <h1 className="text-3xl sm:text-5xl font-display font-black text-foreground tracking-tighter uppercase break-words">Heading 1</h1>
+            <h2 className="text-2xl sm:text-4xl font-display font-black text-foreground tracking-tighter uppercase break-words">Heading 2</h2>
+            <h3 className="text-xl sm:text-3xl font-display font-bold text-foreground tracking-tight">Heading 3</h3>
+            <h4 className="text-lg sm:text-2xl font-display font-bold text-foreground">Heading 4</h4>
+            <h5 className="text-base sm:text-xl font-display font-bold text-foreground">Heading 5</h5>
+            <h6 className="text-sm sm:text-lg font-display font-bold text-foreground">Heading 6</h6>
           </div>
           <div className="space-y-3 pt-4 border-t border-border">
             <p className="text-[10px] font-display font-bold text-muted-foreground uppercase tracking-widest mb-4">Font Body (Inter)</p>
