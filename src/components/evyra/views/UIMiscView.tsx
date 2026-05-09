@@ -133,7 +133,7 @@ export const UIMiscView = () => {
 
       {/* Icons Showcase */}
       <DocCard title="Ícones em Uso">
-        <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-8 gap-3 sm:gap-4">
           {[Heart, Star, Zap, ShieldCheck, Copy, Download, Hash, Link2].map((Icon, i) => (
             <button
               key={i}
