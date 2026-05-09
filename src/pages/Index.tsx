@@ -196,7 +196,7 @@ const Index = () => {
           sidebarOpen={sidebarOpen}
           onMobileMenuToggle={() => setMobileMenuOpen(true)}
         />
-        <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto">
+        <div className="p-3 sm:p-6 lg:p-10 max-w-7xl mx-auto overflow-x-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentView}
