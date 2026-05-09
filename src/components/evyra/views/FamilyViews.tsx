@@ -178,11 +178,11 @@ export const FamilyMemberView = () => {
       <SectionHeader title="Familiar Cuidado" desc={`Perfil completo de ${info.nomeCompleto}.`} />
 
       <motion.div {...fadeUp} className="bg-card rounded-3xl border border-border shadow-card overflow-hidden">
-        <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-end gap-5">
-          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-primary text-primary-foreground flex items-center justify-center text-3xl font-display font-black shadow-glow shrink-0">{initials}</div>
-          <div className="flex-1 text-center sm:text-left">
-            <h3 className="text-2xl sm:text-3xl font-display font-black text-foreground tracking-tighter">{info.nomeCompleto}</h3>
-            <p className="text-sm text-muted-foreground font-medium mt-1">78 anos · Cascais · Mobilidade reduzida</p>
+        <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-4 sm:p-8 flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-5">
+          <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-3xl bg-primary text-primary-foreground flex items-center justify-center text-2xl sm:text-3xl font-display font-black shadow-glow shrink-0">{initials}</div>
+          <div className="flex-1 min-w-0 text-center sm:text-left">
+            <h3 className="text-xl sm:text-3xl font-display font-black text-foreground tracking-tighter break-words">{info.nomeCompleto}</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">78 anos · Cascais · Mobilidade reduzida</p>
             <div className="flex gap-2 mt-3 justify-center sm:justify-start flex-wrap">
               {(editing ? draftSaude : saude).filter(s => s.c.trim()).slice(0, 4).map((s, i) => (
                 <Badge key={i} variant="secondary">{s.c}</Badge>
@@ -190,16 +190,16 @@ export const FamilyMemberView = () => {
             </div>
           </div>
           {editing ? (
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={cancelEdit}><XCircle size={16} /> Cancelar</Button>
-              <Button variant="default" onClick={saveEdit}><CheckCircle2 size={16} /> Guardar</Button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button variant="outline" className="flex-1 sm:flex-none" onClick={cancelEdit}><XCircle size={16} /> Cancelar</Button>
+              <Button variant="default" className="flex-1 sm:flex-none" onClick={saveEdit}><CheckCircle2 size={16} /> Guardar</Button>
             </div>
           ) : (
-            <Button variant="outline" onClick={startEdit}><Edit3 size={16} /> Editar</Button>
+            <Button variant="outline" className="w-full sm:w-auto" onClick={startEdit}><Edit3 size={16} /> Editar</Button>
           )}
         </div>
 
-        <div className="border-b border-border px-6 flex gap-1 overflow-x-auto">
+        <div className="border-b border-border px-3 sm:px-6 flex gap-1 overflow-x-auto scrollbar-hide">
           {(['info', 'saude', 'rotina'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               className={cn("px-4 py-3 text-xs font-display font-bold uppercase tracking-widest border-b-2 transition-colors",
