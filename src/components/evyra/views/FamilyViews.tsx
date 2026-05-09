@@ -209,7 +209,7 @@ export const FamilyMemberView = () => {
           ))}
         </div>
 
-        <div className="p-6 sm:p-8">
+        <div className="p-4 sm:p-8">
           {tab === 'info' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {InfoLabels.map(([key, label]) => (
