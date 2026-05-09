@@ -153,7 +153,7 @@ export const NovoContratoView = ({ onNavigate }: { onNavigate?: (v: string) => v
       </div>
 
       <SectionCard label="Termos do Contrato">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           {[['Valor/Hora (€)', 'rate'], ['Horas/Semana', 'hours'], ['Semanas', 'weeks']].map(([label, key]) => (
             <FieldBox key={key} label={label}>
               <input type="number" min={1} value={form[key as keyof typeof form] as number} onChange={e => setForm(p => ({ ...p, [key]: Number(e.target.value) }))} className={inputCls} />
