@@ -342,7 +342,7 @@ export const FamilySearchView = () => {
     <div className="space-y-8">
       <SectionHeader title="Procurar Cuidadores" desc="Encontra o profissional ideal para o teu familiar." />
       <DocCard title="Filtros de Pesquisa">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           <Input placeholder="Localização..." />
           <Input placeholder="Especialidade..." />
           <Input placeholder="Preço/hora máx..." />
