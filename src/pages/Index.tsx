@@ -71,14 +71,14 @@ const ModalController = ({ type, onClose }: { type: string; onClose: () => void 
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 40, scale: 0.95 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="bg-card w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-elevated p-8 sm:p-10 relative border border-border text-center"
+        className="bg-card w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-elevated p-6 sm:p-10 relative border border-border text-center max-h-[90dvh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        <button onClick={onClose} className="absolute top-6 right-6 text-muted-foreground hover:text-foreground transition-all"><X size={20} /></button>
-        <div className={`w-16 h-16 ${bgMap[c.variant]} rounded-2xl flex items-center justify-center mb-6 mx-auto`}><Icon size={32} /></div>
-        <h2 className="text-2xl font-display font-black text-foreground tracking-tighter mb-2 uppercase">{c.title}</h2>
-        <p className="text-muted-foreground font-medium mb-8 leading-relaxed">{c.desc}</p>
-        <div className="flex gap-3">
+        <button onClick={onClose} className="absolute top-4 right-4 sm:top-6 sm:right-6 text-muted-foreground hover:text-foreground transition-all"><X size={20} /></button>
+        <div className={`w-14 h-14 sm:w-16 sm:h-16 ${bgMap[c.variant]} rounded-2xl flex items-center justify-center mb-5 sm:mb-6 mx-auto`}><Icon size={28} className="sm:!size-8" /></div>
+        <h2 className="text-xl sm:text-2xl font-display font-black text-foreground tracking-tighter mb-2 uppercase break-words">{c.title}</h2>
+        <p className="text-sm sm:text-base text-muted-foreground font-medium mb-6 sm:mb-8 leading-relaxed">{c.desc}</p>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <Button variant={btnMap[c.variant]} size="lg" className="flex-1" onClick={() => { toast.success('Processo iniciado!'); onClose(); }}>Confirmar</Button>
           <Button variant="outline" size="lg" onClick={onClose}>Cancelar</Button>
         </div>
