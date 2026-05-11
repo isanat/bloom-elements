@@ -4,7 +4,7 @@ import {
   BookOpen, Settings, LogOut, Briefcase, FileText, Bell, Globe,
   BarChart3, Layers, Key, UserPlus, Heart, Shield, ShieldCheck,
   HelpCircle, LayoutDashboard, Calendar, Stethoscope, AlertTriangle, Star,
-  Palette, Smartphone, Sparkles, Box, CircleDot, Type
+  Palette, Smartphone, Sparkles, Box, CircleDot, Type, Ruler
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -135,6 +135,7 @@ const navItems = {
     { id: 'ui-bloom-custom',   icon: Box,        label: 'Bloom Custom' },
     { id: 'ui-status-badge',   icon: CircleDot,  label: 'Status Badges' },
     { id: 'ui-special-inputs', icon: Type,       label: 'Inputs Especiais' },
+    { id: 'ui-mobile-audit',   icon: Ruler,      label: 'Mobile UI Audit' },
   ],
 };
 
