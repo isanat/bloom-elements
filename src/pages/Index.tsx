@@ -27,6 +27,7 @@ import {
   UIColorsView, UIHealthIconsView, UIBottomNavView, UISpecialtyModalsView,
   UIBloomCustomView, UIStatusBadgeView, UISpecialInputsView
 } from '@/components/evyra/views/UIBloomViews';
+import { UIMobileAuditView } from '@/components/evyra/views/UIMobileAuditView';
 
 // ── NEW views (páginas faltantes) ─────────────────────────────
 import { LoginView, RegisterView }                  from '@/components/evyra/views/AuthViews';
@@ -159,6 +160,7 @@ const Index = () => {
       case 'ui-bloom-custom':     return <UIBloomCustomView />;
       case 'ui-status-badge':     return <UIStatusBadgeView />;
       case 'ui-special-inputs':   return <UISpecialInputsView />;
+      case 'ui-mobile-audit':     return <UIMobileAuditView />;
 
       default: return <DashboardView />;
     }
