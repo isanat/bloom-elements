@@ -3,7 +3,8 @@ import {
   Search, Menu, X, Users, Wallet, Zap, MessageSquare, CreditCard,
   BookOpen, Settings, LogOut, Briefcase, FileText, Bell, Globe,
   BarChart3, Layers, Key, UserPlus, Heart, Shield, ShieldCheck,
-  HelpCircle, LayoutDashboard
+  HelpCircle, LayoutDashboard, Calendar, Stethoscope, AlertTriangle, Star,
+  Palette, Smartphone, Sparkles, Box, CircleDot, Type, Ruler
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -100,6 +101,20 @@ const navItems = {
     { id: 'profile-setup', icon: Users,      label: 'Profile Setup',   desc: 'Wizard cuidador',     badge: 'novo' },
     { id: 'kyc',           icon: Shield,     label: 'Verificação KYC', desc: 'Identidade Didit',    badge: 'novo' },
   ],
+  family: [
+    { id: 'family-dashboard', icon: LayoutDashboard, label: 'Dashboard Família',   desc: 'Visão do cuidado',     badge: 'novo' },
+    { id: 'family-member',    icon: Heart,           label: 'Familiar Cuidado',    desc: 'Perfil do dependente', badge: 'novo' },
+    { id: 'family-search',    icon: Search,          label: 'Procurar Cuidadores', desc: 'Busca avançada',       badge: 'novo' },
+    { id: 'family-demandas',  icon: Briefcase,       label: 'Minhas Demandas',     desc: 'Vagas publicadas',     badge: 'novo' },
+    { id: 'family-agenda',    icon: Calendar,        label: 'Agenda',              desc: 'Turnos da semana',     badge: 'novo' },
+    { id: 'family-care-plan', icon: Stethoscope,     label: 'Plano de Cuidados',   desc: 'Medicação & rotina',   badge: 'novo' },
+    { id: 'family-emergency', icon: AlertTriangle,   label: 'Emergências SOS',     desc: 'Contactos rápidos',    badge: 'novo' },
+    { id: 'family-payments',  icon: CreditCard,      label: 'Pagamentos Família',  desc: 'Faturas & recibos',    badge: 'novo' },
+    { id: 'family-contracts', icon: FileText,        label: 'Contratos Família',   desc: 'Em vigor',             badge: 'novo' },
+    { id: 'family-favorites', icon: Star,            label: 'Favoritos',           desc: 'Cuidadores guardados', badge: 'novo' },
+    { id: 'family-review',    icon: Star,            label: 'Avaliar Cuidador',    desc: 'Review pós-contrato',  badge: 'novo' },
+    { id: 'family-chat',      icon: MessageSquare,   label: 'Chat Família',        desc: 'Falar com cuidadora',  badge: 'novo' },
+  ],
   admin: [
     { id: 'admin', icon: LayoutDashboard, label: 'Admin Dashboard', desc: 'Painel de gestão', badge: 'novo' },
     { id: 'help',  icon: HelpCircle,      label: 'Centro de Ajuda', desc: 'FAQ & suporte',   badge: 'novo' },
@@ -113,6 +128,14 @@ const navItems = {
     { id: 'ui-navigation', icon: Globe,     label: 'Navegação' },
     { id: 'ui-overlays',   icon: Layers,    label: 'Overlays & Modais' },
     { id: 'ui-misc',       icon: Zap,       label: 'Utilitários' },
+    { id: 'ui-colors',         icon: Palette,    label: 'Paleta de Cores' },
+    { id: 'ui-health-icons',   icon: Heart,      label: 'Ícones Health' },
+    { id: 'ui-bottom-nav',     icon: Smartphone, label: 'Bottom Nav' },
+    { id: 'ui-specialty-modals',icon: Sparkles,  label: 'Modais Especiais' },
+    { id: 'ui-bloom-custom',   icon: Box,        label: 'Bloom Custom' },
+    { id: 'ui-status-badge',   icon: CircleDot,  label: 'Status Badges' },
+    { id: 'ui-special-inputs', icon: Type,       label: 'Inputs Especiais' },
+    { id: 'ui-mobile-audit',   icon: Ruler,      label: 'Mobile UI Audit' },
   ],
 };
 
@@ -178,6 +201,12 @@ const SidebarContent: React.FC<{
 
         <SectionLabel label="Auth & Onboarding" isOpen={isOpen} />
         {navItems.auth.map(item => (
+          <SidebarLink key={item.id} icon={item.icon} label={item.label} desc={isOpen ? item.desc : undefined}
+            active={currentView === item.id} onClick={() => handleNav(item.id)} isOpen={isOpen} badge={item.badge} />
+        ))}
+
+        <SectionLabel label="Família" isOpen={isOpen} />
+        {navItems.family.map(item => (
           <SidebarLink key={item.id} icon={item.icon} label={item.label} desc={isOpen ? item.desc : undefined}
             active={currentView === item.id} onClick={() => handleNav(item.id)} isOpen={isOpen} badge={item.badge} />
         ))}

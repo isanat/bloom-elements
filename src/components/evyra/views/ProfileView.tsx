@@ -192,7 +192,7 @@ export const ProfileView = () => {
 
           {/* Caregiver Stats */}
           {role === 'caregiver' && (
-            <div className="grid grid-cols-4 gap-3 mt-5 pt-5 border-t border-border">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-5 border-t border-border">
               {[
                 { value: (profile as typeof mockCaregiverProfile).totalContracts, label: 'Contratos', icon: Users },
                 { value: (profile as typeof mockCaregiverProfile).totalReviews, label: 'Avaliações', icon: Star },

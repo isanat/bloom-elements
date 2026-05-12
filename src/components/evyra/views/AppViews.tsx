@@ -57,7 +57,7 @@ export const WalletView = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {[{ label:'Este Mês', value:'€510', sub:'+12%', color:'text-success' }, { label:'Contratos Ativos', value:'3', sub:'1 escrow', color:'text-primary' }, { label:'Taxa Plataforma', value:'10%', sub:'por pagamento', color:'text-warning' }].map(s => (
           <div key={s.label} className="bg-card rounded-2xl border border-border shadow-card p-4 text-center">
             <p className="text-[9px] font-display font-black uppercase tracking-widest text-muted-foreground">{s.label}</p>
@@ -257,7 +257,7 @@ export const CuidadorDetailView = ({ onNavigate }: { onNavigate?: (v: string) =>
             <p className="text-[10px] font-display font-black uppercase tracking-widest text-muted-foreground mb-3">Apresentação</p>
             <p className="text-sm text-muted-foreground leading-relaxed">{c.bio}</p>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
             {[{ label:'Taxa/Hora', value:`€${c.rate}`, color:'text-primary' }, { label:'Contratos', value:'12', color:'text-foreground' }, { label:'Avaliação', value:String(c.rating), color:'text-warning' }].map(s => (
               <div key={s.label} className="bg-card rounded-2xl border border-border p-4 text-center shadow-card">
                 <p className="text-[9px] font-display font-black uppercase tracking-widest text-muted-foreground">{s.label}</p>
