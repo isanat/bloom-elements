@@ -8,9 +8,11 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
 dist-ssr
 *.local
+
+# dist is intentionally tracked so npm install from GitHub works without building
+# dist/
 
 # Editor directories and files
 .vscode/*
