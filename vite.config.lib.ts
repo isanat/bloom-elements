@@ -103,6 +103,9 @@ export default defineConfig({
           react: 'React',
           'react-dom': 'ReactDOM',
         },
+        // Inject "use client" so Next.js App Router knows this is a client bundle
+        banner: '"use client";',
+        // Preserve module structure for tree-shaking
         preserveModules: false,
       },
     },
