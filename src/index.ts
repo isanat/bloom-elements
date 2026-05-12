@@ -1,3 +1,12 @@
+"use client";
+
+// ─────────────────────────────────────────────────────────────
+// @isanat/bloom-elements — public entrypoint
+// All components in this kit are CLIENT components (hooks, Radix
+// portals, framer-motion). The build also injects "use client"
+// into every emitted chunk for Next.js App Router compatibility.
+// ─────────────────────────────────────────────────────────────
+
 // UI Components - Base
 export { Button, buttonVariants } from "./components/ui/button";
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./components/ui/card";
