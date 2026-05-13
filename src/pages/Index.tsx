@@ -107,7 +107,9 @@ const Index = () => {
       case 'kyc':            return <KYCView onNavigate={navigate} />;
 
       // App views
-      case 'dashboard':          return <DashboardView />;
+      case 'dashboard':              return <DashboardCaregiverView />;
+      case 'dashboard-caregiver':    return <DashboardCaregiverView />;
+      case 'dashboard-family':       return <DashboardFamilyView />;
       case 'marketplace':        return <MarketplaceView onAction={handleAction} />;
       case 'demandas':           return <DemandasView />;
       case 'search-cuidadores':  return <SearchCuidadoresView />;
