@@ -103,7 +103,6 @@ const navItems = {
     { id: 'kyc',           icon: Shield,     label: 'Verificação KYC', desc: 'Identidade Didit',    badge: 'novo' },
   ],
   family: [
-    { id: 'family-dashboard', icon: LayoutDashboard, label: 'Dashboard Família',   desc: 'Visão do cuidado',     badge: 'novo' },
     { id: 'family-member',    icon: Heart,           label: 'Familiar Cuidado',    desc: 'Perfil do dependente', badge: 'novo' },
     { id: 'family-search',    icon: Search,          label: 'Procurar Cuidadores', desc: 'Busca avançada',       badge: 'novo' },
     { id: 'family-demandas',  icon: Briefcase,       label: 'Minhas Demandas',     desc: 'Vagas publicadas',     badge: 'novo' },
