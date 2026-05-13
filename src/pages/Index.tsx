@@ -13,7 +13,7 @@ import { SearchCuidadoresView } from '@/components/evyra/views/SearchCuidadoresV
 import { EntrevistasView }      from '@/components/evyra/views/EntrevistasView';
 import { ContratosView }        from '@/components/evyra/views/ContratosView';
 import { VerificacaoView }      from '@/components/evyra/views/VerificacaoView';
-import { DashboardView }        from '@/components/evyra/views/DashboardView';
+import { DashboardView, DashboardCaregiverView, DashboardFamilyView } from '@/components/evyra/views/DashboardView';
 import { ProfileView }          from '@/components/evyra/views/ProfileView';
 import { UIButtonsView }        from '@/components/evyra/views/UIButtonsView';
 import { UIFormsView }          from '@/components/evyra/views/UIFormsView';
