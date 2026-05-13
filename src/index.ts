@@ -70,6 +70,7 @@ export { Avatar, AvatarImage, AvatarFallback } from "./components/ui/avatar";
 
 // Evyra Components
 export { LoginView, RegisterView } from "./components/evyra/views/AuthViews";
+export { FamilySetupView, KYCView, ProfileSetupView } from "./components/evyra/views/OnboardingViews";
 export { EvyraHeader } from "./components/evyra/EvyraHeader";
 export { EvyraSidebar } from "./components/evyra/EvyraSidebar";
 export { ProfileModal } from "./components/evyra/ProfileModal";

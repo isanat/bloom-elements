@@ -174,6 +174,185 @@ export const FamilySetupView = ({ onNavigate }: { onNavigate?: (v: string) => vo
   );
 };
 
+// ── PROFILE SETUP (CUIDADOR) ──────────────────────────────────
+const SPECIALTIES = ['Cuidados a Idosos','Alzheimer/Demência','Cuidados Paliativos','Fisioterapia','Enfermagem','Administração de Medicação','Higiene Pessoal','Reabilitação','Apoio Psicológico','Pediatria'];
+const CERT_LIST   = ['Certificado de Cuidador Formal','Licenciatura em Enfermagem','Técnico de Geriatria','Primeiros Socorros','HACCP','Carta de Condução'];
+const AVAIL_DAYS  = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+const AVAIL_TIMES = ['Manhã (6h–12h)','Tarde (12h–18h)','Noite (18h–00h)','Full-time'];
+
+export const ProfileSetupView = ({ onNavigate }: { onNavigate?: (v: string) => void }) => {
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState({
+    firstName: '', lastName: '', city: '', phone: '', bio: '',
+    specialties: [] as string[], experience: '', rate: '',
+    certifications: [] as string[], days: [] as string[], times: [] as string[],
+  });
+
+  const toggle = (key: 'specialties' | 'certifications' | 'days' | 'times', val: string) =>
+    setForm(p => ({ ...p, [key]: p[key].includes(val) ? p[key].filter(x => x !== val) : [...p[key], val] }));
+
+  const handleNext = () => {
+    if (step === 1 && (!form.firstName || !form.lastName)) { toast.error('Preencha o nome completo'); return; }
+    if (step === 2 && form.specialties.length === 0)        { toast.error('Selecione pelo menos uma especialidade'); return; }
+    if (step < 3) setStep(s => s + 1);
+    else { toast.success('Perfil de cuidador criado!'); onNavigate?.('kyc'); }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-primary/[0.04] via-background to-background px-4 py-10">
+      <div className="max-w-xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="relative inline-block">
+            <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-glow">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-lg flex items-center justify-center border-2 border-background">
+              <span className="text-primary-foreground text-[8px] font-black">✦</span>
+            </div>
+          </div>
+          <div>
+            <h1 className="text-3xl font-display font-black uppercase tracking-tighter text-foreground">Criar Perfil</h1>
+            <p className="text-sm text-muted-foreground mt-1">Cuidador · EVYRA · Passo {step} de 3</p>
+          </div>
+        </div>
+
+        <StepBar step={step} total={3} labels={['Dados Pessoais', 'Especialidades', 'Disponibilidade']} />
+
+        <AnimatePresence mode="wait">
+          <motion.div key={step} variants={containerVariants} initial="hidden" animate="show"
+            className="bg-card rounded-3xl border border-border shadow-elevated p-6 sm:p-8 space-y-6">
+
+            {/* Step 1 — Dados pessoais */}
+            {step === 1 && (
+              <motion.div variants={itemVariants} className="space-y-5">
+                <SectionDivider label="Dados Pessoais" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <FieldLabel>Primeiro Nome *</FieldLabel>
+                    <FieldInput value={form.firstName} onChange={e => setForm(p => ({ ...p, firstName: e.target.value }))} placeholder="Maria" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <FieldLabel>Apelido *</FieldLabel>
+                    <FieldInput value={form.lastName} onChange={e => setForm(p => ({ ...p, lastName: e.target.value }))} placeholder="Silva" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <FieldLabel>Cidade</FieldLabel>
+                    <FieldInput value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} placeholder="Lisboa" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <FieldLabel>Telemóvel</FieldLabel>
+                    <FieldInput type="tel" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="+351 912 345 678" />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel>Apresentação</FieldLabel>
+                  <textarea value={form.bio} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} rows={3}
+                    placeholder="Descreva a sua experiência e abordagem aos cuidados..."
+                    className="w-full px-4 py-3 bg-secondary border border-border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none" />
+                </div>
+                {/* Avatar upload placeholder */}
+                <div className="border-2 border-dashed border-border rounded-2xl p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/[0.02] transition-all"
+                  onClick={() => toast.info('Upload de foto em desenvolvimento')}>
+                  <div className="w-14 h-14 bg-secondary rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  <p className="text-sm font-display font-black text-foreground uppercase">Foto de Perfil</p>
+                  <p className="text-xs text-muted-foreground mt-1">Clique para fazer upload</p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 2 — Especialidades e certificações */}
+            {step === 2 && (
+              <motion.div variants={itemVariants} className="space-y-6">
+                <SectionDivider label="Especialidades *" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {SPECIALTIES.map(s => (
+                    <CheckChip key={s} label={s} active={form.specialties.includes(s)} onClick={() => toggle('specialties', s)} />
+                  ))}
+                </div>
+
+                <SectionDivider label="Experiência & Tarifas" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <FieldLabel>Anos de Experiência</FieldLabel>
+                    <FieldInput type="number" value={form.experience} onChange={e => setForm(p => ({ ...p, experience: e.target.value }))} placeholder="5" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <FieldLabel>Tarifa Horária (€)</FieldLabel>
+                    <FieldInput type="number" value={form.rate} onChange={e => setForm(p => ({ ...p, rate: e.target.value }))} placeholder="20" />
+                  </div>
+                </div>
+
+                <SectionDivider label="Certificações" />
+                <div className="grid grid-cols-1 gap-2">
+                  {CERT_LIST.map(c => (
+                    <CheckChip key={c} label={c} active={form.certifications.includes(c)} onClick={() => toggle('certifications', c)} />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 3 — Disponibilidade + Resumo */}
+            {step === 3 && (
+              <motion.div variants={itemVariants} className="space-y-6">
+                <SectionDivider label="Disponibilidade" />
+                <div className="space-y-2">
+                  <FieldLabel>Dias Disponíveis</FieldLabel>
+                  <div className="grid grid-cols-2 gap-2">
+                    {AVAIL_DAYS.map(d => <CheckChip key={d} label={d} active={form.days.includes(d)} onClick={() => toggle('days', d)} />)}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <FieldLabel>Períodos</FieldLabel>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {AVAIL_TIMES.map(t => <CheckChip key={t} label={t} active={form.times.includes(t)} onClick={() => toggle('times', t)} />)}
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 space-y-2">
+                  <p className="text-[9px] font-display font-black uppercase tracking-widest text-primary mb-3">Resumo do Perfil</p>
+                  {[
+                    ['Nome',           `${form.firstName} ${form.lastName}`.trim() || '—'],
+                    ['Cidade',         form.city || '—'],
+                    ['Experiência',    form.experience ? `${form.experience} anos` : '—'],
+                    ['Tarifa',         form.rate ? `€${form.rate}/hora` : '—'],
+                    ['Especialidades', `${form.specialties.length} selecionadas`],
+                    ['Certificações',  `${form.certifications.length} selecionadas`],
+                  ].map(([k, v]) => (
+                    <div key={k} className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{k}</span>
+                      <span className="font-display font-black text-foreground">{v}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="flex gap-3">
+          {step > 1 && (
+            <Button variant="outline" className="px-5 rounded-2xl" onClick={() => setStep(s => s - 1)}>← Voltar</Button>
+          )}
+          <Button size="lg" className="flex-1 rounded-2xl" onClick={handleNext}>
+            {step === 3 ? 'Criar Perfil' : 'Continuar'} <ArrowRight size={16} className="ml-2" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ── KYC VIEW ──────────────────────────────────────────────────
 type KycStatus = 'UNVERIFIED' | 'PENDING' | 'VERIFIED' | 'REJECTED';
 

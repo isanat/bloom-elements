@@ -1,53 +1,53 @@
 "use client";
-import { jsx as e, jsxs as d, Fragment as xe } from "react/jsx-runtime";
-import * as i from "react";
-import ja, { useState as I, createContext as Ea, useEffect as Me, useContext as La, useRef as He, forwardRef as Fa } from "react";
-import { Slot as K } from "@radix-ui/react-slot";
-import { cva as O } from "class-variance-authority";
-import { clsx as Ba } from "clsx";
-import { twMerge as Ga } from "tailwind-merge";
-import * as Qe from "@radix-ui/react-label";
-import * as j from "@radix-ui/react-toast";
-import { X as ee, Check as $, Circle as ve, ChevronDown as ye, ChevronUp as Va, Dot as Ha, ChevronRight as W, ChevronLeft as Xe, MoreHorizontal as Oa, PanelLeft as $a, GripVertical as Ka, ArrowLeft as Ya, ArrowRight as Ua, Search as ne, Mail as qa, Lock as Wa, EyeOff as Ja, Eye as Qa, Loader2 as Ze, Users as V, Heart as H, Menu as ea, Sun as Xa, Moon as Za, Bell as be, Clock as Le, FileText as B, MessageSquare as he, CheckCircle as aa, Settings as et, LogOut as at, BarChart3 as Oe, LayoutDashboard as $e, Briefcase as se, Zap as Se, Wallet as me, ShieldCheck as ae, CreditCard as Te, Key as tt, UserPlus as rt, Shield as ot, Calendar as st, Stethoscope as it, AlertTriangle as nt, Star as de, HelpCircle as dt, Layers as Ke, Globe as lt, Palette as ct, Smartphone as mt, Sparkles as ut, Box as pt, CircleDot as ft, Type as gt, Ruler as bt, MapPin as ht, Award as xt, Phone as vt, ArrowUp as yt, ArrowDown as Nt, Scale as wt, Receipt as Ct } from "lucide-react";
-import * as Ae from "@radix-ui/react-progress";
-import { FormProvider as kt, Controller as Rt, useFormContext as St } from "react-hook-form";
-import * as _e from "@radix-ui/react-checkbox";
-import * as le from "@radix-ui/react-radio-group";
-import * as k from "@radix-ui/react-select";
-import * as oe from "@radix-ui/react-slider";
-import * as je from "@radix-ui/react-switch";
-import * as ta from "@radix-ui/react-toggle";
-import * as Ne from "@radix-ui/react-toggle-group";
-import { OTPInput as Tt, OTPInputContext as Pt } from "input-otp";
-import * as q from "@radix-ui/react-accordion";
-import * as J from "@radix-ui/react-tabs";
-import * as D from "@radix-ui/react-navigation-menu";
-import * as h from "@radix-ui/react-menubar";
-import * as ra from "@radix-ui/react-separator";
-import * as x from "@radix-ui/react-dialog";
-import * as ue from "@radix-ui/react-tooltip";
-import { Drawer as F } from "vaul";
-import * as Fe from "@radix-ui/react-collapsible";
-import * as U from "@radix-ui/react-scroll-area";
-import * as Be from "react-resizable-panels";
-import { DayPicker as zt } from "react-day-picker";
-import It from "embla-carousel-react";
-import { Command as M } from "cmdk";
-import * as Ge from "recharts";
-import * as Dt from "@radix-ui/react-aspect-ratio";
-import * as z from "@radix-ui/react-alert-dialog";
-import * as C from "@radix-ui/react-context-menu";
+import { jsx as e, jsxs as s, Fragment as se } from "react/jsx-runtime";
+import * as n from "react";
+import Oe, { useState as z, createContext as qa, useEffect as Le, useContext as Wa, useRef as Xe, forwardRef as Ja } from "react";
+import { Slot as W } from "@radix-ui/react-slot";
+import { cva as K } from "class-variance-authority";
+import { clsx as Qa } from "clsx";
+import { twMerge as Xa } from "tailwind-merge";
+import * as da from "@radix-ui/react-label";
+import * as F from "@radix-ui/react-toast";
+import { X as ne, Check as L, Circle as ke, ChevronDown as Se, ChevronUp as Za, Dot as et, ChevronRight as Z, ChevronLeft as la, MoreHorizontal as at, PanelLeft as tt, GripVertical as rt, ArrowLeft as ot, ArrowRight as Re, Search as pe, Mail as st, Lock as it, EyeOff as nt, Eye as dt, Loader2 as Ye, Users as O, Heart as Y, Shield as Ve, Camera as Ze, ShieldCheck as ee, Sun as ca, Menu as ma, Moon as lt, Bell as we, Clock as Ke, FileText as G, MessageSquare as Ce, CheckCircle as ua, Settings as ct, LogOut as mt, BarChart3 as ea, LayoutDashboard as aa, Briefcase as me, Zap as Ae, Wallet as he, CreditCard as Me, Key as ut, UserPlus as pt, Calendar as ft, Stethoscope as gt, AlertTriangle as bt, Star as fe, HelpCircle as ht, Layers as ta, Globe as xt, Palette as vt, Smartphone as yt, Sparkles as Nt, Box as wt, CircleDot as Ct, Type as kt, Ruler as St, MapPin as Rt, Award as It, Phone as Tt, ArrowUp as Pt, ArrowDown as zt, Scale as Dt, Receipt as At } from "lucide-react";
+import * as Be from "@radix-ui/react-progress";
+import { FormProvider as Mt, Controller as Et, useFormContext as _t } from "react-hook-form";
+import * as $e from "@radix-ui/react-checkbox";
+import * as ge from "@radix-ui/react-radio-group";
+import * as P from "@radix-ui/react-select";
+import * as ce from "@radix-ui/react-slider";
+import * as Ge from "@radix-ui/react-switch";
+import * as pa from "@radix-ui/react-toggle";
+import * as Ie from "@radix-ui/react-toggle-group";
+import { OTPInput as jt, OTPInputContext as Ft } from "input-otp";
+import * as X from "@radix-ui/react-accordion";
+import * as ae from "@radix-ui/react-tabs";
+import * as _ from "@radix-ui/react-navigation-menu";
+import * as x from "@radix-ui/react-menubar";
+import * as fa from "@radix-ui/react-separator";
+import * as v from "@radix-ui/react-dialog";
+import * as xe from "@radix-ui/react-tooltip";
+import { Drawer as $ } from "vaul";
+import * as Ue from "@radix-ui/react-collapsible";
+import * as Q from "@radix-ui/react-scroll-area";
+import * as qe from "react-resizable-panels";
+import { DayPicker as Lt } from "react-day-picker";
+import Vt from "embla-carousel-react";
+import { Command as j } from "cmdk";
+import * as We from "recharts";
+import * as Bt from "@radix-ui/react-aspect-ratio";
+import * as E from "@radix-ui/react-alert-dialog";
+import * as R from "@radix-ui/react-context-menu";
 import * as N from "@radix-ui/react-dropdown-menu";
-import * as ce from "@radix-ui/react-popover";
-import * as we from "@radix-ui/react-hover-card";
-import * as te from "@radix-ui/react-avatar";
-import { toast as P } from "sonner";
-import { motion as E, AnimatePresence as Mt } from "framer-motion";
-import { NavLink as At } from "react-router-dom";
-function o(...a) {
-  return Ga(Ba(a));
+import * as be from "@radix-ui/react-popover";
+import * as Te from "@radix-ui/react-hover-card";
+import * as de from "@radix-ui/react-avatar";
+import { toast as T } from "sonner";
+import { AnimatePresence as Je, motion as I } from "framer-motion";
+import { NavLink as $t } from "react-router-dom";
+function i(...t) {
+  return Xa(Qa(t));
 }
-const Z = O(
+const ie = K(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap font-display font-bold tracking-wide uppercase ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.97]",
   {
     variants: {
@@ -78,50 +78,50 @@ const Z = O(
       size: "default"
     }
   }
-), _ = i.forwardRef(
-  ({ className: a, variant: t, size: r, asChild: s = !1, ...n }, c) => /* @__PURE__ */ e(s ? K : "button", { className: o(Z({ variant: t, size: r, className: a })), ref: c, ...n })
+), S = n.forwardRef(
+  ({ className: t, variant: a, size: r, asChild: o = !1, ...d }, m) => /* @__PURE__ */ e(o ? W : "button", { className: i(ie({ variant: a, size: r, className: t })), ref: m, ...d })
 );
-_.displayName = "Button";
-const _t = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e("div", { ref: r, className: o("rounded-lg border bg-card text-card-foreground shadow-sm", a), ...t }));
-_t.displayName = "Card";
-const jt = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("div", { ref: r, className: o("flex flex-col space-y-1.5 p-6", a), ...t })
+S.displayName = "Button";
+const Gt = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e("div", { ref: r, className: i("rounded-lg border bg-card text-card-foreground shadow-sm", t), ...a }));
+Gt.displayName = "Card";
+const Ht = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("div", { ref: r, className: i("flex flex-col space-y-1.5 p-6", t), ...a })
 );
-jt.displayName = "CardHeader";
-const Et = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("h3", { ref: r, className: o("text-2xl font-semibold leading-none tracking-tight", a), ...t })
+Ht.displayName = "CardHeader";
+const Ot = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("h3", { ref: r, className: i("text-2xl font-semibold leading-none tracking-tight", t), ...a })
 );
-Et.displayName = "CardTitle";
-const Lt = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("p", { ref: r, className: o("text-sm text-muted-foreground", a), ...t })
+Ot.displayName = "CardTitle";
+const Yt = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("p", { ref: r, className: i("text-sm text-muted-foreground", t), ...a })
 );
-Lt.displayName = "CardDescription";
-const Ft = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("div", { ref: r, className: o("p-6 pt-0", a), ...t })
+Yt.displayName = "CardDescription";
+const Kt = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("div", { ref: r, className: i("p-6 pt-0", t), ...a })
 );
-Ft.displayName = "CardContent";
-const Bt = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("div", { ref: r, className: o("flex items-center p-6 pt-0", a), ...t })
+Kt.displayName = "CardContent";
+const Ut = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("div", { ref: r, className: i("flex items-center p-6 pt-0", t), ...a })
 );
-Bt.displayName = "CardFooter";
-const oa = i.forwardRef(
-  ({ className: a, type: t, ...r }, s) => /* @__PURE__ */ e(
+Ut.displayName = "CardFooter";
+const ga = n.forwardRef(
+  ({ className: t, type: a, ...r }, o) => /* @__PURE__ */ e(
     "input",
     {
-      type: t,
-      className: o(
+      type: a,
+      className: i(
         "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        a
+        t
       ),
-      ref: s,
+      ref: o,
       ...r
     }
   )
 );
-oa.displayName = "Input";
-const Gt = O("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"), sa = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(Qe.Root, { ref: r, className: o(Gt(), a), ...t }));
-sa.displayName = Qe.Root.displayName;
-const Vt = O(
+ga.displayName = "Input";
+const qt = K("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"), ba = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(da.Root, { ref: r, className: i(qt(), t), ...a }));
+ba.displayName = da.Root.displayName;
+const Wt = K(
   "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
@@ -137,10 +137,10 @@ const Vt = O(
     }
   }
 );
-function Bi({ className: a, variant: t, ...r }) {
-  return /* @__PURE__ */ e("div", { className: o(Vt({ variant: t }), a), ...r });
+function tn({ className: t, variant: a, ...r }) {
+  return /* @__PURE__ */ e("div", { className: i(Wt({ variant: a }), t), ...r });
 }
-const Ht = O(
+const Jt = K(
   "relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
   {
     variants: {
@@ -153,29 +153,29 @@ const Ht = O(
       variant: "default"
     }
   }
-), Ot = i.forwardRef(({ className: a, variant: t, ...r }, s) => /* @__PURE__ */ e("div", { ref: s, role: "alert", className: o(Ht({ variant: t }), a), ...r }));
-Ot.displayName = "Alert";
-const $t = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("h5", { ref: r, className: o("mb-1 font-medium leading-none tracking-tight", a), ...t })
+), Qt = n.forwardRef(({ className: t, variant: a, ...r }, o) => /* @__PURE__ */ e("div", { ref: o, role: "alert", className: i(Jt({ variant: a }), t), ...r }));
+Qt.displayName = "Alert";
+const Xt = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("h5", { ref: r, className: i("mb-1 font-medium leading-none tracking-tight", t), ...a })
 );
-$t.displayName = "AlertTitle";
-const Kt = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("div", { ref: r, className: o("text-sm [&_p]:leading-relaxed", a), ...t })
+Xt.displayName = "AlertTitle";
+const Zt = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("div", { ref: r, className: i("text-sm [&_p]:leading-relaxed", t), ...a })
 );
-Kt.displayName = "AlertDescription";
-const Yt = j.Provider, ia = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  j.Viewport,
+Zt.displayName = "AlertDescription";
+const er = F.Provider, ha = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  F.Viewport,
   {
     ref: r,
-    className: o(
+    className: i(
       "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-ia.displayName = j.Viewport.displayName;
-const Ut = O(
+ha.displayName = F.Viewport.displayName;
+const ar = K(
   "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
   {
     variants: {
@@ -188,377 +188,377 @@ const Ut = O(
       variant: "default"
     }
   }
-), na = i.forwardRef(({ className: a, variant: t, ...r }, s) => /* @__PURE__ */ e(j.Root, { ref: s, className: o(Ut({ variant: t }), a), ...r }));
-na.displayName = j.Root.displayName;
-const qt = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  j.Action,
+), xa = n.forwardRef(({ className: t, variant: a, ...r }, o) => /* @__PURE__ */ e(F.Root, { ref: o, className: i(ar({ variant: a }), t), ...r }));
+xa.displayName = F.Root.displayName;
+const tr = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  F.Action,
   {
     ref: r,
-    className: o(
+    className: i(
       "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors group-[.destructive]:border-muted/40 hover:bg-secondary group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 group-[.destructive]:focus:ring-destructive disabled:pointer-events-none disabled:opacity-50",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-qt.displayName = j.Action.displayName;
-const da = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  j.Close,
+tr.displayName = F.Action.displayName;
+const va = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  F.Close,
   {
     ref: r,
-    className: o(
+    className: i(
       "absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity group-hover:opacity-100 group-[.destructive]:text-red-300 hover:text-foreground group-[.destructive]:hover:text-red-50 focus:opacity-100 focus:outline-none focus:ring-2 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
-      a
+      t
     ),
     "toast-close": "",
-    ...t,
-    children: /* @__PURE__ */ e(ee, { className: "h-4 w-4" })
+    ...a,
+    children: /* @__PURE__ */ e(ne, { className: "h-4 w-4" })
   }
 ));
-da.displayName = j.Close.displayName;
-const la = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(j.Title, { ref: r, className: o("text-sm font-semibold", a), ...t }));
-la.displayName = j.Title.displayName;
-const ca = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(j.Description, { ref: r, className: o("text-sm opacity-90", a), ...t }));
-ca.displayName = j.Description.displayName;
-const Wt = 1, Jt = 1e6;
-let Pe = 0;
-function Qt() {
-  return Pe = (Pe + 1) % Number.MAX_SAFE_INTEGER, Pe.toString();
+va.displayName = F.Close.displayName;
+const ya = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(F.Title, { ref: r, className: i("text-sm font-semibold", t), ...a }));
+ya.displayName = F.Title.displayName;
+const Na = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(F.Description, { ref: r, className: i("text-sm opacity-90", t), ...a }));
+Na.displayName = F.Description.displayName;
+const rr = 1, or = 1e6;
+let Ee = 0;
+function sr() {
+  return Ee = (Ee + 1) % Number.MAX_SAFE_INTEGER, Ee.toString();
 }
-const ze = /* @__PURE__ */ new Map(), Ye = (a) => {
-  if (ze.has(a))
+const _e = /* @__PURE__ */ new Map(), ra = (t) => {
+  if (_e.has(t))
     return;
-  const t = setTimeout(() => {
-    ze.delete(a), ie({
+  const a = setTimeout(() => {
+    _e.delete(t), ue({
       type: "REMOVE_TOAST",
-      toastId: a
+      toastId: t
     });
-  }, Jt);
-  ze.set(a, t);
-}, Xt = (a, t) => {
-  switch (t.type) {
+  }, or);
+  _e.set(t, a);
+}, ir = (t, a) => {
+  switch (a.type) {
     case "ADD_TOAST":
       return {
-        ...a,
-        toasts: [t.toast, ...a.toasts].slice(0, Wt)
+        ...t,
+        toasts: [a.toast, ...t.toasts].slice(0, rr)
       };
     case "UPDATE_TOAST":
       return {
-        ...a,
-        toasts: a.toasts.map((r) => r.id === t.toast.id ? { ...r, ...t.toast } : r)
+        ...t,
+        toasts: t.toasts.map((r) => r.id === a.toast.id ? { ...r, ...a.toast } : r)
       };
     case "DISMISS_TOAST": {
-      const { toastId: r } = t;
-      return r ? Ye(r) : a.toasts.forEach((s) => {
-        Ye(s.id);
+      const { toastId: r } = a;
+      return r ? ra(r) : t.toasts.forEach((o) => {
+        ra(o.id);
       }), {
-        ...a,
-        toasts: a.toasts.map(
-          (s) => s.id === r || r === void 0 ? {
-            ...s,
+        ...t,
+        toasts: t.toasts.map(
+          (o) => o.id === r || r === void 0 ? {
+            ...o,
             open: !1
-          } : s
+          } : o
         )
       };
     }
     case "REMOVE_TOAST":
-      return t.toastId === void 0 ? {
-        ...a,
+      return a.toastId === void 0 ? {
+        ...t,
         toasts: []
       } : {
-        ...a,
-        toasts: a.toasts.filter((r) => r.id !== t.toastId)
+        ...t,
+        toasts: t.toasts.filter((r) => r.id !== a.toastId)
       };
   }
-}, fe = [];
-let ge = { toasts: [] };
-function ie(a) {
-  ge = Xt(ge, a), fe.forEach((t) => {
-    t(ge);
+}, ye = [];
+let Ne = { toasts: [] };
+function ue(t) {
+  Ne = ir(Ne, t), ye.forEach((a) => {
+    a(Ne);
   });
 }
-function Zt({ ...a }) {
-  const t = Qt(), r = (n) => ie({
+function nr({ ...t }) {
+  const a = sr(), r = (d) => ue({
     type: "UPDATE_TOAST",
-    toast: { ...n, id: t }
-  }), s = () => ie({ type: "DISMISS_TOAST", toastId: t });
-  return ie({
+    toast: { ...d, id: a }
+  }), o = () => ue({ type: "DISMISS_TOAST", toastId: a });
+  return ue({
     type: "ADD_TOAST",
     toast: {
-      ...a,
-      id: t,
+      ...t,
+      id: a,
       open: !0,
-      onOpenChange: (n) => {
-        n || s();
+      onOpenChange: (d) => {
+        d || o();
       }
     }
   }), {
-    id: t,
-    dismiss: s,
+    id: a,
+    dismiss: o,
     update: r
   };
 }
-function er() {
-  const [a, t] = i.useState(ge);
-  return i.useEffect(() => (fe.push(t), () => {
-    const r = fe.indexOf(t);
-    r > -1 && fe.splice(r, 1);
-  }), [a]), {
-    ...a,
-    toast: Zt,
-    dismiss: (r) => ie({ type: "DISMISS_TOAST", toastId: r })
+function dr() {
+  const [t, a] = n.useState(Ne);
+  return n.useEffect(() => (ye.push(a), () => {
+    const r = ye.indexOf(a);
+    r > -1 && ye.splice(r, 1);
+  }), [t]), {
+    ...t,
+    toast: nr,
+    dismiss: (r) => ue({ type: "DISMISS_TOAST", toastId: r })
   };
 }
-function Gi() {
-  const { toasts: a } = er();
-  return /* @__PURE__ */ d(Yt, { children: [
-    a.map(function({ id: t, title: r, description: s, action: n, ...c }) {
-      return /* @__PURE__ */ d(na, { ...c, children: [
-        /* @__PURE__ */ d("div", { className: "grid gap-1", children: [
-          r && /* @__PURE__ */ e(la, { children: r }),
-          s && /* @__PURE__ */ e(ca, { children: s })
+function rn() {
+  const { toasts: t } = dr();
+  return /* @__PURE__ */ s(er, { children: [
+    t.map(function({ id: a, title: r, description: o, action: d, ...m }) {
+      return /* @__PURE__ */ s(xa, { ...m, children: [
+        /* @__PURE__ */ s("div", { className: "grid gap-1", children: [
+          r && /* @__PURE__ */ e(ya, { children: r }),
+          o && /* @__PURE__ */ e(Na, { children: o })
         ] }),
-        n,
-        /* @__PURE__ */ e(da, {})
-      ] }, t);
+        d,
+        /* @__PURE__ */ e(va, {})
+      ] }, a);
     }),
-    /* @__PURE__ */ e(ia, {})
+    /* @__PURE__ */ e(ha, {})
   ] });
 }
-const ar = i.forwardRef(({ className: a, value: t, ...r }, s) => /* @__PURE__ */ e(
-  Ae.Root,
+const lr = n.forwardRef(({ className: t, value: a, ...r }, o) => /* @__PURE__ */ e(
+  Be.Root,
   {
-    ref: s,
-    className: o("relative h-4 w-full overflow-hidden rounded-full bg-secondary", a),
+    ref: o,
+    className: i("relative h-4 w-full overflow-hidden rounded-full bg-secondary", t),
     ...r,
     children: /* @__PURE__ */ e(
-      Ae.Indicator,
+      Be.Indicator,
       {
         className: "h-full w-full flex-1 bg-primary transition-all",
-        style: { transform: `translateX(-${100 - (t || 0)}%)` }
+        style: { transform: `translateX(-${100 - (a || 0)}%)` }
       }
     )
   }
 ));
-ar.displayName = Ae.Root.displayName;
-function Ue({ className: a, ...t }) {
-  return /* @__PURE__ */ e("div", { className: o("animate-pulse rounded-md bg-muted", a), ...t });
+lr.displayName = Be.Root.displayName;
+function oa({ className: t, ...a }) {
+  return /* @__PURE__ */ e("div", { className: i("animate-pulse rounded-md bg-muted", t), ...a });
 }
-const Vi = kt, ma = i.createContext({}), Hi = ({
-  ...a
-}) => /* @__PURE__ */ e(ma.Provider, { value: { name: a.name }, children: /* @__PURE__ */ e(Rt, { ...a }) }), Ce = () => {
-  const a = i.useContext(ma), t = i.useContext(ua), { getFieldState: r, formState: s } = St(), n = r(a.name, s);
-  if (!a)
+const on = Mt, wa = n.createContext({}), sn = ({
+  ...t
+}) => /* @__PURE__ */ e(wa.Provider, { value: { name: t.name }, children: /* @__PURE__ */ e(Et, { ...t }) }), Pe = () => {
+  const t = n.useContext(wa), a = n.useContext(Ca), { getFieldState: r, formState: o } = _t(), d = r(t.name, o);
+  if (!t)
     throw new Error("useFormField should be used within <FormField>");
-  const { id: c } = t;
+  const { id: m } = a;
   return {
-    id: c,
-    name: a.name,
-    formItemId: `${c}-form-item`,
-    formDescriptionId: `${c}-form-item-description`,
-    formMessageId: `${c}-form-item-message`,
-    ...n
+    id: m,
+    name: t.name,
+    formItemId: `${m}-form-item`,
+    formDescriptionId: `${m}-form-item-description`,
+    formMessageId: `${m}-form-item-message`,
+    ...d
   };
-}, ua = i.createContext({}), tr = i.forwardRef(
-  ({ className: a, ...t }, r) => {
-    const s = i.useId();
-    return /* @__PURE__ */ e(ua.Provider, { value: { id: s }, children: /* @__PURE__ */ e("div", { ref: r, className: o("space-y-2", a), ...t }) });
+}, Ca = n.createContext({}), cr = n.forwardRef(
+  ({ className: t, ...a }, r) => {
+    const o = n.useId();
+    return /* @__PURE__ */ e(Ca.Provider, { value: { id: o }, children: /* @__PURE__ */ e("div", { ref: r, className: i("space-y-2", t), ...a }) });
   }
 );
-tr.displayName = "FormItem";
-const rr = i.forwardRef(({ className: a, ...t }, r) => {
-  const { error: s, formItemId: n } = Ce();
-  return /* @__PURE__ */ e(sa, { ref: r, className: o(s && "text-destructive", a), htmlFor: n, ...t });
+cr.displayName = "FormItem";
+const mr = n.forwardRef(({ className: t, ...a }, r) => {
+  const { error: o, formItemId: d } = Pe();
+  return /* @__PURE__ */ e(ba, { ref: r, className: i(o && "text-destructive", t), htmlFor: d, ...a });
 });
-rr.displayName = "FormLabel";
-const or = i.forwardRef(
-  ({ ...a }, t) => {
-    const { error: r, formItemId: s, formDescriptionId: n, formMessageId: c } = Ce();
+mr.displayName = "FormLabel";
+const ur = n.forwardRef(
+  ({ ...t }, a) => {
+    const { error: r, formItemId: o, formDescriptionId: d, formMessageId: m } = Pe();
     return /* @__PURE__ */ e(
-      K,
+      W,
       {
-        ref: t,
-        id: s,
-        "aria-describedby": r ? `${n} ${c}` : `${n}`,
+        ref: a,
+        id: o,
+        "aria-describedby": r ? `${d} ${m}` : `${d}`,
         "aria-invalid": !!r,
-        ...a
+        ...t
       }
     );
   }
 );
-or.displayName = "FormControl";
-const sr = i.forwardRef(
-  ({ className: a, ...t }, r) => {
-    const { formDescriptionId: s } = Ce();
-    return /* @__PURE__ */ e("p", { ref: r, id: s, className: o("text-sm text-muted-foreground", a), ...t });
+ur.displayName = "FormControl";
+const pr = n.forwardRef(
+  ({ className: t, ...a }, r) => {
+    const { formDescriptionId: o } = Pe();
+    return /* @__PURE__ */ e("p", { ref: r, id: o, className: i("text-sm text-muted-foreground", t), ...a });
   }
 );
-sr.displayName = "FormDescription";
-const ir = i.forwardRef(
-  ({ className: a, children: t, ...r }, s) => {
-    const { error: n, formMessageId: c } = Ce(), l = n ? String(n == null ? void 0 : n.message) : t;
-    return l ? /* @__PURE__ */ e("p", { ref: s, id: c, className: o("text-sm font-medium text-destructive", a), ...r, children: l }) : null;
+pr.displayName = "FormDescription";
+const fr = n.forwardRef(
+  ({ className: t, children: a, ...r }, o) => {
+    const { error: d, formMessageId: m } = Pe(), c = d ? String(d == null ? void 0 : d.message) : a;
+    return c ? /* @__PURE__ */ e("p", { ref: o, id: m, className: i("text-sm font-medium text-destructive", t), ...r, children: c }) : null;
   }
 );
-ir.displayName = "FormMessage";
-const nr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
+fr.displayName = "FormMessage";
+const gr = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
   "textarea",
   {
-    className: o(
+    className: i(
       "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-      a
+      t
     ),
     ref: r,
-    ...t
+    ...a
   }
 ));
-nr.displayName = "Textarea";
-const dr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  _e.Root,
+gr.displayName = "Textarea";
+const br = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  $e.Root,
   {
     ref: r,
-    className: o(
+    className: i(
       "peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-      a
+      t
     ),
-    ...t,
-    children: /* @__PURE__ */ e(_e.Indicator, { className: o("flex items-center justify-center text-current"), children: /* @__PURE__ */ e($, { className: "h-4 w-4" }) })
+    ...a,
+    children: /* @__PURE__ */ e($e.Indicator, { className: i("flex items-center justify-center text-current"), children: /* @__PURE__ */ e(L, { className: "h-4 w-4" }) })
   }
 ));
-dr.displayName = _e.Root.displayName;
-const lr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(le.Root, { className: o("grid gap-2", a), ...t, ref: r }));
-lr.displayName = le.Root.displayName;
-const cr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  le.Item,
+br.displayName = $e.Root.displayName;
+const hr = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(ge.Root, { className: i("grid gap-2", t), ...a, ref: r }));
+hr.displayName = ge.Root.displayName;
+const xr = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  ge.Item,
   {
     ref: r,
-    className: o(
+    className: i(
       "aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-      a
+      t
     ),
-    ...t,
-    children: /* @__PURE__ */ e(le.Indicator, { className: "flex items-center justify-center", children: /* @__PURE__ */ e(ve, { className: "h-2.5 w-2.5 fill-current text-current" }) })
+    ...a,
+    children: /* @__PURE__ */ e(ge.Indicator, { className: "flex items-center justify-center", children: /* @__PURE__ */ e(ke, { className: "h-2.5 w-2.5 fill-current text-current" }) })
   }
 ));
-cr.displayName = le.Item.displayName;
-const Oi = k.Root, $i = k.Group, Ki = k.Value, mr = i.forwardRef(({ className: a, children: t, ...r }, s) => /* @__PURE__ */ d(
-  k.Trigger,
+xr.displayName = ge.Item.displayName;
+const nn = P.Root, dn = P.Group, ln = P.Value, vr = n.forwardRef(({ className: t, children: a, ...r }, o) => /* @__PURE__ */ s(
+  P.Trigger,
   {
-    ref: s,
-    className: o(
+    ref: o,
+    className: i(
       "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
-      a
+      t
     ),
     ...r,
     children: [
-      t,
-      /* @__PURE__ */ e(k.Icon, { asChild: !0, children: /* @__PURE__ */ e(ye, { className: "h-4 w-4 opacity-50" }) })
+      a,
+      /* @__PURE__ */ e(P.Icon, { asChild: !0, children: /* @__PURE__ */ e(Se, { className: "h-4 w-4 opacity-50" }) })
     ]
   }
 ));
-mr.displayName = k.Trigger.displayName;
-const pa = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  k.ScrollUpButton,
+vr.displayName = P.Trigger.displayName;
+const ka = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  P.ScrollUpButton,
   {
     ref: r,
-    className: o("flex cursor-default items-center justify-center py-1", a),
-    ...t,
-    children: /* @__PURE__ */ e(Va, { className: "h-4 w-4" })
+    className: i("flex cursor-default items-center justify-center py-1", t),
+    ...a,
+    children: /* @__PURE__ */ e(Za, { className: "h-4 w-4" })
   }
 ));
-pa.displayName = k.ScrollUpButton.displayName;
-const fa = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  k.ScrollDownButton,
+ka.displayName = P.ScrollUpButton.displayName;
+const Sa = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  P.ScrollDownButton,
   {
     ref: r,
-    className: o("flex cursor-default items-center justify-center py-1", a),
-    ...t,
-    children: /* @__PURE__ */ e(ye, { className: "h-4 w-4" })
+    className: i("flex cursor-default items-center justify-center py-1", t),
+    ...a,
+    children: /* @__PURE__ */ e(Se, { className: "h-4 w-4" })
   }
 ));
-fa.displayName = k.ScrollDownButton.displayName;
-const ur = i.forwardRef(({ className: a, children: t, position: r = "popper", ...s }, n) => /* @__PURE__ */ e(k.Portal, { children: /* @__PURE__ */ d(
-  k.Content,
+Sa.displayName = P.ScrollDownButton.displayName;
+const yr = n.forwardRef(({ className: t, children: a, position: r = "popper", ...o }, d) => /* @__PURE__ */ e(P.Portal, { children: /* @__PURE__ */ s(
+  P.Content,
   {
-    ref: n,
-    className: o(
+    ref: d,
+    className: i(
       "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
       r === "popper" && "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
-      a
+      t
     ),
     position: r,
-    ...s,
+    ...o,
     children: [
-      /* @__PURE__ */ e(pa, {}),
+      /* @__PURE__ */ e(ka, {}),
       /* @__PURE__ */ e(
-        k.Viewport,
+        P.Viewport,
         {
-          className: o(
+          className: i(
             "p-1",
             r === "popper" && "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
           ),
-          children: t
+          children: a
         }
       ),
-      /* @__PURE__ */ e(fa, {})
+      /* @__PURE__ */ e(Sa, {})
     ]
   }
 ) }));
-ur.displayName = k.Content.displayName;
-const pr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(k.Label, { ref: r, className: o("py-1.5 pl-8 pr-2 text-sm font-semibold", a), ...t }));
-pr.displayName = k.Label.displayName;
-const fr = i.forwardRef(({ className: a, children: t, ...r }, s) => /* @__PURE__ */ d(
-  k.Item,
+yr.displayName = P.Content.displayName;
+const Nr = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(P.Label, { ref: r, className: i("py-1.5 pl-8 pr-2 text-sm font-semibold", t), ...a }));
+Nr.displayName = P.Label.displayName;
+const wr = n.forwardRef(({ className: t, children: a, ...r }, o) => /* @__PURE__ */ s(
+  P.Item,
   {
-    ref: s,
-    className: o(
+    ref: o,
+    className: i(
       "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
-      a
+      t
     ),
     ...r,
     children: [
-      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(k.ItemIndicator, { children: /* @__PURE__ */ e($, { className: "h-4 w-4" }) }) }),
-      /* @__PURE__ */ e(k.ItemText, { children: t })
+      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(P.ItemIndicator, { children: /* @__PURE__ */ e(L, { className: "h-4 w-4" }) }) }),
+      /* @__PURE__ */ e(P.ItemText, { children: a })
     ]
   }
 ));
-fr.displayName = k.Item.displayName;
-const gr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(k.Separator, { ref: r, className: o("-mx-1 my-1 h-px bg-muted", a), ...t }));
-gr.displayName = k.Separator.displayName;
-const br = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ d(
-  oe.Root,
+wr.displayName = P.Item.displayName;
+const Cr = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(P.Separator, { ref: r, className: i("-mx-1 my-1 h-px bg-muted", t), ...a }));
+Cr.displayName = P.Separator.displayName;
+const kr = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ s(
+  ce.Root,
   {
     ref: r,
-    className: o("relative flex w-full touch-none select-none items-center", a),
-    ...t,
+    className: i("relative flex w-full touch-none select-none items-center", t),
+    ...a,
     children: [
-      /* @__PURE__ */ e(oe.Track, { className: "relative h-2 w-full grow overflow-hidden rounded-full bg-secondary", children: /* @__PURE__ */ e(oe.Range, { className: "absolute h-full bg-primary" }) }),
-      /* @__PURE__ */ e(oe.Thumb, { className: "block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" })
+      /* @__PURE__ */ e(ce.Track, { className: "relative h-2 w-full grow overflow-hidden rounded-full bg-secondary", children: /* @__PURE__ */ e(ce.Range, { className: "absolute h-full bg-primary" }) }),
+      /* @__PURE__ */ e(ce.Thumb, { className: "block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" })
     ]
   }
 ));
-br.displayName = oe.Root.displayName;
-const hr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  je.Root,
+kr.displayName = ce.Root.displayName;
+const Sr = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  Ge.Root,
   {
-    className: o(
+    className: i(
       "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
-      a
+      t
     ),
-    ...t,
+    ...a,
     ref: r,
     children: /* @__PURE__ */ e(
-      je.Thumb,
+      Ge.Thumb,
       {
-        className: o(
+        className: i(
           "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
         )
       }
     )
   }
 ));
-hr.displayName = je.Root.displayName;
-const ga = O(
+Sr.displayName = Ge.Root.displayName;
+const Ra = K(
   "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground",
   {
     variants: {
@@ -577,255 +577,255 @@ const ga = O(
       size: "default"
     }
   }
-), xr = i.forwardRef(({ className: a, variant: t, size: r, ...s }, n) => /* @__PURE__ */ e(ta.Root, { ref: n, className: o(ga({ variant: t, size: r, className: a })), ...s }));
-xr.displayName = ta.Root.displayName;
-const ba = i.createContext({
+), Rr = n.forwardRef(({ className: t, variant: a, size: r, ...o }, d) => /* @__PURE__ */ e(pa.Root, { ref: d, className: i(Ra({ variant: a, size: r, className: t })), ...o }));
+Rr.displayName = pa.Root.displayName;
+const Ia = n.createContext({
   size: "default",
   variant: "default"
-}), vr = i.forwardRef(({ className: a, variant: t, size: r, children: s, ...n }, c) => /* @__PURE__ */ e(Ne.Root, { ref: c, className: o("flex items-center justify-center gap-1", a), ...n, children: /* @__PURE__ */ e(ba.Provider, { value: { variant: t, size: r }, children: s }) }));
-vr.displayName = Ne.Root.displayName;
-const yr = i.forwardRef(({ className: a, children: t, variant: r, size: s, ...n }, c) => {
-  const l = i.useContext(ba);
+}), Ir = n.forwardRef(({ className: t, variant: a, size: r, children: o, ...d }, m) => /* @__PURE__ */ e(Ie.Root, { ref: m, className: i("flex items-center justify-center gap-1", t), ...d, children: /* @__PURE__ */ e(Ia.Provider, { value: { variant: a, size: r }, children: o }) }));
+Ir.displayName = Ie.Root.displayName;
+const Tr = n.forwardRef(({ className: t, children: a, variant: r, size: o, ...d }, m) => {
+  const c = n.useContext(Ia);
   return /* @__PURE__ */ e(
-    Ne.Item,
+    Ie.Item,
     {
-      ref: c,
-      className: o(
-        ga({
-          variant: l.variant || r,
-          size: l.size || s
+      ref: m,
+      className: i(
+        Ra({
+          variant: c.variant || r,
+          size: c.size || o
         }),
-        a
+        t
       ),
-      ...n,
-      children: t
+      ...d,
+      children: a
     }
   );
 });
-yr.displayName = Ne.Item.displayName;
-const Nr = i.forwardRef(
-  ({ className: a, containerClassName: t, ...r }, s) => /* @__PURE__ */ e(
-    Tt,
+Tr.displayName = Ie.Item.displayName;
+const Pr = n.forwardRef(
+  ({ className: t, containerClassName: a, ...r }, o) => /* @__PURE__ */ e(
+    jt,
     {
-      ref: s,
-      containerClassName: o("flex items-center gap-2 has-[:disabled]:opacity-50", t),
-      className: o("disabled:cursor-not-allowed", a),
+      ref: o,
+      containerClassName: i("flex items-center gap-2 has-[:disabled]:opacity-50", a),
+      className: i("disabled:cursor-not-allowed", t),
       ...r
     }
   )
 );
-Nr.displayName = "InputOTP";
-const wr = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("div", { ref: r, className: o("flex items-center", a), ...t })
+Pr.displayName = "InputOTP";
+const zr = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("div", { ref: r, className: i("flex items-center", t), ...a })
 );
-wr.displayName = "InputOTPGroup";
-const Cr = i.forwardRef(({ index: a, className: t, ...r }, s) => {
-  const n = i.useContext(Pt), { char: c, hasFakeCaret: l, isActive: f } = n.slots[a];
-  return /* @__PURE__ */ d(
+zr.displayName = "InputOTPGroup";
+const Dr = n.forwardRef(({ index: t, className: a, ...r }, o) => {
+  const d = n.useContext(Ft), { char: m, hasFakeCaret: c, isActive: l } = d.slots[t];
+  return /* @__PURE__ */ s(
     "div",
     {
-      ref: s,
-      className: o(
+      ref: o,
+      className: i(
         "relative flex h-10 w-10 items-center justify-center border-y border-r border-input text-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
-        f && "z-10 ring-2 ring-ring ring-offset-background",
-        t
+        l && "z-10 ring-2 ring-ring ring-offset-background",
+        a
       ),
       ...r,
       children: [
-        c,
-        l && /* @__PURE__ */ e("div", { className: "pointer-events-none absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ e("div", { className: "animate-caret-blink h-4 w-px bg-foreground duration-1000" }) })
+        m,
+        c && /* @__PURE__ */ e("div", { className: "pointer-events-none absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ e("div", { className: "animate-caret-blink h-4 w-px bg-foreground duration-1000" }) })
       ]
     }
   );
 });
-Cr.displayName = "InputOTPSlot";
-const kr = i.forwardRef(
-  ({ ...a }, t) => /* @__PURE__ */ e("div", { ref: t, role: "separator", ...a, children: /* @__PURE__ */ e(Ha, {}) })
+Dr.displayName = "InputOTPSlot";
+const Ar = n.forwardRef(
+  ({ ...t }, a) => /* @__PURE__ */ e("div", { ref: a, role: "separator", ...t, children: /* @__PURE__ */ e(et, {}) })
 );
-kr.displayName = "InputOTPSeparator";
-const Yi = q.Root, Rr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(q.Item, { ref: r, className: o("border-b", a), ...t }));
-Rr.displayName = "AccordionItem";
-const Sr = i.forwardRef(({ className: a, children: t, ...r }, s) => /* @__PURE__ */ e(q.Header, { className: "flex", children: /* @__PURE__ */ d(
-  q.Trigger,
+Ar.displayName = "InputOTPSeparator";
+const cn = X.Root, Mr = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(X.Item, { ref: r, className: i("border-b", t), ...a }));
+Mr.displayName = "AccordionItem";
+const Er = n.forwardRef(({ className: t, children: a, ...r }, o) => /* @__PURE__ */ e(X.Header, { className: "flex", children: /* @__PURE__ */ s(
+  X.Trigger,
   {
-    ref: s,
-    className: o(
+    ref: o,
+    className: i(
       "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180",
-      a
+      t
     ),
     ...r,
     children: [
-      t,
-      /* @__PURE__ */ e(ye, { className: "h-4 w-4 shrink-0 transition-transform duration-200" })
+      a,
+      /* @__PURE__ */ e(Se, { className: "h-4 w-4 shrink-0 transition-transform duration-200" })
     ]
   }
 ) }));
-Sr.displayName = q.Trigger.displayName;
-const Tr = i.forwardRef(({ className: a, children: t, ...r }, s) => /* @__PURE__ */ e(
-  q.Content,
+Er.displayName = X.Trigger.displayName;
+const _r = n.forwardRef(({ className: t, children: a, ...r }, o) => /* @__PURE__ */ e(
+  X.Content,
   {
-    ref: s,
+    ref: o,
     className: "overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
     ...r,
-    children: /* @__PURE__ */ e("div", { className: o("pb-4 pt-0", a), children: t })
+    children: /* @__PURE__ */ e("div", { className: i("pb-4 pt-0", t), children: a })
   }
 ));
-Tr.displayName = q.Content.displayName;
-const Ui = J.Root, Pr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  J.List,
+_r.displayName = X.Content.displayName;
+const mn = ae.Root, jr = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  ae.List,
   {
     ref: r,
-    className: o(
+    className: i(
       "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-Pr.displayName = J.List.displayName;
-const zr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  J.Trigger,
+jr.displayName = ae.List.displayName;
+const Fr = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  ae.Trigger,
   {
     ref: r,
-    className: o(
+    className: i(
       "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-zr.displayName = J.Trigger.displayName;
-const Ir = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  J.Content,
+Fr.displayName = ae.Trigger.displayName;
+const Lr = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  ae.Content,
   {
     ref: r,
-    className: o(
+    className: i(
       "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-Ir.displayName = J.Content.displayName;
-const Dr = i.forwardRef(({ ...a }, t) => /* @__PURE__ */ e("nav", { ref: t, "aria-label": "breadcrumb", ...a }));
-Dr.displayName = "Breadcrumb";
-const Mr = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e(
+Lr.displayName = ae.Content.displayName;
+const Vr = n.forwardRef(({ ...t }, a) => /* @__PURE__ */ e("nav", { ref: a, "aria-label": "breadcrumb", ...t }));
+Vr.displayName = "Breadcrumb";
+const Br = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e(
     "ol",
     {
       ref: r,
-      className: o(
+      className: i(
         "flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5",
-        a
+        t
       ),
-      ...t
+      ...a
     }
   )
 );
-Mr.displayName = "BreadcrumbList";
-const Ar = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("li", { ref: r, className: o("inline-flex items-center gap-1.5", a), ...t })
+Br.displayName = "BreadcrumbList";
+const $r = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("li", { ref: r, className: i("inline-flex items-center gap-1.5", t), ...a })
 );
-Ar.displayName = "BreadcrumbItem";
-const _r = i.forwardRef(({ asChild: a, className: t, ...r }, s) => /* @__PURE__ */ e(a ? K : "a", { ref: s, className: o("transition-colors hover:text-foreground", t), ...r }));
-_r.displayName = "BreadcrumbLink";
-const jr = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e(
+$r.displayName = "BreadcrumbItem";
+const Gr = n.forwardRef(({ asChild: t, className: a, ...r }, o) => /* @__PURE__ */ e(t ? W : "a", { ref: o, className: i("transition-colors hover:text-foreground", a), ...r }));
+Gr.displayName = "BreadcrumbLink";
+const Hr = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e(
     "span",
     {
       ref: r,
       role: "link",
       "aria-disabled": "true",
       "aria-current": "page",
-      className: o("font-normal text-foreground", a),
-      ...t
+      className: i("font-normal text-foreground", t),
+      ...a
     }
   )
 );
-jr.displayName = "BreadcrumbPage";
-const Er = ({ children: a, className: t, ...r }) => /* @__PURE__ */ e("li", { role: "presentation", "aria-hidden": "true", className: o("[&>svg]:size-3.5", t), ...r, children: a ?? /* @__PURE__ */ e(W, {}) });
-Er.displayName = "BreadcrumbSeparator";
-const Lr = ({ className: a, ...t }) => /* @__PURE__ */ e(
+Hr.displayName = "BreadcrumbPage";
+const Or = ({ children: t, className: a, ...r }) => /* @__PURE__ */ e("li", { role: "presentation", "aria-hidden": "true", className: i("[&>svg]:size-3.5", a), ...r, children: t ?? /* @__PURE__ */ e(Z, {}) });
+Or.displayName = "BreadcrumbSeparator";
+const Yr = ({ className: t, ...a }) => /* @__PURE__ */ e(
   "nav",
   {
     role: "navigation",
     "aria-label": "pagination",
-    className: o("mx-auto flex w-full justify-center", a),
-    ...t
+    className: i("mx-auto flex w-full justify-center", t),
+    ...a
   }
 );
-Lr.displayName = "Pagination";
-const Fr = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("ul", { ref: r, className: o("flex flex-row items-center gap-1", a), ...t })
+Yr.displayName = "Pagination";
+const Kr = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("ul", { ref: r, className: i("flex flex-row items-center gap-1", t), ...a })
 );
-Fr.displayName = "PaginationContent";
-const Br = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e("li", { ref: r, className: o("", a), ...t }));
-Br.displayName = "PaginationItem";
-const Ve = ({ className: a, isActive: t, size: r = "icon", ...s }) => /* @__PURE__ */ e(
+Kr.displayName = "PaginationContent";
+const Ur = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e("li", { ref: r, className: i("", t), ...a }));
+Ur.displayName = "PaginationItem";
+const Qe = ({ className: t, isActive: a, size: r = "icon", ...o }) => /* @__PURE__ */ e(
   "a",
   {
-    "aria-current": t ? "page" : void 0,
-    className: o(
-      Z({
-        variant: t ? "outline" : "ghost",
+    "aria-current": a ? "page" : void 0,
+    className: i(
+      ie({
+        variant: a ? "outline" : "ghost",
         size: r
       }),
-      a
+      t
     ),
-    ...s
+    ...o
   }
 );
-Ve.displayName = "PaginationLink";
-const Gr = ({ className: a, ...t }) => /* @__PURE__ */ d(Ve, { "aria-label": "Go to previous page", size: "default", className: o("gap-1 pl-2.5", a), ...t, children: [
-  /* @__PURE__ */ e(Xe, { className: "h-4 w-4" }),
+Qe.displayName = "PaginationLink";
+const qr = ({ className: t, ...a }) => /* @__PURE__ */ s(Qe, { "aria-label": "Go to previous page", size: "default", className: i("gap-1 pl-2.5", t), ...a, children: [
+  /* @__PURE__ */ e(la, { className: "h-4 w-4" }),
   /* @__PURE__ */ e("span", { children: "Previous" })
 ] });
-Gr.displayName = "PaginationPrevious";
-const Vr = ({ className: a, ...t }) => /* @__PURE__ */ d(Ve, { "aria-label": "Go to next page", size: "default", className: o("gap-1 pr-2.5", a), ...t, children: [
+qr.displayName = "PaginationPrevious";
+const Wr = ({ className: t, ...a }) => /* @__PURE__ */ s(Qe, { "aria-label": "Go to next page", size: "default", className: i("gap-1 pr-2.5", t), ...a, children: [
   /* @__PURE__ */ e("span", { children: "Next" }),
-  /* @__PURE__ */ e(W, { className: "h-4 w-4" })
+  /* @__PURE__ */ e(Z, { className: "h-4 w-4" })
 ] });
-Vr.displayName = "PaginationNext";
-const Hr = ({ className: a, ...t }) => /* @__PURE__ */ d("span", { "aria-hidden": !0, className: o("flex h-9 w-9 items-center justify-center", a), ...t, children: [
-  /* @__PURE__ */ e(Oa, { className: "h-4 w-4" }),
+Wr.displayName = "PaginationNext";
+const Jr = ({ className: t, ...a }) => /* @__PURE__ */ s("span", { "aria-hidden": !0, className: i("flex h-9 w-9 items-center justify-center", t), ...a, children: [
+  /* @__PURE__ */ e(at, { className: "h-4 w-4" }),
   /* @__PURE__ */ e("span", { className: "sr-only", children: "More pages" })
 ] });
-Hr.displayName = "PaginationEllipsis";
-const Or = i.forwardRef(({ className: a, children: t, ...r }, s) => /* @__PURE__ */ d(
-  D.Root,
+Jr.displayName = "PaginationEllipsis";
+const Qr = n.forwardRef(({ className: t, children: a, ...r }, o) => /* @__PURE__ */ s(
+  _.Root,
   {
-    ref: s,
-    className: o("relative z-10 flex max-w-max flex-1 items-center justify-center", a),
+    ref: o,
+    className: i("relative z-10 flex max-w-max flex-1 items-center justify-center", t),
     ...r,
     children: [
-      t,
-      /* @__PURE__ */ e(ha, {})
+      a,
+      /* @__PURE__ */ e(Ta, {})
     ]
   }
 ));
-Or.displayName = D.Root.displayName;
-const $r = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  D.List,
+Qr.displayName = _.Root.displayName;
+const Xr = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  _.List,
   {
     ref: r,
-    className: o("group flex flex-1 list-none items-center justify-center space-x-1", a),
-    ...t
+    className: i("group flex flex-1 list-none items-center justify-center space-x-1", t),
+    ...a
   }
 ));
-$r.displayName = D.List.displayName;
-const qi = D.Item, Kr = O(
+Xr.displayName = _.List.displayName;
+const un = _.Item, Zr = K(
   "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
-), Yr = i.forwardRef(({ className: a, children: t, ...r }, s) => /* @__PURE__ */ d(
-  D.Trigger,
+), eo = n.forwardRef(({ className: t, children: a, ...r }, o) => /* @__PURE__ */ s(
+  _.Trigger,
   {
-    ref: s,
-    className: o(Kr(), "group", a),
+    ref: o,
+    className: i(Zr(), "group", t),
     ...r,
     children: [
-      t,
+      a,
       " ",
       /* @__PURE__ */ e(
-        ye,
+        Se,
         {
           className: "relative top-[1px] ml-1 h-3 w-3 transition duration-200 group-data-[state=open]:rotate-180",
           "aria-hidden": "true"
@@ -834,202 +834,202 @@ const qi = D.Item, Kr = O(
     ]
   }
 ));
-Yr.displayName = D.Trigger.displayName;
-const Ur = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  D.Content,
+eo.displayName = _.Trigger.displayName;
+const ao = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  _.Content,
   {
     ref: r,
-    className: o(
+    className: i(
       "left-0 top-0 w-full data-[motion^=from-]:animate-in data-[motion^=to-]:animate-out data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52 data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52 md:absolute md:w-auto",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-Ur.displayName = D.Content.displayName;
-const Wi = D.Link, ha = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e("div", { className: o("absolute left-0 top-full flex justify-center"), children: /* @__PURE__ */ e(
-  D.Viewport,
+ao.displayName = _.Content.displayName;
+const pn = _.Link, Ta = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e("div", { className: i("absolute left-0 top-full flex justify-center"), children: /* @__PURE__ */ e(
+  _.Viewport,
   {
-    className: o(
+    className: i(
       "origin-top-center relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]",
-      a
+      t
     ),
     ref: r,
-    ...t
+    ...a
   }
 ) }));
-ha.displayName = D.Viewport.displayName;
-const qr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  D.Indicator,
+Ta.displayName = _.Viewport.displayName;
+const to = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  _.Indicator,
   {
     ref: r,
-    className: o(
+    className: i(
       "top-full z-[1] flex h-1.5 items-end justify-center overflow-hidden data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in",
-      a
+      t
     ),
-    ...t,
+    ...a,
     children: /* @__PURE__ */ e("div", { className: "relative top-[60%] h-2 w-2 rotate-45 rounded-tl-sm bg-border shadow-md" })
   }
 ));
-qr.displayName = D.Indicator.displayName;
-const Ji = h.Menu, Qi = h.Group, Xi = h.Sub, Wr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  h.Root,
+to.displayName = _.Indicator.displayName;
+const fn = x.Menu, gn = x.Group, bn = x.Sub, ro = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  x.Root,
   {
     ref: r,
-    className: o("flex h-10 items-center space-x-1 rounded-md border bg-background p-1", a),
-    ...t
+    className: i("flex h-10 items-center space-x-1 rounded-md border bg-background p-1", t),
+    ...a
   }
 ));
-Wr.displayName = h.Root.displayName;
-const Jr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  h.Trigger,
+ro.displayName = x.Root.displayName;
+const oo = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  x.Trigger,
   {
     ref: r,
-    className: o(
+    className: i(
       "flex cursor-default select-none items-center rounded-sm px-3 py-1.5 text-sm font-medium outline-none data-[state=open]:bg-accent data-[state=open]:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-Jr.displayName = h.Trigger.displayName;
-const Qr = i.forwardRef(({ className: a, inset: t, children: r, ...s }, n) => /* @__PURE__ */ d(
-  h.SubTrigger,
+oo.displayName = x.Trigger.displayName;
+const so = n.forwardRef(({ className: t, inset: a, children: r, ...o }, d) => /* @__PURE__ */ s(
+  x.SubTrigger,
   {
-    ref: n,
-    className: o(
+    ref: d,
+    className: i(
       "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[state=open]:bg-accent data-[state=open]:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-      t && "pl-8",
-      a
+      a && "pl-8",
+      t
     ),
-    ...s,
+    ...o,
     children: [
       r,
-      /* @__PURE__ */ e(W, { className: "ml-auto h-4 w-4" })
+      /* @__PURE__ */ e(Z, { className: "ml-auto h-4 w-4" })
     ]
   }
 ));
-Qr.displayName = h.SubTrigger.displayName;
-const Xr = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  h.SubContent,
+so.displayName = x.SubTrigger.displayName;
+const io = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  x.SubContent,
   {
     ref: r,
-    className: o(
+    className: i(
       "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-Xr.displayName = h.SubContent.displayName;
-const Zr = i.forwardRef(({ className: a, align: t = "start", alignOffset: r = -4, sideOffset: s = 8, ...n }, c) => /* @__PURE__ */ e(h.Portal, { children: /* @__PURE__ */ e(
-  h.Content,
+io.displayName = x.SubContent.displayName;
+const no = n.forwardRef(({ className: t, align: a = "start", alignOffset: r = -4, sideOffset: o = 8, ...d }, m) => /* @__PURE__ */ e(x.Portal, { children: /* @__PURE__ */ e(
+  x.Content,
   {
-    ref: c,
-    align: t,
+    ref: m,
+    align: a,
     alignOffset: r,
-    sideOffset: s,
-    className: o(
+    sideOffset: o,
+    className: i(
       "z-50 min-w-[12rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      a
+      t
     ),
-    ...n
+    ...d
   }
 ) }));
-Zr.displayName = h.Content.displayName;
-const eo = i.forwardRef(({ className: a, inset: t, ...r }, s) => /* @__PURE__ */ e(
-  h.Item,
+no.displayName = x.Content.displayName;
+const lo = n.forwardRef(({ className: t, inset: a, ...r }, o) => /* @__PURE__ */ e(
+  x.Item,
   {
-    ref: s,
-    className: o(
+    ref: o,
+    className: i(
       "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
-      t && "pl-8",
-      a
+      a && "pl-8",
+      t
     ),
     ...r
   }
 ));
-eo.displayName = h.Item.displayName;
-const ao = i.forwardRef(({ className: a, children: t, checked: r, ...s }, n) => /* @__PURE__ */ d(
-  h.CheckboxItem,
+lo.displayName = x.Item.displayName;
+const co = n.forwardRef(({ className: t, children: a, checked: r, ...o }, d) => /* @__PURE__ */ s(
+  x.CheckboxItem,
   {
-    ref: n,
-    className: o(
+    ref: d,
+    className: i(
       "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
-      a
+      t
     ),
     checked: r,
-    ...s,
+    ...o,
     children: [
-      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(h.ItemIndicator, { children: /* @__PURE__ */ e($, { className: "h-4 w-4" }) }) }),
-      t
+      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(x.ItemIndicator, { children: /* @__PURE__ */ e(L, { className: "h-4 w-4" }) }) }),
+      a
     ]
   }
 ));
-ao.displayName = h.CheckboxItem.displayName;
-const to = i.forwardRef(({ className: a, children: t, ...r }, s) => /* @__PURE__ */ d(
-  h.RadioItem,
+co.displayName = x.CheckboxItem.displayName;
+const mo = n.forwardRef(({ className: t, children: a, ...r }, o) => /* @__PURE__ */ s(
+  x.RadioItem,
   {
-    ref: s,
-    className: o(
+    ref: o,
+    className: i(
       "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
-      a
+      t
     ),
     ...r,
     children: [
-      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(h.ItemIndicator, { children: /* @__PURE__ */ e(ve, { className: "h-2 w-2 fill-current" }) }) }),
-      t
+      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(x.ItemIndicator, { children: /* @__PURE__ */ e(ke, { className: "h-2 w-2 fill-current" }) }) }),
+      a
     ]
   }
 ));
-to.displayName = h.RadioItem.displayName;
-const ro = i.forwardRef(({ className: a, inset: t, ...r }, s) => /* @__PURE__ */ e(
-  h.Label,
+mo.displayName = x.RadioItem.displayName;
+const uo = n.forwardRef(({ className: t, inset: a, ...r }, o) => /* @__PURE__ */ e(
+  x.Label,
   {
-    ref: s,
-    className: o("px-2 py-1.5 text-sm font-semibold", t && "pl-8", a),
+    ref: o,
+    className: i("px-2 py-1.5 text-sm font-semibold", a && "pl-8", t),
     ...r
   }
 ));
-ro.displayName = h.Label.displayName;
-const oo = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(h.Separator, { ref: r, className: o("-mx-1 my-1 h-px bg-muted", a), ...t }));
-oo.displayName = h.Separator.displayName;
-const so = ({ className: a, ...t }) => /* @__PURE__ */ e("span", { className: o("ml-auto text-xs tracking-widest text-muted-foreground", a), ...t });
-so.displayname = "MenubarShortcut";
-const Ie = 768;
-function io() {
-  const [a, t] = i.useState(void 0);
-  return i.useEffect(() => {
-    const r = window.matchMedia(`(max-width: ${Ie - 1}px)`), s = () => {
-      t(window.innerWidth < Ie);
+uo.displayName = x.Label.displayName;
+const po = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(x.Separator, { ref: r, className: i("-mx-1 my-1 h-px bg-muted", t), ...a }));
+po.displayName = x.Separator.displayName;
+const fo = ({ className: t, ...a }) => /* @__PURE__ */ e("span", { className: i("ml-auto text-xs tracking-widest text-muted-foreground", t), ...a });
+fo.displayname = "MenubarShortcut";
+const je = 768;
+function go() {
+  const [t, a] = n.useState(void 0);
+  return n.useEffect(() => {
+    const r = window.matchMedia(`(max-width: ${je - 1}px)`), o = () => {
+      a(window.innerWidth < je);
     };
-    return r.addEventListener("change", s), t(window.innerWidth < Ie), () => r.removeEventListener("change", s);
-  }, []), !!a;
+    return r.addEventListener("change", o), a(window.innerWidth < je), () => r.removeEventListener("change", o);
+  }, []), !!t;
 }
-const xa = i.forwardRef(({ className: a, orientation: t = "horizontal", decorative: r = !0, ...s }, n) => /* @__PURE__ */ e(
-  ra.Root,
+const Pa = n.forwardRef(({ className: t, orientation: a = "horizontal", decorative: r = !0, ...o }, d) => /* @__PURE__ */ e(
+  fa.Root,
   {
-    ref: n,
+    ref: d,
     decorative: r,
-    orientation: t,
-    className: o("shrink-0 bg-border", t === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]", a),
-    ...s
+    orientation: a,
+    className: i("shrink-0 bg-border", a === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]", t),
+    ...o
   }
 ));
-xa.displayName = ra.Root.displayName;
-const no = x.Root, Zi = x.Trigger, en = x.Close, lo = x.Portal, va = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  x.Overlay,
+Pa.displayName = fa.Root.displayName;
+const bo = v.Root, hn = v.Trigger, xn = v.Close, ho = v.Portal, za = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  v.Overlay,
   {
-    className: o(
+    className: i(
       "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      a
+      t
     ),
-    ...t,
+    ...a,
     ref: r
   }
 ));
-va.displayName = x.Overlay.displayName;
-const co = O(
+za.displayName = v.Overlay.displayName;
+const xo = K(
   "fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
   {
     variants: {
@@ -1044,149 +1044,149 @@ const co = O(
       side: "right"
     }
   }
-), ya = i.forwardRef(
-  ({ side: a = "right", className: t, children: r, ...s }, n) => /* @__PURE__ */ d(lo, { children: [
-    /* @__PURE__ */ e(va, {}),
-    /* @__PURE__ */ d(x.Content, { ref: n, className: o(co({ side: a }), t), ...s, children: [
+), Da = n.forwardRef(
+  ({ side: t = "right", className: a, children: r, ...o }, d) => /* @__PURE__ */ s(ho, { children: [
+    /* @__PURE__ */ e(za, {}),
+    /* @__PURE__ */ s(v.Content, { ref: d, className: i(xo({ side: t }), a), ...o, children: [
       r,
-      /* @__PURE__ */ d(x.Close, { className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-secondary hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none", children: [
-        /* @__PURE__ */ e(ee, { className: "h-4 w-4" }),
+      /* @__PURE__ */ s(v.Close, { className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-secondary hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none", children: [
+        /* @__PURE__ */ e(ne, { className: "h-4 w-4" }),
         /* @__PURE__ */ e("span", { className: "sr-only", children: "Close" })
       ] })
     ] })
   ] })
 );
-ya.displayName = x.Content.displayName;
-const mo = ({ className: a, ...t }) => /* @__PURE__ */ e("div", { className: o("flex flex-col space-y-2 text-center sm:text-left", a), ...t });
-mo.displayName = "SheetHeader";
-const uo = ({ className: a, ...t }) => /* @__PURE__ */ e("div", { className: o("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", a), ...t });
-uo.displayName = "SheetFooter";
-const po = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(x.Title, { ref: r, className: o("text-lg font-semibold text-foreground", a), ...t }));
-po.displayName = x.Title.displayName;
-const fo = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(x.Description, { ref: r, className: o("text-sm text-muted-foreground", a), ...t }));
-fo.displayName = x.Description.displayName;
-const go = ue.Provider, bo = ue.Root, ho = ue.Trigger, Na = i.forwardRef(({ className: a, sideOffset: t = 4, ...r }, s) => /* @__PURE__ */ e(
-  ue.Content,
+Da.displayName = v.Content.displayName;
+const vo = ({ className: t, ...a }) => /* @__PURE__ */ e("div", { className: i("flex flex-col space-y-2 text-center sm:text-left", t), ...a });
+vo.displayName = "SheetHeader";
+const yo = ({ className: t, ...a }) => /* @__PURE__ */ e("div", { className: i("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", t), ...a });
+yo.displayName = "SheetFooter";
+const No = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(v.Title, { ref: r, className: i("text-lg font-semibold text-foreground", t), ...a }));
+No.displayName = v.Title.displayName;
+const wo = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(v.Description, { ref: r, className: i("text-sm text-muted-foreground", t), ...a }));
+wo.displayName = v.Description.displayName;
+const Co = xe.Provider, ko = xe.Root, So = xe.Trigger, Aa = n.forwardRef(({ className: t, sideOffset: a = 4, ...r }, o) => /* @__PURE__ */ e(
+  xe.Content,
   {
-    ref: s,
-    sideOffset: t,
-    className: o(
+    ref: o,
+    sideOffset: a,
+    className: i(
       "z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      a
+      t
     ),
     ...r
   }
 ));
-Na.displayName = ue.Content.displayName;
-const xo = "sidebar:state", vo = 60 * 60 * 24 * 7, yo = "16rem", No = "18rem", wo = "3rem", Co = "b", wa = i.createContext(null);
-function ke() {
-  const a = i.useContext(wa);
-  if (!a)
+Aa.displayName = xe.Content.displayName;
+const Ro = "sidebar:state", Io = 60 * 60 * 24 * 7, To = "16rem", Po = "18rem", zo = "3rem", Do = "b", Ma = n.createContext(null);
+function ze() {
+  const t = n.useContext(Ma);
+  if (!t)
     throw new Error("useSidebar must be used within a SidebarProvider.");
-  return a;
+  return t;
 }
-const ko = i.forwardRef(({ defaultOpen: a = !0, open: t, onOpenChange: r, className: s, style: n, children: c, ...l }, f) => {
-  const g = io(), [u, v] = i.useState(!1), [S, R] = i.useState(a), A = t ?? S, p = i.useCallback(
-    (b) => {
-      const T = typeof b == "function" ? b(A) : b;
-      r ? r(T) : R(T), document.cookie = `${xo}=${T}; path=/; max-age=${vo}`;
+const Ao = n.forwardRef(({ defaultOpen: t = !0, open: a, onOpenChange: r, className: o, style: d, children: m, ...c }, l) => {
+  const u = go(), [p, b] = n.useState(!1), [C, w] = n.useState(t), M = a ?? C, g = n.useCallback(
+    (h) => {
+      const A = typeof h == "function" ? h(M) : h;
+      r ? r(A) : w(A), document.cookie = `${Ro}=${A}; path=/; max-age=${Io}`;
     },
-    [r, A]
-  ), y = i.useCallback(() => g ? v((b) => !b) : p((b) => !b), [g, p, v]);
-  i.useEffect(() => {
-    const b = (T) => {
-      T.key === Co && (T.metaKey || T.ctrlKey) && (T.preventDefault(), y());
+    [r, M]
+  ), y = n.useCallback(() => u ? b((h) => !h) : g((h) => !h), [u, g, b]);
+  n.useEffect(() => {
+    const h = (A) => {
+      A.key === Do && (A.metaKey || A.ctrlKey) && (A.preventDefault(), y());
     };
-    return window.addEventListener("keydown", b), () => window.removeEventListener("keydown", b);
+    return window.addEventListener("keydown", h), () => window.removeEventListener("keydown", h);
   }, [y]);
-  const w = A ? "expanded" : "collapsed", m = i.useMemo(
+  const k = M ? "expanded" : "collapsed", f = n.useMemo(
     () => ({
-      state: w,
-      open: A,
-      setOpen: p,
-      isMobile: g,
-      openMobile: u,
-      setOpenMobile: v,
+      state: k,
+      open: M,
+      setOpen: g,
+      isMobile: u,
+      openMobile: p,
+      setOpenMobile: b,
       toggleSidebar: y
     }),
-    [w, A, p, g, u, v, y]
+    [k, M, g, u, p, b, y]
   );
-  return /* @__PURE__ */ e(wa.Provider, { value: m, children: /* @__PURE__ */ e(go, { delayDuration: 0, children: /* @__PURE__ */ e(
+  return /* @__PURE__ */ e(Ma.Provider, { value: f, children: /* @__PURE__ */ e(Co, { delayDuration: 0, children: /* @__PURE__ */ e(
     "div",
     {
       style: {
-        "--sidebar-width": yo,
-        "--sidebar-width-icon": wo,
-        ...n
+        "--sidebar-width": To,
+        "--sidebar-width-icon": zo,
+        ...d
       },
-      className: o("group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar", s),
-      ref: f,
-      ...l,
-      children: c
+      className: i("group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar", o),
+      ref: l,
+      ...c,
+      children: m
     }
   ) }) });
 });
-ko.displayName = "SidebarProvider";
-const Ro = i.forwardRef(({ side: a = "left", variant: t = "sidebar", collapsible: r = "offcanvas", className: s, children: n, ...c }, l) => {
-  const { isMobile: f, state: g, openMobile: u, setOpenMobile: v } = ke();
+Ao.displayName = "SidebarProvider";
+const Mo = n.forwardRef(({ side: t = "left", variant: a = "sidebar", collapsible: r = "offcanvas", className: o, children: d, ...m }, c) => {
+  const { isMobile: l, state: u, openMobile: p, setOpenMobile: b } = ze();
   return r === "none" ? /* @__PURE__ */ e(
     "div",
     {
-      className: o("flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground", s),
-      ref: l,
-      ...c,
-      children: n
+      className: i("flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground", o),
+      ref: c,
+      ...m,
+      children: d
     }
-  ) : f ? /* @__PURE__ */ e(no, { open: u, onOpenChange: v, ...c, children: /* @__PURE__ */ e(
-    ya,
+  ) : l ? /* @__PURE__ */ e(bo, { open: p, onOpenChange: b, ...m, children: /* @__PURE__ */ e(
+    Da,
     {
       "data-sidebar": "sidebar",
       "data-mobile": "true",
       className: "w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden",
       style: {
-        "--sidebar-width": No
+        "--sidebar-width": Po
       },
-      side: a,
-      children: /* @__PURE__ */ e("div", { className: "flex h-full w-full flex-col", children: n })
+      side: t,
+      children: /* @__PURE__ */ e("div", { className: "flex h-full w-full flex-col", children: d })
     }
-  ) }) : /* @__PURE__ */ d(
+  ) }) : /* @__PURE__ */ s(
     "div",
     {
-      ref: l,
+      ref: c,
       className: "group peer hidden text-sidebar-foreground md:block",
-      "data-state": g,
-      "data-collapsible": g === "collapsed" ? r : "",
-      "data-variant": t,
-      "data-side": a,
+      "data-state": u,
+      "data-collapsible": u === "collapsed" ? r : "",
+      "data-variant": a,
+      "data-side": t,
       children: [
         /* @__PURE__ */ e(
           "div",
           {
-            className: o(
+            className: i(
               "relative h-svh w-[--sidebar-width] bg-transparent transition-[width] duration-200 ease-linear",
               "group-data-[collapsible=offcanvas]:w-0",
               "group-data-[side=right]:rotate-180",
-              t === "floating" || t === "inset" ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]" : "group-data-[collapsible=icon]:w-[--sidebar-width-icon]"
+              a === "floating" || a === "inset" ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]" : "group-data-[collapsible=icon]:w-[--sidebar-width-icon]"
             )
           }
         ),
         /* @__PURE__ */ e(
           "div",
           {
-            className: o(
+            className: i(
               "fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear md:flex",
-              a === "left" ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]" : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
+              t === "left" ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]" : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
               // Adjust the padding for floating and inset variants.
-              t === "floating" || t === "inset" ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]" : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l",
-              s
+              a === "floating" || a === "inset" ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]" : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l",
+              o
             ),
-            ...c,
+            ...m,
             children: /* @__PURE__ */ e(
               "div",
               {
                 "data-sidebar": "sidebar",
                 className: "flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow",
-                children: n
+                children: d
               }
             )
           }
@@ -1195,34 +1195,34 @@ const Ro = i.forwardRef(({ side: a = "left", variant: t = "sidebar", collapsible
     }
   );
 });
-Ro.displayName = "Sidebar";
-const So = i.forwardRef(
-  ({ className: a, onClick: t, ...r }, s) => {
-    const { toggleSidebar: n } = ke();
-    return /* @__PURE__ */ d(
-      _,
+Mo.displayName = "Sidebar";
+const Eo = n.forwardRef(
+  ({ className: t, onClick: a, ...r }, o) => {
+    const { toggleSidebar: d } = ze();
+    return /* @__PURE__ */ s(
+      S,
       {
-        ref: s,
+        ref: o,
         "data-sidebar": "trigger",
         variant: "ghost",
         size: "icon",
-        className: o("h-7 w-7", a),
-        onClick: (c) => {
-          t == null || t(c), n();
+        className: i("h-7 w-7", t),
+        onClick: (m) => {
+          a == null || a(m), d();
         },
         ...r,
         children: [
-          /* @__PURE__ */ e($a, {}),
+          /* @__PURE__ */ e(tt, {}),
           /* @__PURE__ */ e("span", { className: "sr-only", children: "Toggle Sidebar" })
         ]
       }
     );
   }
 );
-So.displayName = "SidebarTrigger";
-const To = i.forwardRef(
-  ({ className: a, ...t }, r) => {
-    const { toggleSidebar: s } = ke();
+Eo.displayName = "SidebarTrigger";
+const _o = n.forwardRef(
+  ({ className: t, ...a }, r) => {
+    const { toggleSidebar: o } = ze();
     return /* @__PURE__ */ e(
       "button",
       {
@@ -1230,133 +1230,133 @@ const To = i.forwardRef(
         "data-sidebar": "rail",
         "aria-label": "Toggle Sidebar",
         tabIndex: -1,
-        onClick: s,
+        onClick: o,
         title: "Toggle Sidebar",
-        className: o(
+        className: i(
           "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] group-data-[side=left]:-right-4 group-data-[side=right]:left-0 hover:after:bg-sidebar-border sm:flex",
           "[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize",
           "[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
           "group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full group-data-[collapsible=offcanvas]:hover:bg-sidebar",
           "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
           "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
-          a
+          t
         ),
-        ...t
+        ...a
       }
     );
   }
 );
-To.displayName = "SidebarRail";
-const Po = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
+_o.displayName = "SidebarRail";
+const jo = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
   "main",
   {
     ref: r,
-    className: o(
+    className: i(
       "relative flex min-h-svh flex-1 flex-col bg-background",
       "peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-Po.displayName = "SidebarInset";
-const zo = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e(
-    oa,
+jo.displayName = "SidebarInset";
+const Fo = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e(
+    ga,
     {
       ref: r,
       "data-sidebar": "input",
-      className: o(
+      className: i(
         "h-8 w-full bg-background shadow-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-        a
+        t
       ),
-      ...t
+      ...a
     }
   )
 );
-zo.displayName = "SidebarInput";
-const Io = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e("div", { ref: r, "data-sidebar": "header", className: o("flex flex-col gap-2 p-2", a), ...t }));
-Io.displayName = "SidebarHeader";
-const Do = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e("div", { ref: r, "data-sidebar": "footer", className: o("flex flex-col gap-2 p-2", a), ...t }));
-Do.displayName = "SidebarFooter";
-const Mo = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e(
-    xa,
+Fo.displayName = "SidebarInput";
+const Lo = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e("div", { ref: r, "data-sidebar": "header", className: i("flex flex-col gap-2 p-2", t), ...a }));
+Lo.displayName = "SidebarHeader";
+const Vo = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e("div", { ref: r, "data-sidebar": "footer", className: i("flex flex-col gap-2 p-2", t), ...a }));
+Vo.displayName = "SidebarFooter";
+const Bo = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e(
+    Pa,
     {
       ref: r,
       "data-sidebar": "separator",
-      className: o("mx-2 w-auto bg-sidebar-border", a),
-      ...t
+      className: i("mx-2 w-auto bg-sidebar-border", t),
+      ...a
     }
   )
 );
-Mo.displayName = "SidebarSeparator";
-const Ao = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
+Bo.displayName = "SidebarSeparator";
+const $o = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
   "div",
   {
     ref: r,
     "data-sidebar": "content",
-    className: o(
+    className: i(
       "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-Ao.displayName = "SidebarContent";
-const _o = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
+$o.displayName = "SidebarContent";
+const Go = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
   "div",
   {
     ref: r,
     "data-sidebar": "group",
-    className: o("relative flex w-full min-w-0 flex-col p-2", a),
-    ...t
+    className: i("relative flex w-full min-w-0 flex-col p-2", t),
+    ...a
   }
 ));
-_o.displayName = "SidebarGroup";
-const jo = i.forwardRef(
-  ({ className: a, asChild: t = !1, ...r }, s) => /* @__PURE__ */ e(
-    t ? K : "div",
+Go.displayName = "SidebarGroup";
+const Ho = n.forwardRef(
+  ({ className: t, asChild: a = !1, ...r }, o) => /* @__PURE__ */ e(
+    a ? W : "div",
     {
-      ref: s,
+      ref: o,
       "data-sidebar": "group-label",
-      className: o(
+      className: i(
         "flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[margin,opa] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
         "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
-        a
+        t
       ),
       ...r
     }
   )
 );
-jo.displayName = "SidebarGroupLabel";
-const Eo = i.forwardRef(
-  ({ className: a, asChild: t = !1, ...r }, s) => /* @__PURE__ */ e(
-    t ? K : "button",
+Ho.displayName = "SidebarGroupLabel";
+const Oo = n.forwardRef(
+  ({ className: t, asChild: a = !1, ...r }, o) => /* @__PURE__ */ e(
+    a ? W : "button",
     {
-      ref: s,
+      ref: o,
       "data-sidebar": "group-action",
-      className: o(
+      className: i(
         "absolute right-3 top-3.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
         // Increases the hit area of the button on mobile.
         "after:absolute after:-inset-2 after:md:hidden",
         "group-data-[collapsible=icon]:hidden",
-        a
+        t
       ),
       ...r
     }
   )
 );
-Eo.displayName = "SidebarGroupAction";
-const Lo = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("div", { ref: r, "data-sidebar": "group-content", className: o("w-full text-sm", a), ...t })
+Oo.displayName = "SidebarGroupAction";
+const Yo = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("div", { ref: r, "data-sidebar": "group-content", className: i("w-full text-sm", t), ...a })
 );
-Lo.displayName = "SidebarGroupContent";
-const Fo = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e("ul", { ref: r, "data-sidebar": "menu", className: o("flex w-full min-w-0 flex-col gap-1", a), ...t }));
-Fo.displayName = "SidebarMenu";
-const Bo = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e("li", { ref: r, "data-sidebar": "menu-item", className: o("group/menu-item relative", a), ...t }));
-Bo.displayName = "SidebarMenuItem";
-const Go = O(
+Yo.displayName = "SidebarGroupContent";
+const Ko = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e("ul", { ref: r, "data-sidebar": "menu", className: i("flex w-full min-w-0 flex-col gap-1", t), ...a }));
+Ko.displayName = "SidebarMenu";
+const Uo = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e("li", { ref: r, "data-sidebar": "menu-item", className: i("group/menu-item relative", t), ...a }));
+Uo.displayName = "SidebarMenuItem";
+const qo = K(
   "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
@@ -1375,32 +1375,32 @@ const Go = O(
       size: "default"
     }
   }
-), Vo = i.forwardRef(({ asChild: a = !1, isActive: t = !1, variant: r = "default", size: s = "default", tooltip: n, className: c, ...l }, f) => {
-  const g = a ? K : "button", { isMobile: u, state: v } = ke(), S = /* @__PURE__ */ e(
-    g,
+), Wo = n.forwardRef(({ asChild: t = !1, isActive: a = !1, variant: r = "default", size: o = "default", tooltip: d, className: m, ...c }, l) => {
+  const u = t ? W : "button", { isMobile: p, state: b } = ze(), C = /* @__PURE__ */ e(
+    u,
     {
-      ref: f,
+      ref: l,
       "data-sidebar": "menu-button",
-      "data-size": s,
-      "data-active": t,
-      className: o(Go({ variant: r, size: s }), c),
-      ...l
+      "data-size": o,
+      "data-active": a,
+      className: i(qo({ variant: r, size: o }), m),
+      ...c
     }
   );
-  return n ? (typeof n == "string" && (n = {
-    children: n
-  }), /* @__PURE__ */ d(bo, { children: [
-    /* @__PURE__ */ e(ho, { asChild: !0, children: S }),
-    /* @__PURE__ */ e(Na, { side: "right", align: "center", hidden: v !== "collapsed" || u, ...n })
-  ] })) : S;
+  return d ? (typeof d == "string" && (d = {
+    children: d
+  }), /* @__PURE__ */ s(ko, { children: [
+    /* @__PURE__ */ e(So, { asChild: !0, children: C }),
+    /* @__PURE__ */ e(Aa, { side: "right", align: "center", hidden: b !== "collapsed" || p, ...d })
+  ] })) : C;
 });
-Vo.displayName = "SidebarMenuButton";
-const Ho = i.forwardRef(({ className: a, asChild: t = !1, showOnHover: r = !1, ...s }, n) => /* @__PURE__ */ e(
-  t ? K : "button",
+Wo.displayName = "SidebarMenuButton";
+const Jo = n.forwardRef(({ className: t, asChild: a = !1, showOnHover: r = !1, ...o }, d) => /* @__PURE__ */ e(
+  a ? W : "button",
   {
-    ref: n,
+    ref: d,
     "data-sidebar": "menu-action",
-    className: o(
+    className: i(
       "absolute right-1 top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform peer-hover/menu-button:text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
       // Increases the hit area of the button on mobile.
       "after:absolute after:-inset-2 after:md:hidden",
@@ -1409,50 +1409,50 @@ const Ho = i.forwardRef(({ className: a, asChild: t = !1, showOnHover: r = !1, .
       "peer-data-[size=lg]/menu-button:top-2.5",
       "group-data-[collapsible=icon]:hidden",
       r && "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0",
-      a
+      t
     ),
-    ...s
+    ...o
   }
 ));
-Ho.displayName = "SidebarMenuAction";
-const Oo = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e(
+Jo.displayName = "SidebarMenuAction";
+const Qo = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e(
     "div",
     {
       ref: r,
       "data-sidebar": "menu-badge",
-      className: o(
+      className: i(
         "pointer-events-none absolute right-1 flex h-5 min-w-5 select-none items-center justify-center rounded-md px-1 text-xs font-medium tabular-nums text-sidebar-foreground",
         "peer-hover/menu-button:text-sidebar-accent-foreground peer-data-[active=true]/menu-button:text-sidebar-accent-foreground",
         "peer-data-[size=sm]/menu-button:top-1",
         "peer-data-[size=default]/menu-button:top-1.5",
         "peer-data-[size=lg]/menu-button:top-2.5",
         "group-data-[collapsible=icon]:hidden",
-        a
+        t
       ),
-      ...t
+      ...a
     }
   )
 );
-Oo.displayName = "SidebarMenuBadge";
-const $o = i.forwardRef(({ className: a, showIcon: t = !1, ...r }, s) => {
-  const n = i.useMemo(() => `${Math.floor(Math.random() * 40) + 50}%`, []);
-  return /* @__PURE__ */ d(
+Qo.displayName = "SidebarMenuBadge";
+const Xo = n.forwardRef(({ className: t, showIcon: a = !1, ...r }, o) => {
+  const d = n.useMemo(() => `${Math.floor(Math.random() * 40) + 50}%`, []);
+  return /* @__PURE__ */ s(
     "div",
     {
-      ref: s,
+      ref: o,
       "data-sidebar": "menu-skeleton",
-      className: o("flex h-8 items-center gap-2 rounded-md px-2", a),
+      className: i("flex h-8 items-center gap-2 rounded-md px-2", t),
       ...r,
       children: [
-        t && /* @__PURE__ */ e(Ue, { className: "size-4 rounded-md", "data-sidebar": "menu-skeleton-icon" }),
+        a && /* @__PURE__ */ e(oa, { className: "size-4 rounded-md", "data-sidebar": "menu-skeleton-icon" }),
         /* @__PURE__ */ e(
-          Ue,
+          oa,
           {
             className: "h-4 max-w-[--skeleton-width] flex-1",
             "data-sidebar": "menu-skeleton-text",
             style: {
-              "--skeleton-width": n
+              "--skeleton-width": d
             }
           }
         )
@@ -1460,187 +1460,187 @@ const $o = i.forwardRef(({ className: a, showIcon: t = !1, ...r }, s) => {
     }
   );
 });
-$o.displayName = "SidebarMenuSkeleton";
-const Ko = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e(
+Xo.displayName = "SidebarMenuSkeleton";
+const Zo = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e(
     "ul",
     {
       ref: r,
       "data-sidebar": "menu-sub",
-      className: o(
+      className: i(
         "mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5",
         "group-data-[collapsible=icon]:hidden",
-        a
+        t
       ),
-      ...t
+      ...a
     }
   )
 );
-Ko.displayName = "SidebarMenuSub";
-const Yo = i.forwardRef(({ ...a }, t) => /* @__PURE__ */ e("li", { ref: t, ...a }));
-Yo.displayName = "SidebarMenuSubItem";
-const Uo = i.forwardRef(({ asChild: a = !1, size: t = "md", isActive: r, className: s, ...n }, c) => /* @__PURE__ */ e(
-  a ? K : "a",
+Zo.displayName = "SidebarMenuSub";
+const es = n.forwardRef(({ ...t }, a) => /* @__PURE__ */ e("li", { ref: a, ...t }));
+es.displayName = "SidebarMenuSubItem";
+const as = n.forwardRef(({ asChild: t = !1, size: a = "md", isActive: r, className: o, ...d }, m) => /* @__PURE__ */ e(
+  t ? W : "a",
   {
-    ref: c,
+    ref: m,
     "data-sidebar": "menu-sub-button",
-    "data-size": t,
+    "data-size": a,
     "data-active": r,
-    className: o(
+    className: i(
       "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground outline-none ring-sidebar-ring aria-disabled:pointer-events-none aria-disabled:opacity-50 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground",
       "data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground",
-      t === "sm" && "text-xs",
-      t === "md" && "text-sm",
+      a === "sm" && "text-xs",
+      a === "md" && "text-sm",
       "group-data-[collapsible=icon]:hidden",
-      s
+      o
     ),
-    ...n
+    ...d
   }
 ));
-Uo.displayName = "SidebarMenuSubButton";
-const qo = ({ shouldScaleBackground: a = !0, ...t }) => /* @__PURE__ */ e(F.Root, { shouldScaleBackground: a, ...t });
-qo.displayName = "Drawer";
-const an = F.Trigger, Wo = F.Portal, tn = F.Close, Ca = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(F.Overlay, { ref: r, className: o("fixed inset-0 z-50 bg-black/80", a), ...t }));
-Ca.displayName = F.Overlay.displayName;
-const Jo = i.forwardRef(({ className: a, children: t, ...r }, s) => /* @__PURE__ */ d(Wo, { children: [
-  /* @__PURE__ */ e(Ca, {}),
-  /* @__PURE__ */ d(
-    F.Content,
+as.displayName = "SidebarMenuSubButton";
+const ts = ({ shouldScaleBackground: t = !0, ...a }) => /* @__PURE__ */ e($.Root, { shouldScaleBackground: t, ...a });
+ts.displayName = "Drawer";
+const vn = $.Trigger, rs = $.Portal, yn = $.Close, Ea = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e($.Overlay, { ref: r, className: i("fixed inset-0 z-50 bg-black/80", t), ...a }));
+Ea.displayName = $.Overlay.displayName;
+const os = n.forwardRef(({ className: t, children: a, ...r }, o) => /* @__PURE__ */ s(rs, { children: [
+  /* @__PURE__ */ e(Ea, {}),
+  /* @__PURE__ */ s(
+    $.Content,
     {
-      ref: s,
-      className: o(
+      ref: o,
+      className: i(
         "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
-        a
+        t
       ),
       ...r,
       children: [
         /* @__PURE__ */ e("div", { className: "mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" }),
-        t
+        a
       ]
     }
   )
 ] }));
-Jo.displayName = "DrawerContent";
-const Qo = ({ className: a, ...t }) => /* @__PURE__ */ e("div", { className: o("grid gap-1.5 p-4 text-center sm:text-left", a), ...t });
-Qo.displayName = "DrawerHeader";
-const Xo = ({ className: a, ...t }) => /* @__PURE__ */ e("div", { className: o("mt-auto flex flex-col gap-2 p-4", a), ...t });
-Xo.displayName = "DrawerFooter";
-const Zo = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  F.Title,
+os.displayName = "DrawerContent";
+const ss = ({ className: t, ...a }) => /* @__PURE__ */ e("div", { className: i("grid gap-1.5 p-4 text-center sm:text-left", t), ...a });
+ss.displayName = "DrawerHeader";
+const is = ({ className: t, ...a }) => /* @__PURE__ */ e("div", { className: i("mt-auto flex flex-col gap-2 p-4", t), ...a });
+is.displayName = "DrawerFooter";
+const ns = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  $.Title,
   {
     ref: r,
-    className: o("text-lg font-semibold leading-none tracking-tight", a),
-    ...t
+    className: i("text-lg font-semibold leading-none tracking-tight", t),
+    ...a
   }
 ));
-Zo.displayName = F.Title.displayName;
-const es = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(F.Description, { ref: r, className: o("text-sm text-muted-foreground", a), ...t }));
-es.displayName = F.Description.displayName;
-const rn = Fe.Root, on = Fe.CollapsibleTrigger, sn = Fe.CollapsibleContent, as = i.forwardRef(({ className: a, children: t, ...r }, s) => /* @__PURE__ */ d(U.Root, { ref: s, className: o("relative overflow-hidden", a), ...r, children: [
-  /* @__PURE__ */ e(U.Viewport, { className: "h-full w-full rounded-[inherit]", children: t }),
-  /* @__PURE__ */ e(ka, {}),
-  /* @__PURE__ */ e(U.Corner, {})
+ns.displayName = $.Title.displayName;
+const ds = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e($.Description, { ref: r, className: i("text-sm text-muted-foreground", t), ...a }));
+ds.displayName = $.Description.displayName;
+const Nn = Ue.Root, wn = Ue.CollapsibleTrigger, Cn = Ue.CollapsibleContent, ls = n.forwardRef(({ className: t, children: a, ...r }, o) => /* @__PURE__ */ s(Q.Root, { ref: o, className: i("relative overflow-hidden", t), ...r, children: [
+  /* @__PURE__ */ e(Q.Viewport, { className: "h-full w-full rounded-[inherit]", children: a }),
+  /* @__PURE__ */ e(_a, {}),
+  /* @__PURE__ */ e(Q.Corner, {})
 ] }));
-as.displayName = U.Root.displayName;
-const ka = i.forwardRef(({ className: a, orientation: t = "vertical", ...r }, s) => /* @__PURE__ */ e(
-  U.ScrollAreaScrollbar,
+ls.displayName = Q.Root.displayName;
+const _a = n.forwardRef(({ className: t, orientation: a = "vertical", ...r }, o) => /* @__PURE__ */ e(
+  Q.ScrollAreaScrollbar,
   {
-    ref: s,
-    orientation: t,
-    className: o(
+    ref: o,
+    orientation: a,
+    className: i(
       "flex touch-none select-none transition-colors",
-      t === "vertical" && "h-full w-2.5 border-l border-l-transparent p-[1px]",
-      t === "horizontal" && "h-2.5 flex-col border-t border-t-transparent p-[1px]",
-      a
-    ),
-    ...r,
-    children: /* @__PURE__ */ e(U.ScrollAreaThumb, { className: "relative flex-1 rounded-full bg-border" })
-  }
-));
-ka.displayName = U.ScrollAreaScrollbar.displayName;
-const nn = ({ className: a, ...t }) => /* @__PURE__ */ e(
-  Be.PanelGroup,
-  {
-    className: o("flex h-full w-full data-[panel-group-direction=vertical]:flex-col", a),
-    ...t
-  }
-), dn = Be.Panel, ln = ({
-  withHandle: a,
-  className: t,
-  ...r
-}) => /* @__PURE__ */ e(
-  Be.PanelResizeHandle,
-  {
-    className: o(
-      "relative flex w-px items-center justify-center bg-border after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 [&[data-panel-group-direction=vertical]>div]:rotate-90",
+      a === "vertical" && "h-full w-2.5 border-l border-l-transparent p-[1px]",
+      a === "horizontal" && "h-2.5 flex-col border-t border-t-transparent p-[1px]",
       t
     ),
     ...r,
-    children: a && /* @__PURE__ */ e("div", { className: "z-10 flex h-4 w-3 items-center justify-center rounded-sm border bg-border", children: /* @__PURE__ */ e(Ka, { className: "h-2.5 w-2.5" }) })
+    children: /* @__PURE__ */ e(Q.ScrollAreaThumb, { className: "relative flex-1 rounded-full bg-border" })
   }
-), ts = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("div", { className: "relative w-full overflow-auto", children: /* @__PURE__ */ e("table", { ref: r, className: o("w-full caption-bottom text-sm", a), ...t }) })
+));
+_a.displayName = Q.ScrollAreaScrollbar.displayName;
+const kn = ({ className: t, ...a }) => /* @__PURE__ */ e(
+  qe.PanelGroup,
+  {
+    className: i("flex h-full w-full data-[panel-group-direction=vertical]:flex-col", t),
+    ...a
+  }
+), Sn = qe.Panel, Rn = ({
+  withHandle: t,
+  className: a,
+  ...r
+}) => /* @__PURE__ */ e(
+  qe.PanelResizeHandle,
+  {
+    className: i(
+      "relative flex w-px items-center justify-center bg-border after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 [&[data-panel-group-direction=vertical]>div]:rotate-90",
+      a
+    ),
+    ...r,
+    children: t && /* @__PURE__ */ e("div", { className: "z-10 flex h-4 w-3 items-center justify-center rounded-sm border bg-border", children: /* @__PURE__ */ e(rt, { className: "h-2.5 w-2.5" }) })
+  }
+), cs = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("div", { className: "relative w-full overflow-auto", children: /* @__PURE__ */ e("table", { ref: r, className: i("w-full caption-bottom text-sm", t), ...a }) })
 );
-ts.displayName = "Table";
-const rs = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("thead", { ref: r, className: o("[&_tr]:border-b", a), ...t })
+cs.displayName = "Table";
+const ms = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("thead", { ref: r, className: i("[&_tr]:border-b", t), ...a })
 );
-rs.displayName = "TableHeader";
-const os = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("tbody", { ref: r, className: o("[&_tr:last-child]:border-0", a), ...t })
+ms.displayName = "TableHeader";
+const us = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("tbody", { ref: r, className: i("[&_tr:last-child]:border-0", t), ...a })
 );
-os.displayName = "TableBody";
-const ss = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("tfoot", { ref: r, className: o("border-t bg-muted/50 font-medium [&>tr]:last:border-b-0", a), ...t })
+us.displayName = "TableBody";
+const ps = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("tfoot", { ref: r, className: i("border-t bg-muted/50 font-medium [&>tr]:last:border-b-0", t), ...a })
 );
-ss.displayName = "TableFooter";
-const is = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e(
+ps.displayName = "TableFooter";
+const fs = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e(
     "tr",
     {
       ref: r,
-      className: o("border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50", a),
-      ...t
+      className: i("border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50", t),
+      ...a
     }
   )
 );
-is.displayName = "TableRow";
-const ns = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e(
+fs.displayName = "TableRow";
+const gs = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e(
     "th",
     {
       ref: r,
-      className: o(
+      className: i(
         "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
-        a
+        t
       ),
-      ...t
+      ...a
     }
   )
 );
-ns.displayName = "TableHead";
-const ds = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("td", { ref: r, className: o("p-4 align-middle [&:has([role=checkbox])]:pr-0", a), ...t })
+gs.displayName = "TableHead";
+const bs = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("td", { ref: r, className: i("p-4 align-middle [&:has([role=checkbox])]:pr-0", t), ...a })
 );
-ds.displayName = "TableCell";
-const ls = i.forwardRef(
-  ({ className: a, ...t }, r) => /* @__PURE__ */ e("caption", { ref: r, className: o("mt-4 text-sm text-muted-foreground", a), ...t })
+bs.displayName = "TableCell";
+const hs = n.forwardRef(
+  ({ className: t, ...a }, r) => /* @__PURE__ */ e("caption", { ref: r, className: i("mt-4 text-sm text-muted-foreground", t), ...a })
 );
-ls.displayName = "TableCaption";
-function cs({ className: a, classNames: t, showOutsideDays: r = !0, ...s }) {
+hs.displayName = "TableCaption";
+function xs({ className: t, classNames: a, showOutsideDays: r = !0, ...o }) {
   return /* @__PURE__ */ e(
-    zt,
+    Lt,
     {
       showOutsideDays: r,
-      className: o("p-3", a),
+      className: i("p-3", t),
       classNames: {
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
         caption: "flex justify-center pt-1 relative items-center",
         caption_label: "text-sm font-medium",
         nav: "space-x-1 flex items-center",
-        nav_button: o(
-          Z({ variant: "outline" }),
+        nav_button: i(
+          ie({ variant: "outline" }),
           "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
         ),
         nav_button_previous: "absolute left-1",
@@ -1650,7 +1650,7 @@ function cs({ className: a, classNames: t, showOutsideDays: r = !0, ...s }) {
         head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
         row: "flex w-full mt-2",
         cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-        day: o(Z({ variant: "ghost" }), "h-9 w-9 p-0 font-normal aria-selected:opacity-100"),
+        day: i(ie({ variant: "ghost" }), "h-9 w-9 p-0 font-normal aria-selected:opacity-100"),
         day_range_end: "day-range-end",
         day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
         day_today: "bg-accent text-accent-foreground",
@@ -1658,318 +1658,318 @@ function cs({ className: a, classNames: t, showOutsideDays: r = !0, ...s }) {
         day_disabled: "text-muted-foreground opacity-50",
         day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
-        ...t
+        ...a
       },
       components: {
-        IconLeft: ({ ...n }) => /* @__PURE__ */ e(Xe, { className: "h-4 w-4" }),
-        IconRight: ({ ...n }) => /* @__PURE__ */ e(W, { className: "h-4 w-4" })
+        IconLeft: ({ ...d }) => /* @__PURE__ */ e(la, { className: "h-4 w-4" }),
+        IconRight: ({ ...d }) => /* @__PURE__ */ e(Z, { className: "h-4 w-4" })
       },
-      ...s
+      ...o
     }
   );
 }
-cs.displayName = "Calendar";
-const Ra = i.createContext(null);
-function Re() {
-  const a = i.useContext(Ra);
-  if (!a)
+xs.displayName = "Calendar";
+const ja = n.createContext(null);
+function De() {
+  const t = n.useContext(ja);
+  if (!t)
     throw new Error("useCarousel must be used within a <Carousel />");
-  return a;
+  return t;
 }
-const ms = i.forwardRef(
-  ({ orientation: a = "horizontal", opts: t, setApi: r, plugins: s, className: n, children: c, ...l }, f) => {
-    const [g, u] = It(
+const vs = n.forwardRef(
+  ({ orientation: t = "horizontal", opts: a, setApi: r, plugins: o, className: d, children: m, ...c }, l) => {
+    const [u, p] = Vt(
       {
-        ...t,
-        axis: a === "horizontal" ? "x" : "y"
+        ...a,
+        axis: t === "horizontal" ? "x" : "y"
       },
-      s
-    ), [v, S] = i.useState(!1), [R, A] = i.useState(!1), p = i.useCallback((b) => {
-      b && (S(b.canScrollPrev()), A(b.canScrollNext()));
-    }, []), y = i.useCallback(() => {
-      u == null || u.scrollPrev();
-    }, [u]), w = i.useCallback(() => {
-      u == null || u.scrollNext();
-    }, [u]), m = i.useCallback(
-      (b) => {
-        b.key === "ArrowLeft" ? (b.preventDefault(), y()) : b.key === "ArrowRight" && (b.preventDefault(), w());
+      o
+    ), [b, C] = n.useState(!1), [w, M] = n.useState(!1), g = n.useCallback((h) => {
+      h && (C(h.canScrollPrev()), M(h.canScrollNext()));
+    }, []), y = n.useCallback(() => {
+      p == null || p.scrollPrev();
+    }, [p]), k = n.useCallback(() => {
+      p == null || p.scrollNext();
+    }, [p]), f = n.useCallback(
+      (h) => {
+        h.key === "ArrowLeft" ? (h.preventDefault(), y()) : h.key === "ArrowRight" && (h.preventDefault(), k());
       },
-      [y, w]
+      [y, k]
     );
-    return i.useEffect(() => {
-      !u || !r || r(u);
-    }, [u, r]), i.useEffect(() => {
-      if (u)
-        return p(u), u.on("reInit", p), u.on("select", p), () => {
-          u == null || u.off("select", p);
+    return n.useEffect(() => {
+      !p || !r || r(p);
+    }, [p, r]), n.useEffect(() => {
+      if (p)
+        return g(p), p.on("reInit", g), p.on("select", g), () => {
+          p == null || p.off("select", g);
         };
-    }, [u, p]), /* @__PURE__ */ e(
-      Ra.Provider,
+    }, [p, g]), /* @__PURE__ */ e(
+      ja.Provider,
       {
         value: {
-          carouselRef: g,
-          api: u,
-          opts: t,
-          orientation: a || ((t == null ? void 0 : t.axis) === "y" ? "vertical" : "horizontal"),
+          carouselRef: u,
+          api: p,
+          opts: a,
+          orientation: t || ((a == null ? void 0 : a.axis) === "y" ? "vertical" : "horizontal"),
           scrollPrev: y,
-          scrollNext: w,
-          canScrollPrev: v,
-          canScrollNext: R
+          scrollNext: k,
+          canScrollPrev: b,
+          canScrollNext: w
         },
         children: /* @__PURE__ */ e(
           "div",
           {
-            ref: f,
-            onKeyDownCapture: m,
-            className: o("relative", n),
+            ref: l,
+            onKeyDownCapture: f,
+            className: i("relative", d),
             role: "region",
             "aria-roledescription": "carousel",
-            ...l,
-            children: c
+            ...c,
+            children: m
           }
         )
       }
     );
   }
 );
-ms.displayName = "Carousel";
-const us = i.forwardRef(
-  ({ className: a, ...t }, r) => {
-    const { carouselRef: s, orientation: n } = Re();
-    return /* @__PURE__ */ e("div", { ref: s, className: "overflow-hidden", children: /* @__PURE__ */ e(
+vs.displayName = "Carousel";
+const ys = n.forwardRef(
+  ({ className: t, ...a }, r) => {
+    const { carouselRef: o, orientation: d } = De();
+    return /* @__PURE__ */ e("div", { ref: o, className: "overflow-hidden", children: /* @__PURE__ */ e(
       "div",
       {
         ref: r,
-        className: o("flex", n === "horizontal" ? "-ml-4" : "-mt-4 flex-col", a),
-        ...t
+        className: i("flex", d === "horizontal" ? "-ml-4" : "-mt-4 flex-col", t),
+        ...a
       }
     ) });
   }
 );
-us.displayName = "CarouselContent";
-const ps = i.forwardRef(
-  ({ className: a, ...t }, r) => {
-    const { orientation: s } = Re();
+ys.displayName = "CarouselContent";
+const Ns = n.forwardRef(
+  ({ className: t, ...a }, r) => {
+    const { orientation: o } = De();
     return /* @__PURE__ */ e(
       "div",
       {
         ref: r,
         role: "group",
         "aria-roledescription": "slide",
-        className: o("min-w-0 shrink-0 grow-0 basis-full", s === "horizontal" ? "pl-4" : "pt-4", a),
-        ...t
+        className: i("min-w-0 shrink-0 grow-0 basis-full", o === "horizontal" ? "pl-4" : "pt-4", t),
+        ...a
       }
     );
   }
 );
-ps.displayName = "CarouselItem";
-const fs = i.forwardRef(
-  ({ className: a, variant: t = "outline", size: r = "icon", ...s }, n) => {
-    const { orientation: c, scrollPrev: l, canScrollPrev: f } = Re();
-    return /* @__PURE__ */ d(
-      _,
+Ns.displayName = "CarouselItem";
+const ws = n.forwardRef(
+  ({ className: t, variant: a = "outline", size: r = "icon", ...o }, d) => {
+    const { orientation: m, scrollPrev: c, canScrollPrev: l } = De();
+    return /* @__PURE__ */ s(
+      S,
       {
-        ref: n,
-        variant: t,
+        ref: d,
+        variant: a,
         size: r,
-        className: o(
+        className: i(
           "absolute h-8 w-8 rounded-full",
-          c === "horizontal" ? "-left-12 top-1/2 -translate-y-1/2" : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
-          a
+          m === "horizontal" ? "-left-12 top-1/2 -translate-y-1/2" : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
+          t
         ),
-        disabled: !f,
-        onClick: l,
-        ...s,
+        disabled: !l,
+        onClick: c,
+        ...o,
         children: [
-          /* @__PURE__ */ e(Ya, { className: "h-4 w-4" }),
+          /* @__PURE__ */ e(ot, { className: "h-4 w-4" }),
           /* @__PURE__ */ e("span", { className: "sr-only", children: "Previous slide" })
         ]
       }
     );
   }
 );
-fs.displayName = "CarouselPrevious";
-const gs = i.forwardRef(
-  ({ className: a, variant: t = "outline", size: r = "icon", ...s }, n) => {
-    const { orientation: c, scrollNext: l, canScrollNext: f } = Re();
-    return /* @__PURE__ */ d(
-      _,
+ws.displayName = "CarouselPrevious";
+const Cs = n.forwardRef(
+  ({ className: t, variant: a = "outline", size: r = "icon", ...o }, d) => {
+    const { orientation: m, scrollNext: c, canScrollNext: l } = De();
+    return /* @__PURE__ */ s(
+      S,
       {
-        ref: n,
-        variant: t,
+        ref: d,
+        variant: a,
         size: r,
-        className: o(
+        className: i(
           "absolute h-8 w-8 rounded-full",
-          c === "horizontal" ? "-right-12 top-1/2 -translate-y-1/2" : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
-          a
+          m === "horizontal" ? "-right-12 top-1/2 -translate-y-1/2" : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
+          t
         ),
-        disabled: !f,
-        onClick: l,
-        ...s,
+        disabled: !l,
+        onClick: c,
+        ...o,
         children: [
-          /* @__PURE__ */ e(Ua, { className: "h-4 w-4" }),
+          /* @__PURE__ */ e(Re, { className: "h-4 w-4" }),
           /* @__PURE__ */ e("span", { className: "sr-only", children: "Next slide" })
         ]
       }
     );
   }
 );
-gs.displayName = "CarouselNext";
-const bs = x.Root, cn = x.Trigger, hs = x.Portal, mn = x.Close, Sa = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  x.Overlay,
+Cs.displayName = "CarouselNext";
+const ks = v.Root, In = v.Trigger, Ss = v.Portal, Tn = v.Close, Fa = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  v.Overlay,
   {
     ref: r,
-    className: o(
+    className: i(
       "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-Sa.displayName = x.Overlay.displayName;
-const Ta = i.forwardRef(({ className: a, children: t, ...r }, s) => /* @__PURE__ */ d(hs, { children: [
-  /* @__PURE__ */ e(Sa, {}),
-  /* @__PURE__ */ d(
-    x.Content,
+Fa.displayName = v.Overlay.displayName;
+const La = n.forwardRef(({ className: t, children: a, ...r }, o) => /* @__PURE__ */ s(Ss, { children: [
+  /* @__PURE__ */ e(Fa, {}),
+  /* @__PURE__ */ s(
+    v.Content,
     {
-      ref: s,
-      className: o(
+      ref: o,
+      className: i(
         "fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-1.5rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-4 sm:p-6 shadow-lg duration-200 max-h-[90dvh] overflow-y-auto rounded-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-        a
+        t
       ),
       ...r,
       children: [
-        t,
-        /* @__PURE__ */ d(x.Close, { className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-accent data-[state=open]:text-muted-foreground hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none", children: [
-          /* @__PURE__ */ e(ee, { className: "h-4 w-4" }),
+        a,
+        /* @__PURE__ */ s(v.Close, { className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-accent data-[state=open]:text-muted-foreground hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none", children: [
+          /* @__PURE__ */ e(ne, { className: "h-4 w-4" }),
           /* @__PURE__ */ e("span", { className: "sr-only", children: "Close" })
         ] })
       ]
     }
   )
 ] }));
-Ta.displayName = x.Content.displayName;
-const xs = ({ className: a, ...t }) => /* @__PURE__ */ e("div", { className: o("flex flex-col space-y-1.5 text-center sm:text-left", a), ...t });
-xs.displayName = "DialogHeader";
-const vs = ({ className: a, ...t }) => /* @__PURE__ */ e("div", { className: o("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", a), ...t });
-vs.displayName = "DialogFooter";
-const ys = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  x.Title,
+La.displayName = v.Content.displayName;
+const Rs = ({ className: t, ...a }) => /* @__PURE__ */ e("div", { className: i("flex flex-col space-y-1.5 text-center sm:text-left", t), ...a });
+Rs.displayName = "DialogHeader";
+const Is = ({ className: t, ...a }) => /* @__PURE__ */ e("div", { className: i("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", t), ...a });
+Is.displayName = "DialogFooter";
+const Ts = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  v.Title,
   {
     ref: r,
-    className: o("text-lg font-semibold leading-none tracking-tight", a),
-    ...t
+    className: i("text-lg font-semibold leading-none tracking-tight", t),
+    ...a
   }
 ));
-ys.displayName = x.Title.displayName;
-const Ns = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(x.Description, { ref: r, className: o("text-sm text-muted-foreground", a), ...t }));
-Ns.displayName = x.Description.displayName;
-const Pa = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  M,
+Ts.displayName = v.Title.displayName;
+const Ps = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(v.Description, { ref: r, className: i("text-sm text-muted-foreground", t), ...a }));
+Ps.displayName = v.Description.displayName;
+const Va = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  j,
   {
     ref: r,
-    className: o(
+    className: i(
       "flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-Pa.displayName = M.displayName;
-const un = ({ children: a, ...t }) => /* @__PURE__ */ e(bs, { ...t, children: /* @__PURE__ */ e(Ta, { className: "overflow-hidden p-0 shadow-lg", children: /* @__PURE__ */ e(Pa, { className: "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5", children: a }) }) }), ws = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ d("div", { className: "flex items-center border-b px-3", "cmdk-input-wrapper": "", children: [
-  /* @__PURE__ */ e(ne, { className: "mr-2 h-4 w-4 shrink-0 opacity-50" }),
+Va.displayName = j.displayName;
+const Pn = ({ children: t, ...a }) => /* @__PURE__ */ e(ks, { ...a, children: /* @__PURE__ */ e(La, { className: "overflow-hidden p-0 shadow-lg", children: /* @__PURE__ */ e(Va, { className: "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5", children: t }) }) }), zs = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ s("div", { className: "flex items-center border-b px-3", "cmdk-input-wrapper": "", children: [
+  /* @__PURE__ */ e(pe, { className: "mr-2 h-4 w-4 shrink-0 opacity-50" }),
   /* @__PURE__ */ e(
-    M.Input,
+    j.Input,
     {
       ref: r,
-      className: o(
+      className: i(
         "flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
-        a
+        t
       ),
-      ...t
+      ...a
     }
   )
 ] }));
-ws.displayName = M.Input.displayName;
-const Cs = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  M.List,
+zs.displayName = j.Input.displayName;
+const Ds = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  j.List,
   {
     ref: r,
-    className: o("max-h-[300px] overflow-y-auto overflow-x-hidden", a),
-    ...t
+    className: i("max-h-[300px] overflow-y-auto overflow-x-hidden", t),
+    ...a
   }
 ));
-Cs.displayName = M.List.displayName;
-const ks = i.forwardRef((a, t) => /* @__PURE__ */ e(M.Empty, { ref: t, className: "py-6 text-center text-sm", ...a }));
-ks.displayName = M.Empty.displayName;
-const Rs = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  M.Group,
+Ds.displayName = j.List.displayName;
+const As = n.forwardRef((t, a) => /* @__PURE__ */ e(j.Empty, { ref: a, className: "py-6 text-center text-sm", ...t }));
+As.displayName = j.Empty.displayName;
+const Ms = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  j.Group,
   {
     ref: r,
-    className: o(
+    className: i(
       "overflow-hidden p-1 text-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-Rs.displayName = M.Group.displayName;
-const Ss = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(M.Separator, { ref: r, className: o("-mx-1 h-px bg-border", a), ...t }));
-Ss.displayName = M.Separator.displayName;
-const Ts = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  M.Item,
+Ms.displayName = j.Group.displayName;
+const Es = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(j.Separator, { ref: r, className: i("-mx-1 h-px bg-border", t), ...a }));
+Es.displayName = j.Separator.displayName;
+const _s = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  j.Item,
   {
     ref: r,
-    className: o(
+    className: i(
       "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-Ts.displayName = M.Item.displayName;
-const Ps = ({ className: a, ...t }) => /* @__PURE__ */ e("span", { className: o("ml-auto text-xs tracking-widest text-muted-foreground", a), ...t });
-Ps.displayName = "CommandShortcut";
-const zs = { light: "", dark: ".dark" }, za = i.createContext(null);
-function Ia() {
-  const a = i.useContext(za);
-  if (!a)
+_s.displayName = j.Item.displayName;
+const js = ({ className: t, ...a }) => /* @__PURE__ */ e("span", { className: i("ml-auto text-xs tracking-widest text-muted-foreground", t), ...a });
+js.displayName = "CommandShortcut";
+const Fs = { light: "", dark: ".dark" }, Ba = n.createContext(null);
+function $a() {
+  const t = n.useContext(Ba);
+  if (!t)
     throw new Error("useChart must be used within a <ChartContainer />");
-  return a;
+  return t;
 }
-const Is = i.forwardRef(({ id: a, className: t, children: r, config: s, ...n }, c) => {
-  const l = i.useId(), f = `chart-${a || l.replace(/:/g, "")}`;
-  return /* @__PURE__ */ e(za.Provider, { value: { config: s }, children: /* @__PURE__ */ d(
+const Ls = n.forwardRef(({ id: t, className: a, children: r, config: o, ...d }, m) => {
+  const c = n.useId(), l = `chart-${t || c.replace(/:/g, "")}`;
+  return /* @__PURE__ */ e(Ba.Provider, { value: { config: o }, children: /* @__PURE__ */ s(
     "div",
     {
-      "data-chart": f,
-      ref: c,
-      className: o(
+      "data-chart": l,
+      ref: m,
+      className: i(
         "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
-        t
+        a
       ),
-      ...n,
+      ...d,
       children: [
-        /* @__PURE__ */ e(Ds, { id: f, config: s }),
-        /* @__PURE__ */ e(Ge.ResponsiveContainer, { children: r })
+        /* @__PURE__ */ e(Vs, { id: l, config: o }),
+        /* @__PURE__ */ e(We.ResponsiveContainer, { children: r })
       ]
     }
   ) });
 });
-Is.displayName = "Chart";
-const Ds = ({ id: a, config: t }) => {
-  const r = Object.entries(t).filter(([s, n]) => n.theme || n.color);
+Ls.displayName = "Chart";
+const Vs = ({ id: t, config: a }) => {
+  const r = Object.entries(a).filter(([o, d]) => d.theme || d.color);
   return r.length ? /* @__PURE__ */ e(
     "style",
     {
       dangerouslySetInnerHTML: {
-        __html: Object.entries(zs).map(
-          ([s, n]) => `
-${n} [data-chart=${a}] {
-${r.map(([c, l]) => {
-            var g;
-            const f = ((g = l.theme) == null ? void 0 : g[s]) || l.color;
-            return f ? `  --color-${c}: ${f};` : null;
+        __html: Object.entries(Fs).map(
+          ([o, d]) => `
+${d} [data-chart=${t}] {
+${r.map(([m, c]) => {
+            var u;
+            const l = ((u = c.theme) == null ? void 0 : u[o]) || c.color;
+            return l ? `  --color-${m}: ${l};` : null;
           }).join(`
 `)}
 }
@@ -1979,86 +1979,86 @@ ${r.map(([c, l]) => {
       }
     }
   ) : null;
-}, pn = Ge.Tooltip, Ms = i.forwardRef(
+}, zn = We.Tooltip, Bs = n.forwardRef(
   ({
-    active: a,
-    payload: t,
+    active: t,
+    payload: a,
     className: r,
-    indicator: s = "dot",
-    hideLabel: n = !1,
-    hideIndicator: c = !1,
-    label: l,
-    labelFormatter: f,
-    labelClassName: g,
-    formatter: u,
-    color: v,
-    nameKey: S,
-    labelKey: R
-  }, A) => {
-    const { config: p } = Ia(), y = i.useMemo(() => {
-      var re;
-      if (n || !(t != null && t.length))
+    indicator: o = "dot",
+    hideLabel: d = !1,
+    hideIndicator: m = !1,
+    label: c,
+    labelFormatter: l,
+    labelClassName: u,
+    formatter: p,
+    color: b,
+    nameKey: C,
+    labelKey: w
+  }, M) => {
+    const { config: g } = $a(), y = n.useMemo(() => {
+      var le;
+      if (d || !(a != null && a.length))
         return null;
-      const [m] = t, b = `${R || m.dataKey || m.name || "value"}`, T = Ee(p, m, b), L = !R && typeof l == "string" ? ((re = p[l]) == null ? void 0 : re.label) || l : T == null ? void 0 : T.label;
-      return f ? /* @__PURE__ */ e("div", { className: o("font-medium", g), children: f(L, t) }) : L ? /* @__PURE__ */ e("div", { className: o("font-medium", g), children: L }) : null;
-    }, [l, f, t, n, g, p, R]);
-    if (!a || !(t != null && t.length))
+      const [f] = a, h = `${w || f.dataKey || f.name || "value"}`, A = He(g, f, h), V = !w && typeof c == "string" ? ((le = g[c]) == null ? void 0 : le.label) || c : A == null ? void 0 : A.label;
+      return l ? /* @__PURE__ */ e("div", { className: i("font-medium", u), children: l(V, a) }) : V ? /* @__PURE__ */ e("div", { className: i("font-medium", u), children: V }) : null;
+    }, [c, l, a, d, u, g, w]);
+    if (!t || !(a != null && a.length))
       return null;
-    const w = t.length === 1 && s !== "dot";
-    return /* @__PURE__ */ d(
+    const k = a.length === 1 && o !== "dot";
+    return /* @__PURE__ */ s(
       "div",
       {
-        ref: A,
-        className: o(
+        ref: M,
+        className: i(
           "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl",
           r
         ),
         children: [
-          w ? null : y,
-          /* @__PURE__ */ e("div", { className: "grid gap-1.5", children: t.map((m, b) => {
-            const T = `${S || m.name || m.dataKey || "value"}`, L = Ee(p, m, T), re = v || m.payload.fill || m.color;
+          k ? null : y,
+          /* @__PURE__ */ e("div", { className: "grid gap-1.5", children: a.map((f, h) => {
+            const A = `${C || f.name || f.dataKey || "value"}`, V = He(g, f, A), le = b || f.payload.fill || f.color;
             return /* @__PURE__ */ e(
               "div",
               {
-                className: o(
+                className: i(
                   "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground",
-                  s === "dot" && "items-center"
+                  o === "dot" && "items-center"
                 ),
-                children: u && (m == null ? void 0 : m.value) !== void 0 && m.name ? u(m.value, m.name, m, b, m.payload) : /* @__PURE__ */ d(xe, { children: [
-                  L != null && L.icon ? /* @__PURE__ */ e(L.icon, {}) : !c && /* @__PURE__ */ e(
+                children: p && (f == null ? void 0 : f.value) !== void 0 && f.name ? p(f.value, f.name, f, h, f.payload) : /* @__PURE__ */ s(se, { children: [
+                  V != null && V.icon ? /* @__PURE__ */ e(V.icon, {}) : !m && /* @__PURE__ */ e(
                     "div",
                     {
-                      className: o("shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]", {
-                        "h-2.5 w-2.5": s === "dot",
-                        "w-1": s === "line",
-                        "w-0 border-[1.5px] border-dashed bg-transparent": s === "dashed",
-                        "my-0.5": w && s === "dashed"
+                      className: i("shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]", {
+                        "h-2.5 w-2.5": o === "dot",
+                        "w-1": o === "line",
+                        "w-0 border-[1.5px] border-dashed bg-transparent": o === "dashed",
+                        "my-0.5": k && o === "dashed"
                       }),
                       style: {
-                        "--color-bg": re,
-                        "--color-border": re
+                        "--color-bg": le,
+                        "--color-border": le
                       }
                     }
                   ),
-                  /* @__PURE__ */ d(
+                  /* @__PURE__ */ s(
                     "div",
                     {
-                      className: o(
+                      className: i(
                         "flex flex-1 justify-between leading-none",
-                        w ? "items-end" : "items-center"
+                        k ? "items-end" : "items-center"
                       ),
                       children: [
-                        /* @__PURE__ */ d("div", { className: "grid gap-1.5", children: [
-                          w ? y : null,
-                          /* @__PURE__ */ e("span", { className: "text-muted-foreground", children: (L == null ? void 0 : L.label) || m.name })
+                        /* @__PURE__ */ s("div", { className: "grid gap-1.5", children: [
+                          k ? y : null,
+                          /* @__PURE__ */ e("span", { className: "text-muted-foreground", children: (V == null ? void 0 : V.label) || f.name })
                         ] }),
-                        m.value && /* @__PURE__ */ e("span", { className: "font-mono font-medium tabular-nums text-foreground", children: m.value.toLocaleString() })
+                        f.value && /* @__PURE__ */ e("span", { className: "font-mono font-medium tabular-nums text-foreground", children: f.value.toLocaleString() })
                       ]
                     }
                   )
                 ] })
               },
-              m.dataKey
+              f.dataKey
             );
           }) })
         ]
@@ -2066,362 +2066,362 @@ ${r.map(([c, l]) => {
     );
   }
 );
-Ms.displayName = "ChartTooltip";
-const fn = Ge.Legend, As = i.forwardRef(({ className: a, hideIcon: t = !1, payload: r, verticalAlign: s = "bottom", nameKey: n }, c) => {
-  const { config: l } = Ia();
+Bs.displayName = "ChartTooltip";
+const Dn = We.Legend, $s = n.forwardRef(({ className: t, hideIcon: a = !1, payload: r, verticalAlign: o = "bottom", nameKey: d }, m) => {
+  const { config: c } = $a();
   return r != null && r.length ? /* @__PURE__ */ e(
     "div",
     {
-      ref: c,
-      className: o("flex items-center justify-center gap-4", s === "top" ? "pb-3" : "pt-3", a),
-      children: r.map((f) => {
-        const g = `${n || f.dataKey || "value"}`, u = Ee(l, f, g);
-        return /* @__PURE__ */ d(
+      ref: m,
+      className: i("flex items-center justify-center gap-4", o === "top" ? "pb-3" : "pt-3", t),
+      children: r.map((l) => {
+        const u = `${d || l.dataKey || "value"}`, p = He(c, l, u);
+        return /* @__PURE__ */ s(
           "div",
           {
-            className: o("flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground"),
+            className: i("flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground"),
             children: [
-              u != null && u.icon && !t ? /* @__PURE__ */ e(u.icon, {}) : /* @__PURE__ */ e(
+              p != null && p.icon && !a ? /* @__PURE__ */ e(p.icon, {}) : /* @__PURE__ */ e(
                 "div",
                 {
                   className: "h-2 w-2 shrink-0 rounded-[2px]",
                   style: {
-                    backgroundColor: f.color
+                    backgroundColor: l.color
                   }
                 }
               ),
-              u == null ? void 0 : u.label
+              p == null ? void 0 : p.label
             ]
           },
-          f.value
+          l.value
         );
       })
     }
   ) : null;
 });
-As.displayName = "ChartLegend";
-function Ee(a, t, r) {
-  if (typeof t != "object" || t === null)
+$s.displayName = "ChartLegend";
+function He(t, a, r) {
+  if (typeof a != "object" || a === null)
     return;
-  const s = "payload" in t && typeof t.payload == "object" && t.payload !== null ? t.payload : void 0;
-  let n = r;
-  return r in t && typeof t[r] == "string" ? n = t[r] : s && r in s && typeof s[r] == "string" && (n = s[r]), n in a ? a[n] : a[r];
+  const o = "payload" in a && typeof a.payload == "object" && a.payload !== null ? a.payload : void 0;
+  let d = r;
+  return r in a && typeof a[r] == "string" ? d = a[r] : o && r in o && typeof o[r] == "string" && (d = o[r]), d in t ? t[d] : t[r];
 }
-const gn = Dt.Root, bn = z.Root, hn = z.Trigger, _s = z.Portal, Da = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  z.Overlay,
+const An = Bt.Root, Mn = E.Root, En = E.Trigger, Gs = E.Portal, Ga = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  E.Overlay,
   {
-    className: o(
+    className: i(
       "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      a
+      t
     ),
-    ...t,
+    ...a,
     ref: r
   }
 ));
-Da.displayName = z.Overlay.displayName;
-const js = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ d(_s, { children: [
-  /* @__PURE__ */ e(Da, {}),
+Ga.displayName = E.Overlay.displayName;
+const Hs = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ s(Gs, { children: [
+  /* @__PURE__ */ e(Ga, {}),
   /* @__PURE__ */ e(
-    z.Content,
+    E.Content,
     {
       ref: r,
-      className: o(
+      className: i(
         "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-        a
+        t
       ),
-      ...t
+      ...a
     }
   )
 ] }));
-js.displayName = z.Content.displayName;
-const Es = ({ className: a, ...t }) => /* @__PURE__ */ e("div", { className: o("flex flex-col space-y-2 text-center sm:text-left", a), ...t });
-Es.displayName = "AlertDialogHeader";
-const Ls = ({ className: a, ...t }) => /* @__PURE__ */ e("div", { className: o("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", a), ...t });
-Ls.displayName = "AlertDialogFooter";
-const Fs = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(z.Title, { ref: r, className: o("text-lg font-semibold", a), ...t }));
-Fs.displayName = z.Title.displayName;
-const Bs = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(z.Description, { ref: r, className: o("text-sm text-muted-foreground", a), ...t }));
-Bs.displayName = z.Description.displayName;
-const Gs = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(z.Action, { ref: r, className: o(Z(), a), ...t }));
-Gs.displayName = z.Action.displayName;
-const Vs = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  z.Cancel,
+Hs.displayName = E.Content.displayName;
+const Os = ({ className: t, ...a }) => /* @__PURE__ */ e("div", { className: i("flex flex-col space-y-2 text-center sm:text-left", t), ...a });
+Os.displayName = "AlertDialogHeader";
+const Ys = ({ className: t, ...a }) => /* @__PURE__ */ e("div", { className: i("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", t), ...a });
+Ys.displayName = "AlertDialogFooter";
+const Ks = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(E.Title, { ref: r, className: i("text-lg font-semibold", t), ...a }));
+Ks.displayName = E.Title.displayName;
+const Us = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(E.Description, { ref: r, className: i("text-sm text-muted-foreground", t), ...a }));
+Us.displayName = E.Description.displayName;
+const qs = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(E.Action, { ref: r, className: i(ie(), t), ...a }));
+qs.displayName = E.Action.displayName;
+const Ws = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  E.Cancel,
   {
     ref: r,
-    className: o(Z({ variant: "outline" }), "mt-2 sm:mt-0", a),
-    ...t
+    className: i(ie({ variant: "outline" }), "mt-2 sm:mt-0", t),
+    ...a
   }
 ));
-Vs.displayName = z.Cancel.displayName;
-const xn = C.Root, vn = C.Trigger, yn = C.Group, Nn = C.Sub, Hs = i.forwardRef(({ className: a, inset: t, children: r, ...s }, n) => /* @__PURE__ */ d(
-  C.SubTrigger,
+Ws.displayName = E.Cancel.displayName;
+const _n = R.Root, jn = R.Trigger, Fn = R.Group, Ln = R.Sub, Js = n.forwardRef(({ className: t, inset: a, children: r, ...o }, d) => /* @__PURE__ */ s(
+  R.SubTrigger,
   {
-    ref: n,
-    className: o(
+    ref: d,
+    className: i(
       "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[state=open]:bg-accent data-[state=open]:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-      t && "pl-8",
-      a
+      a && "pl-8",
+      t
     ),
-    ...s,
+    ...o,
     children: [
       r,
-      /* @__PURE__ */ e(W, { className: "ml-auto h-4 w-4" })
+      /* @__PURE__ */ e(Z, { className: "ml-auto h-4 w-4" })
     ]
   }
 ));
-Hs.displayName = C.SubTrigger.displayName;
-const Os = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  C.SubContent,
+Js.displayName = R.SubTrigger.displayName;
+const Qs = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  R.SubContent,
   {
     ref: r,
-    className: o(
+    className: i(
       "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-Os.displayName = C.SubContent.displayName;
-const $s = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(C.Portal, { children: /* @__PURE__ */ e(
-  C.Content,
+Qs.displayName = R.SubContent.displayName;
+const Xs = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(R.Portal, { children: /* @__PURE__ */ e(
+  R.Content,
   {
     ref: r,
-    className: o(
+    className: i(
       "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ) }));
-$s.displayName = C.Content.displayName;
-const Ks = i.forwardRef(({ className: a, inset: t, ...r }, s) => /* @__PURE__ */ e(
-  C.Item,
+Xs.displayName = R.Content.displayName;
+const Zs = n.forwardRef(({ className: t, inset: a, ...r }, o) => /* @__PURE__ */ e(
+  R.Item,
   {
-    ref: s,
-    className: o(
+    ref: o,
+    className: i(
       "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
-      t && "pl-8",
-      a
+      a && "pl-8",
+      t
     ),
     ...r
   }
 ));
-Ks.displayName = C.Item.displayName;
-const Ys = i.forwardRef(({ className: a, children: t, checked: r, ...s }, n) => /* @__PURE__ */ d(
-  C.CheckboxItem,
+Zs.displayName = R.Item.displayName;
+const ei = n.forwardRef(({ className: t, children: a, checked: r, ...o }, d) => /* @__PURE__ */ s(
+  R.CheckboxItem,
   {
-    ref: n,
-    className: o(
+    ref: d,
+    className: i(
       "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
-      a
+      t
     ),
     checked: r,
-    ...s,
+    ...o,
     children: [
-      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(C.ItemIndicator, { children: /* @__PURE__ */ e($, { className: "h-4 w-4" }) }) }),
-      t
+      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(R.ItemIndicator, { children: /* @__PURE__ */ e(L, { className: "h-4 w-4" }) }) }),
+      a
     ]
   }
 ));
-Ys.displayName = C.CheckboxItem.displayName;
-const Us = i.forwardRef(({ className: a, children: t, ...r }, s) => /* @__PURE__ */ d(
-  C.RadioItem,
+ei.displayName = R.CheckboxItem.displayName;
+const ai = n.forwardRef(({ className: t, children: a, ...r }, o) => /* @__PURE__ */ s(
+  R.RadioItem,
   {
-    ref: s,
-    className: o(
+    ref: o,
+    className: i(
       "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
-      a
+      t
     ),
     ...r,
     children: [
-      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(C.ItemIndicator, { children: /* @__PURE__ */ e(ve, { className: "h-2 w-2 fill-current" }) }) }),
-      t
+      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(R.ItemIndicator, { children: /* @__PURE__ */ e(ke, { className: "h-2 w-2 fill-current" }) }) }),
+      a
     ]
   }
 ));
-Us.displayName = C.RadioItem.displayName;
-const qs = i.forwardRef(({ className: a, inset: t, ...r }, s) => /* @__PURE__ */ e(
-  C.Label,
+ai.displayName = R.RadioItem.displayName;
+const ti = n.forwardRef(({ className: t, inset: a, ...r }, o) => /* @__PURE__ */ e(
+  R.Label,
   {
-    ref: s,
-    className: o("px-2 py-1.5 text-sm font-semibold text-foreground", t && "pl-8", a),
+    ref: o,
+    className: i("px-2 py-1.5 text-sm font-semibold text-foreground", a && "pl-8", t),
     ...r
   }
 ));
-qs.displayName = C.Label.displayName;
-const Ws = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(C.Separator, { ref: r, className: o("-mx-1 my-1 h-px bg-border", a), ...t }));
-Ws.displayName = C.Separator.displayName;
-const Js = ({ className: a, ...t }) => /* @__PURE__ */ e("span", { className: o("ml-auto text-xs tracking-widest text-muted-foreground", a), ...t });
-Js.displayName = "ContextMenuShortcut";
-const wn = N.Root, Cn = N.Trigger, kn = N.Group, Rn = N.Portal, Sn = N.Sub, Tn = N.RadioGroup, Qs = i.forwardRef(({ className: a, inset: t, children: r, ...s }, n) => /* @__PURE__ */ d(
+ti.displayName = R.Label.displayName;
+const ri = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(R.Separator, { ref: r, className: i("-mx-1 my-1 h-px bg-border", t), ...a }));
+ri.displayName = R.Separator.displayName;
+const oi = ({ className: t, ...a }) => /* @__PURE__ */ e("span", { className: i("ml-auto text-xs tracking-widest text-muted-foreground", t), ...a });
+oi.displayName = "ContextMenuShortcut";
+const Vn = N.Root, Bn = N.Trigger, $n = N.Group, Gn = N.Portal, Hn = N.Sub, On = N.RadioGroup, si = n.forwardRef(({ className: t, inset: a, children: r, ...o }, d) => /* @__PURE__ */ s(
   N.SubTrigger,
   {
-    ref: n,
-    className: o(
+    ref: d,
+    className: i(
       "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[state=open]:bg-accent focus:bg-accent",
-      t && "pl-8",
-      a
+      a && "pl-8",
+      t
     ),
-    ...s,
+    ...o,
     children: [
       r,
-      /* @__PURE__ */ e(W, { className: "ml-auto h-4 w-4" })
+      /* @__PURE__ */ e(Z, { className: "ml-auto h-4 w-4" })
     ]
   }
 ));
-Qs.displayName = N.SubTrigger.displayName;
-const Xs = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
+si.displayName = N.SubTrigger.displayName;
+const ii = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
   N.SubContent,
   {
     ref: r,
-    className: o(
+    className: i(
       "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      a
+      t
     ),
-    ...t
+    ...a
   }
 ));
-Xs.displayName = N.SubContent.displayName;
-const Zs = i.forwardRef(({ className: a, sideOffset: t = 4, ...r }, s) => /* @__PURE__ */ e(N.Portal, { children: /* @__PURE__ */ e(
+ii.displayName = N.SubContent.displayName;
+const ni = n.forwardRef(({ className: t, sideOffset: a = 4, ...r }, o) => /* @__PURE__ */ e(N.Portal, { children: /* @__PURE__ */ e(
   N.Content,
   {
-    ref: s,
-    sideOffset: t,
-    className: o(
+    ref: o,
+    sideOffset: a,
+    className: i(
       "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      a
+      t
     ),
     ...r
   }
 ) }));
-Zs.displayName = N.Content.displayName;
-const ei = i.forwardRef(({ className: a, inset: t, ...r }, s) => /* @__PURE__ */ e(
+ni.displayName = N.Content.displayName;
+const di = n.forwardRef(({ className: t, inset: a, ...r }, o) => /* @__PURE__ */ e(
   N.Item,
   {
-    ref: s,
-    className: o(
+    ref: o,
+    className: i(
       "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
-      t && "pl-8",
-      a
+      a && "pl-8",
+      t
     ),
     ...r
   }
 ));
-ei.displayName = N.Item.displayName;
-const ai = i.forwardRef(({ className: a, children: t, checked: r, ...s }, n) => /* @__PURE__ */ d(
+di.displayName = N.Item.displayName;
+const li = n.forwardRef(({ className: t, children: a, checked: r, ...o }, d) => /* @__PURE__ */ s(
   N.CheckboxItem,
   {
-    ref: n,
-    className: o(
+    ref: d,
+    className: i(
       "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
-      a
+      t
     ),
     checked: r,
-    ...s,
+    ...o,
     children: [
-      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(N.ItemIndicator, { children: /* @__PURE__ */ e($, { className: "h-4 w-4" }) }) }),
-      t
+      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(N.ItemIndicator, { children: /* @__PURE__ */ e(L, { className: "h-4 w-4" }) }) }),
+      a
     ]
   }
 ));
-ai.displayName = N.CheckboxItem.displayName;
-const ti = i.forwardRef(({ className: a, children: t, ...r }, s) => /* @__PURE__ */ d(
+li.displayName = N.CheckboxItem.displayName;
+const ci = n.forwardRef(({ className: t, children: a, ...r }, o) => /* @__PURE__ */ s(
   N.RadioItem,
   {
-    ref: s,
-    className: o(
+    ref: o,
+    className: i(
       "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
-      a
+      t
     ),
     ...r,
     children: [
-      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(N.ItemIndicator, { children: /* @__PURE__ */ e(ve, { className: "h-2 w-2 fill-current" }) }) }),
-      t
+      /* @__PURE__ */ e("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ e(N.ItemIndicator, { children: /* @__PURE__ */ e(ke, { className: "h-2 w-2 fill-current" }) }) }),
+      a
     ]
   }
 ));
-ti.displayName = N.RadioItem.displayName;
-const ri = i.forwardRef(({ className: a, inset: t, ...r }, s) => /* @__PURE__ */ e(
+ci.displayName = N.RadioItem.displayName;
+const mi = n.forwardRef(({ className: t, inset: a, ...r }, o) => /* @__PURE__ */ e(
   N.Label,
   {
-    ref: s,
-    className: o("px-2 py-1.5 text-sm font-semibold", t && "pl-8", a),
+    ref: o,
+    className: i("px-2 py-1.5 text-sm font-semibold", a && "pl-8", t),
     ...r
   }
 ));
-ri.displayName = N.Label.displayName;
-const oi = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(N.Separator, { ref: r, className: o("-mx-1 my-1 h-px bg-muted", a), ...t }));
-oi.displayName = N.Separator.displayName;
-const si = ({ className: a, ...t }) => /* @__PURE__ */ e("span", { className: o("ml-auto text-xs tracking-widest opacity-60", a), ...t });
-si.displayName = "DropdownMenuShortcut";
-const Pn = ce.Root, zn = ce.Trigger, ii = i.forwardRef(({ className: a, align: t = "center", sideOffset: r = 4, ...s }, n) => /* @__PURE__ */ e(ce.Portal, { children: /* @__PURE__ */ e(
-  ce.Content,
+mi.displayName = N.Label.displayName;
+const ui = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(N.Separator, { ref: r, className: i("-mx-1 my-1 h-px bg-muted", t), ...a }));
+ui.displayName = N.Separator.displayName;
+const pi = ({ className: t, ...a }) => /* @__PURE__ */ e("span", { className: i("ml-auto text-xs tracking-widest opacity-60", t), ...a });
+pi.displayName = "DropdownMenuShortcut";
+const Yn = be.Root, Kn = be.Trigger, fi = n.forwardRef(({ className: t, align: a = "center", sideOffset: r = 4, ...o }, d) => /* @__PURE__ */ e(be.Portal, { children: /* @__PURE__ */ e(
+  be.Content,
   {
-    ref: n,
-    align: t,
+    ref: d,
+    align: a,
     sideOffset: r,
-    className: o(
+    className: i(
       "z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      a
+      t
     ),
-    ...s
+    ...o
   }
 ) }));
-ii.displayName = ce.Content.displayName;
-const In = we.Root, Dn = we.Trigger, ni = i.forwardRef(({ className: a, align: t = "center", sideOffset: r = 4, ...s }, n) => /* @__PURE__ */ e(
-  we.Content,
+fi.displayName = be.Content.displayName;
+const Un = Te.Root, qn = Te.Trigger, gi = n.forwardRef(({ className: t, align: a = "center", sideOffset: r = 4, ...o }, d) => /* @__PURE__ */ e(
+  Te.Content,
   {
-    ref: n,
-    align: t,
+    ref: d,
+    align: a,
     sideOffset: r,
-    className: o(
+    className: i(
       "z-50 w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      a
+      t
     ),
-    ...s
+    ...o
   }
 ));
-ni.displayName = we.Content.displayName;
-const di = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  te.Root,
+gi.displayName = Te.Content.displayName;
+const bi = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  de.Root,
   {
     ref: r,
-    className: o("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", a),
-    ...t
+    className: i("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", t),
+    ...a
   }
 ));
-di.displayName = te.Root.displayName;
-const li = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(te.Image, { ref: r, className: o("aspect-square h-full w-full", a), ...t }));
-li.displayName = te.Image.displayName;
-const ci = i.forwardRef(({ className: a, ...t }, r) => /* @__PURE__ */ e(
-  te.Fallback,
+bi.displayName = de.Root.displayName;
+const hi = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(de.Image, { ref: r, className: i("aspect-square h-full w-full", t), ...a }));
+hi.displayName = de.Image.displayName;
+const xi = n.forwardRef(({ className: t, ...a }, r) => /* @__PURE__ */ e(
+  de.Fallback,
   {
     ref: r,
-    className: o("flex h-full w-full items-center justify-center rounded-full bg-muted", a),
-    ...t
+    className: i("flex h-full w-full items-center justify-center rounded-full bg-muted", t),
+    ...a
   }
 ));
-ci.displayName = te.Fallback.displayName;
-const Ma = () => /* @__PURE__ */ e("div", { className: "w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-glow", children: /* @__PURE__ */ e(H, { size: 26, className: "text-primary-foreground", fill: "currentColor" }) }), Mn = ({
-  onNavigate: a,
-  onSubmit: t
+xi.displayName = de.Fallback.displayName;
+const Ha = () => /* @__PURE__ */ e("div", { className: "w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-glow", children: /* @__PURE__ */ e(Y, { size: 26, className: "text-primary-foreground", fill: "currentColor" }) }), Wn = ({
+  onNavigate: t,
+  onSubmit: a
 }) => {
-  const [r, s] = I(""), [n, c] = I(""), [l, f] = I(!1), [g, u] = I(!1);
-  return /* @__PURE__ */ e("div", { className: "min-h-screen bg-gradient-to-b from-primary/5 to-background flex items-center justify-center px-4 py-12", children: /* @__PURE__ */ d("div", { className: "w-full max-w-md space-y-8", children: [
-    /* @__PURE__ */ d("div", { className: "text-center space-y-4", children: [
-      /* @__PURE__ */ e(Ma, {}),
-      /* @__PURE__ */ d("div", { children: [
+  const [r, o] = z(""), [d, m] = z(""), [c, l] = z(!1), [u, p] = z(!1);
+  return /* @__PURE__ */ e("div", { className: "min-h-screen bg-gradient-to-b from-primary/5 to-background flex items-center justify-center px-4 py-12", children: /* @__PURE__ */ s("div", { className: "w-full max-w-md space-y-8", children: [
+    /* @__PURE__ */ s("div", { className: "text-center space-y-4", children: [
+      /* @__PURE__ */ e(Ha, {}),
+      /* @__PURE__ */ s("div", { children: [
         /* @__PURE__ */ e("h1", { className: "text-3xl font-display font-black uppercase tracking-tighter text-foreground", children: "EVYRA" }),
         /* @__PURE__ */ e("p", { className: "text-sm text-muted-foreground font-medium mt-1", children: "Plataforma de cuidados sénior" })
       ] })
     ] }),
-    /* @__PURE__ */ d("div", { className: "bg-card rounded-3xl border border-border shadow-elevated p-8 space-y-6", children: [
-      /* @__PURE__ */ d("div", { children: [
+    /* @__PURE__ */ s("div", { className: "bg-card rounded-3xl border border-border shadow-elevated p-8 space-y-6", children: [
+      /* @__PURE__ */ s("div", { children: [
         /* @__PURE__ */ e("h2", { className: "text-xl font-display font-black uppercase tracking-tighter text-foreground", children: "Entrar na Conta" }),
         /* @__PURE__ */ e("p", { className: "text-sm text-muted-foreground mt-1", children: "Bem-vindo de volta" })
       ] }),
-      /* @__PURE__ */ d(_, { variant: "outline", className: "w-full rounded-2xl", onClick: () => P.info("Google login..."), children: [
-        /* @__PURE__ */ d("svg", { className: "mr-2 h-4 w-4", viewBox: "0 0 24 24", children: [
+      /* @__PURE__ */ s(S, { variant: "outline", className: "w-full rounded-2xl", onClick: () => T.info("Google login..."), children: [
+        /* @__PURE__ */ s("svg", { className: "mr-2 h-4 w-4", viewBox: "0 0 24 24", children: [
           /* @__PURE__ */ e("path", { fill: "#4285F4", d: "M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" }),
           /* @__PURE__ */ e("path", { fill: "#34A853", d: "M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" }),
           /* @__PURE__ */ e("path", { fill: "#FBBC05", d: "M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" }),
@@ -2429,31 +2429,31 @@ const Ma = () => /* @__PURE__ */ e("div", { className: "w-14 h-14 bg-primary rou
         ] }),
         "Continuar com Google"
       ] }),
-      /* @__PURE__ */ d("div", { className: "flex items-center gap-4", children: [
+      /* @__PURE__ */ s("div", { className: "flex items-center gap-4", children: [
         /* @__PURE__ */ e("div", { className: "flex-1 h-px bg-border" }),
         /* @__PURE__ */ e("span", { className: "text-[10px] font-display font-black text-muted-foreground uppercase tracking-widest", children: "ou" }),
         /* @__PURE__ */ e("div", { className: "flex-1 h-px bg-border" })
       ] }),
-      /* @__PURE__ */ d("form", { onSubmit: async (S) => {
-        S.preventDefault(), u(!0);
+      /* @__PURE__ */ s("form", { onSubmit: async (C) => {
+        C.preventDefault(), p(!0);
         try {
-          t ? await t(r, n) : (await new Promise((R) => setTimeout(R, 1200)), P.success("Login efetuado!"), a == null || a("dashboard"));
-        } catch (R) {
-          console.error("Login error:", R);
+          a ? await a(r, d) : (await new Promise((w) => setTimeout(w, 1200)), T.success("Login efetuado!"), t == null || t("dashboard"));
+        } catch (w) {
+          console.error("Login error:", w);
         } finally {
-          u(!1);
+          p(!1);
         }
       }, className: "space-y-4", children: [
-        /* @__PURE__ */ d("div", { className: "space-y-1.5", children: [
+        /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
           /* @__PURE__ */ e("label", { className: "text-[10px] font-display font-black uppercase tracking-widest text-foreground", children: "Email" }),
-          /* @__PURE__ */ d("div", { className: "relative", children: [
-            /* @__PURE__ */ e(qa, { size: 15, className: "absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" }),
+          /* @__PURE__ */ s("div", { className: "relative", children: [
+            /* @__PURE__ */ e(st, { size: 15, className: "absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" }),
             /* @__PURE__ */ e(
               "input",
               {
                 type: "email",
                 value: r,
-                onChange: (S) => s(S.target.value),
+                onChange: (C) => o(C.target.value),
                 placeholder: "email@exemplo.com",
                 required: !0,
                 className: "w-full pl-10 pr-4 py-3 bg-secondary border border-border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -2461,225 +2461,629 @@ const Ma = () => /* @__PURE__ */ e("div", { className: "w-14 h-14 bg-primary rou
             )
           ] })
         ] }),
-        /* @__PURE__ */ d("div", { className: "space-y-1.5", children: [
+        /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
           /* @__PURE__ */ e("label", { className: "text-[10px] font-display font-black uppercase tracking-widest text-foreground", children: "Palavra-passe" }),
-          /* @__PURE__ */ d("div", { className: "relative", children: [
-            /* @__PURE__ */ e(Wa, { size: 15, className: "absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" }),
+          /* @__PURE__ */ s("div", { className: "relative", children: [
+            /* @__PURE__ */ e(it, { size: 15, className: "absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" }),
             /* @__PURE__ */ e(
               "input",
               {
-                type: l ? "text" : "password",
-                value: n,
-                onChange: (S) => c(S.target.value),
+                type: c ? "text" : "password",
+                value: d,
+                onChange: (C) => m(C.target.value),
                 placeholder: "••••••••",
                 required: !0,
                 className: "w-full pl-10 pr-12 py-3 bg-secondary border border-border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               }
             ),
-            /* @__PURE__ */ e("button", { type: "button", onClick: () => f(!l), className: "absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors", children: l ? /* @__PURE__ */ e(Ja, { size: 15 }) : /* @__PURE__ */ e(Qa, { size: 15 }) })
+            /* @__PURE__ */ e("button", { type: "button", onClick: () => l(!c), className: "absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors", children: c ? /* @__PURE__ */ e(nt, { size: 15 }) : /* @__PURE__ */ e(dt, { size: 15 }) })
           ] })
         ] }),
         /* @__PURE__ */ e("div", { className: "flex justify-end", children: /* @__PURE__ */ e("button", { type: "button", className: "text-xs text-primary font-display font-bold hover:underline", children: "Esqueci a palavra-passe" }) }),
-        /* @__PURE__ */ e(_, { type: "submit", size: "lg", className: "w-full rounded-2xl", disabled: g, children: g ? /* @__PURE__ */ d(xe, { children: [
-          /* @__PURE__ */ e(Ze, { size: 16, className: "animate-spin mr-2" }),
+        /* @__PURE__ */ e(S, { type: "submit", size: "lg", className: "w-full rounded-2xl", disabled: u, children: u ? /* @__PURE__ */ s(se, { children: [
+          /* @__PURE__ */ e(Ye, { size: 16, className: "animate-spin mr-2" }),
           "A entrar..."
         ] }) : "Entrar" })
       ] }),
-      /* @__PURE__ */ d("p", { className: "text-center text-sm text-muted-foreground", children: [
+      /* @__PURE__ */ s("p", { className: "text-center text-sm text-muted-foreground", children: [
         "Sem conta?",
         " ",
-        /* @__PURE__ */ e("button", { onClick: () => a == null ? void 0 : a("register"), className: "text-primary font-display font-bold hover:underline", children: "Registar" })
+        /* @__PURE__ */ e("button", { onClick: () => t == null ? void 0 : t("register"), className: "text-primary font-display font-bold hover:underline", children: "Registar" })
       ] })
     ] })
   ] }) });
-}, An = ({
-  onNavigate: a,
-  onSubmitRegister: t
+}, Jn = ({
+  onNavigate: t,
+  onSubmitRegister: a
 }) => {
-  const [r, s] = I(1), [n, c] = I("FAMILY"), [l, f] = I(!1), [g, u] = I(!1), [v, S] = I(!1), [R, A] = I({ name: "", email: "", phone: "", password: "", confirm: "" }), p = (m) => (b) => A((T) => ({ ...T, [m]: b.target.value })), y = async (m) => {
-    if (m.preventDefault(), !v) {
-      P.error("Aceite os termos para continuar");
+  const [r, o] = z(1), [d, m] = z("FAMILY"), [c, l] = z(!1), [u, p] = z(!1), [b, C] = z(!1), [w, M] = z({ name: "", email: "", phone: "", password: "", confirm: "" }), g = (f) => (h) => M((A) => ({ ...A, [f]: h.target.value })), y = async (f) => {
+    if (f.preventDefault(), !b) {
+      T.error("Aceite os termos para continuar");
       return;
     }
-    if (R.password !== R.confirm) {
-      P.error("As palavras-passe não coincidem");
+    if (w.password !== w.confirm) {
+      T.error("As palavras-passe não coincidem");
       return;
     }
-    u(!0);
+    p(!0);
     try {
-      t ? await t({ name: R.name, email: R.email, phone: R.phone, password: R.password, role: n }) : (await new Promise((b) => setTimeout(b, 1200)), P.success("Conta criada!"), a == null || a(n === "FAMILY" ? "family-setup" : "profile-setup"));
-    } catch (b) {
-      console.error("Register error:", b);
+      a ? await a({ name: w.name, email: w.email, phone: w.phone, password: w.password, role: d }) : (await new Promise((h) => setTimeout(h, 1200)), T.success("Conta criada!"), t == null || t(d === "FAMILY" ? "family-setup" : "profile-setup"));
+    } catch (h) {
+      console.error("Register error:", h);
     } finally {
-      u(!1);
+      p(!1);
     }
-  }, w = [
-    { id: "FAMILY", icon: V, title: "Família", desc: "Procuro um cuidador para o meu familiar", tag: "€29 ativação", tagClass: "bg-warning/10 text-warning border border-warning/30" },
-    { id: "CAREGIVER", icon: H, title: "Cuidador(a)", desc: "Sou profissional de saúde ou cuidador", tag: "Gratuito", tagClass: "bg-success/10 text-success border border-success/30" }
+  }, k = [
+    { id: "FAMILY", icon: O, title: "Família", desc: "Procuro um cuidador para o meu familiar", tag: "€29 ativação", tagClass: "bg-warning/10 text-warning border border-warning/30" },
+    { id: "CAREGIVER", icon: Y, title: "Cuidador(a)", desc: "Sou profissional de saúde ou cuidador", tag: "Gratuito", tagClass: "bg-success/10 text-success border border-success/30" }
   ];
-  return /* @__PURE__ */ e("div", { className: "min-h-screen bg-gradient-to-b from-primary/5 to-background flex items-center justify-center px-4 py-12", children: /* @__PURE__ */ d("div", { className: "w-full max-w-lg space-y-6", children: [
-    /* @__PURE__ */ d("div", { className: "text-center space-y-4", children: [
-      /* @__PURE__ */ e(Ma, {}),
+  return /* @__PURE__ */ e("div", { className: "min-h-screen bg-gradient-to-b from-primary/5 to-background flex items-center justify-center px-4 py-12", children: /* @__PURE__ */ s("div", { className: "w-full max-w-lg space-y-6", children: [
+    /* @__PURE__ */ s("div", { className: "text-center space-y-4", children: [
+      /* @__PURE__ */ e(Ha, {}),
       /* @__PURE__ */ e("h1", { className: "text-3xl font-display font-black uppercase tracking-tighter text-foreground", children: "Criar Conta" })
     ] }),
-    /* @__PURE__ */ e("div", { className: "flex items-center justify-center gap-3", children: [1, 2].map((m) => /* @__PURE__ */ d(ja.Fragment, { children: [
-      /* @__PURE__ */ e("div", { className: `w-8 h-8 rounded-xl flex items-center justify-center text-xs font-display font-black transition-all ${m <= r ? "bg-primary text-primary-foreground shadow-md" : "bg-secondary text-muted-foreground border border-border"}`, children: m < r ? /* @__PURE__ */ e($, { size: 14 }) : m }),
-      m < 2 && /* @__PURE__ */ e("div", { className: `w-16 h-0.5 rounded-full transition-all ${m < r ? "bg-primary" : "bg-border"}` })
-    ] }, m)) }),
-    /* @__PURE__ */ d("div", { className: "bg-card rounded-3xl border border-border shadow-elevated p-8 space-y-6", children: [
-      r === 1 && /* @__PURE__ */ d("div", { className: "space-y-5", children: [
-        /* @__PURE__ */ d("div", { children: [
+    /* @__PURE__ */ e("div", { className: "flex items-center justify-center gap-3", children: [1, 2].map((f) => /* @__PURE__ */ s(Oe.Fragment, { children: [
+      /* @__PURE__ */ e("div", { className: `w-8 h-8 rounded-xl flex items-center justify-center text-xs font-display font-black transition-all ${f <= r ? "bg-primary text-primary-foreground shadow-md" : "bg-secondary text-muted-foreground border border-border"}`, children: f < r ? /* @__PURE__ */ e(L, { size: 14 }) : f }),
+      f < 2 && /* @__PURE__ */ e("div", { className: `w-16 h-0.5 rounded-full transition-all ${f < r ? "bg-primary" : "bg-border"}` })
+    ] }, f)) }),
+    /* @__PURE__ */ s("div", { className: "bg-card rounded-3xl border border-border shadow-elevated p-8 space-y-6", children: [
+      r === 1 && /* @__PURE__ */ s("div", { className: "space-y-5", children: [
+        /* @__PURE__ */ s("div", { children: [
           /* @__PURE__ */ e("h2", { className: "text-lg font-display font-black uppercase tracking-tighter", children: "Qual é o seu papel?" }),
           /* @__PURE__ */ e("p", { className: "text-sm text-muted-foreground mt-1", children: "Escolha o tipo de conta a criar" })
         ] }),
-        /* @__PURE__ */ e("div", { className: "space-y-3", children: w.map((m) => /* @__PURE__ */ d(
+        /* @__PURE__ */ e("div", { className: "space-y-3", children: k.map((f) => /* @__PURE__ */ s(
           "label",
           {
-            onClick: () => c(m.id),
-            className: `flex items-center gap-4 p-5 border-2 rounded-2xl cursor-pointer transition-all ${n === m.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`,
+            onClick: () => m(f.id),
+            className: `flex items-center gap-4 p-5 border-2 rounded-2xl cursor-pointer transition-all ${d === f.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`,
             children: [
-              /* @__PURE__ */ e("div", { className: `w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${n === m.id ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`, children: /* @__PURE__ */ e(m.icon, { size: 22 }) }),
-              /* @__PURE__ */ d("div", { className: "flex-1", children: [
-                /* @__PURE__ */ d("div", { className: "flex items-center gap-2 flex-wrap", children: [
-                  /* @__PURE__ */ e("span", { className: "font-display font-black text-foreground text-sm uppercase", children: m.title }),
-                  /* @__PURE__ */ e("span", { className: `text-[9px] font-display font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${m.tagClass}`, children: m.tag })
+              /* @__PURE__ */ e("div", { className: `w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${d === f.id ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`, children: /* @__PURE__ */ e(f.icon, { size: 22 }) }),
+              /* @__PURE__ */ s("div", { className: "flex-1", children: [
+                /* @__PURE__ */ s("div", { className: "flex items-center gap-2 flex-wrap", children: [
+                  /* @__PURE__ */ e("span", { className: "font-display font-black text-foreground text-sm uppercase", children: f.title }),
+                  /* @__PURE__ */ e("span", { className: `text-[9px] font-display font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${f.tagClass}`, children: f.tag })
                 ] }),
-                /* @__PURE__ */ e("p", { className: "text-xs text-muted-foreground mt-0.5", children: m.desc })
+                /* @__PURE__ */ e("p", { className: "text-xs text-muted-foreground mt-0.5", children: f.desc })
               ] }),
-              /* @__PURE__ */ e("div", { className: `w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${n === m.id ? "border-primary bg-primary" : "border-border"}`, children: n === m.id && /* @__PURE__ */ e("div", { className: "w-2 h-2 rounded-full bg-primary-foreground" }) })
+              /* @__PURE__ */ e("div", { className: `w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${d === f.id ? "border-primary bg-primary" : "border-border"}`, children: d === f.id && /* @__PURE__ */ e("div", { className: "w-2 h-2 rounded-full bg-primary-foreground" }) })
             ]
           },
-          m.id
+          f.id
         )) }),
-        /* @__PURE__ */ e(_, { size: "lg", className: "w-full rounded-2xl", onClick: () => s(2), children: "Continuar" })
+        /* @__PURE__ */ e(S, { size: "lg", className: "w-full rounded-2xl", onClick: () => o(2), children: "Continuar" })
       ] }),
-      r === 2 && /* @__PURE__ */ d("form", { onSubmit: y, className: "space-y-5", children: [
-        /* @__PURE__ */ d("div", { className: "flex items-center gap-3 p-4 bg-secondary rounded-2xl", children: [
-          n === "FAMILY" ? /* @__PURE__ */ e(V, { size: 18, className: "text-muted-foreground" }) : /* @__PURE__ */ e(H, { size: 18, className: "text-muted-foreground" }),
-          /* @__PURE__ */ e("span", { className: "font-display font-bold text-sm text-foreground", children: n === "FAMILY" ? "Família" : "Cuidador(a)" }),
-          /* @__PURE__ */ e("button", { type: "button", onClick: () => s(1), className: "ml-auto text-[10px] font-display font-black text-primary uppercase tracking-widest hover:underline", children: "Alterar" })
+      r === 2 && /* @__PURE__ */ s("form", { onSubmit: y, className: "space-y-5", children: [
+        /* @__PURE__ */ s("div", { className: "flex items-center gap-3 p-4 bg-secondary rounded-2xl", children: [
+          d === "FAMILY" ? /* @__PURE__ */ e(O, { size: 18, className: "text-muted-foreground" }) : /* @__PURE__ */ e(Y, { size: 18, className: "text-muted-foreground" }),
+          /* @__PURE__ */ e("span", { className: "font-display font-bold text-sm text-foreground", children: d === "FAMILY" ? "Família" : "Cuidador(a)" }),
+          /* @__PURE__ */ e("button", { type: "button", onClick: () => o(1), className: "ml-auto text-[10px] font-display font-black text-primary uppercase tracking-widest hover:underline", children: "Alterar" })
         ] }),
         [
           { label: "Nome Completo", key: "name", type: "text", placeholder: "Nome completo" },
           { label: "Email", key: "email", type: "email", placeholder: "email@exemplo.com" },
           { label: "Telemóvel", key: "phone", type: "tel", placeholder: "+351 912 345 678" },
-          { label: "Palavra-passe", key: "password", type: l ? "text" : "password", placeholder: "••••••••" },
+          { label: "Palavra-passe", key: "password", type: c ? "text" : "password", placeholder: "••••••••" },
           { label: "Confirmar Palavra-passe", key: "confirm", type: "password", placeholder: "••••••••" }
-        ].map((m) => /* @__PURE__ */ d("div", { className: "space-y-1.5", children: [
-          /* @__PURE__ */ e("label", { className: "text-[10px] font-display font-black uppercase tracking-widest text-foreground", children: m.label }),
+        ].map((f) => /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+          /* @__PURE__ */ e("label", { className: "text-[10px] font-display font-black uppercase tracking-widest text-foreground", children: f.label }),
           /* @__PURE__ */ e(
             "input",
             {
-              type: m.type,
-              value: R[m.key],
-              onChange: p(m.key),
-              placeholder: m.placeholder,
+              type: f.type,
+              value: w[f.key],
+              onChange: g(f.key),
+              placeholder: f.placeholder,
               className: "w-full px-4 py-3 bg-secondary border border-border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             }
           )
-        ] }, m.key)),
-        n === "FAMILY" && /* @__PURE__ */ d("div", { className: "p-4 bg-warning/5 border border-warning/20 rounded-2xl", children: [
+        ] }, f.key)),
+        d === "FAMILY" && /* @__PURE__ */ s("div", { className: "p-4 bg-warning/5 border border-warning/20 rounded-2xl", children: [
           /* @__PURE__ */ e("p", { className: "text-xs font-display font-black text-foreground uppercase", children: "Taxa de Ativação — €29" }),
           /* @__PURE__ */ e("p", { className: "text-xs text-muted-foreground mt-1", children: "Taxa única para acesso completo, verificação KYC e suporte dedicado." })
         ] }),
-        n === "CAREGIVER" && /* @__PURE__ */ d("div", { className: "p-4 bg-success/5 border border-success/20 rounded-2xl flex items-start gap-3", children: [
-          /* @__PURE__ */ e($, { size: 14, className: "text-success mt-0.5 shrink-0" }),
-          /* @__PURE__ */ d("div", { children: [
+        d === "CAREGIVER" && /* @__PURE__ */ s("div", { className: "p-4 bg-success/5 border border-success/20 rounded-2xl flex items-start gap-3", children: [
+          /* @__PURE__ */ e(L, { size: 14, className: "text-success mt-0.5 shrink-0" }),
+          /* @__PURE__ */ s("div", { children: [
             /* @__PURE__ */ e("p", { className: "text-xs font-display font-black text-success uppercase", children: "Registo Gratuito" }),
             /* @__PURE__ */ e("p", { className: "text-xs text-muted-foreground mt-0.5", children: "Sem taxa de ativação. Crie o perfil e comece a receber propostas." })
           ] })
         ] }),
-        /* @__PURE__ */ d("label", { className: "flex items-start gap-3 cursor-pointer", children: [
-          /* @__PURE__ */ e("div", { onClick: () => S(!v), className: `w-5 h-5 rounded-md border-2 flex items-center justify-center mt-0.5 transition-all shrink-0 ${v ? "bg-primary border-primary" : "border-border"}`, children: v && /* @__PURE__ */ e($, { size: 11, className: "text-primary-foreground" }) }),
-          /* @__PURE__ */ d("span", { className: "text-xs text-muted-foreground leading-relaxed", children: [
+        /* @__PURE__ */ s("label", { className: "flex items-start gap-3 cursor-pointer", children: [
+          /* @__PURE__ */ e("div", { onClick: () => C(!b), className: `w-5 h-5 rounded-md border-2 flex items-center justify-center mt-0.5 transition-all shrink-0 ${b ? "bg-primary border-primary" : "border-border"}`, children: b && /* @__PURE__ */ e(L, { size: 11, className: "text-primary-foreground" }) }),
+          /* @__PURE__ */ s("span", { className: "text-xs text-muted-foreground leading-relaxed", children: [
             "Aceito os ",
             /* @__PURE__ */ e("button", { type: "button", className: "text-primary font-medium hover:underline", children: "Termos" }),
             " e a ",
             /* @__PURE__ */ e("button", { type: "button", className: "text-primary font-medium hover:underline", children: "Política de Privacidade" })
           ] })
         ] }),
-        /* @__PURE__ */ d("div", { className: "flex gap-3", children: [
-          /* @__PURE__ */ e(_, { type: "button", variant: "outline", className: "rounded-2xl px-5", onClick: () => s(1), children: "←" }),
-          /* @__PURE__ */ e(_, { type: "submit", size: "lg", className: "flex-1 rounded-2xl", disabled: g || !v, children: g ? /* @__PURE__ */ d(xe, { children: [
-            /* @__PURE__ */ e(Ze, { size: 15, className: "animate-spin mr-2" }),
+        /* @__PURE__ */ s("div", { className: "flex gap-3", children: [
+          /* @__PURE__ */ e(S, { type: "button", variant: "outline", className: "rounded-2xl px-5", onClick: () => o(1), children: "←" }),
+          /* @__PURE__ */ e(S, { type: "submit", size: "lg", className: "flex-1 rounded-2xl", disabled: u || !b, children: u ? /* @__PURE__ */ s(se, { children: [
+            /* @__PURE__ */ e(Ye, { size: 15, className: "animate-spin mr-2" }),
             "A criar..."
           ] }) : "Criar Conta" })
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ d("p", { className: "text-center text-sm text-muted-foreground", children: [
+    /* @__PURE__ */ s("p", { className: "text-center text-sm text-muted-foreground", children: [
       "Já tem conta?",
       " ",
-      /* @__PURE__ */ e("button", { onClick: () => a == null ? void 0 : a("login"), className: "text-primary font-display font-bold hover:underline", children: "Entrar" })
+      /* @__PURE__ */ e("button", { onClick: () => t == null ? void 0 : t("login"), className: "text-primary font-display font-bold hover:underline", children: "Entrar" })
     ] })
   ] }) });
-}, Aa = Ea({ theme: "light", toggleTheme: () => {
+}, Oa = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } }, oe = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } } }, Ya = ({ step: t, total: a, labels: r }) => /* @__PURE__ */ s("div", { className: "space-y-3", children: [
+  /* @__PURE__ */ e("div", { className: "flex items-center", children: Array.from({ length: a }).map((o, d) => /* @__PURE__ */ s(Oe.Fragment, { children: [
+    /* @__PURE__ */ e("div", { className: `w-9 h-9 rounded-xl flex items-center justify-center font-display font-black text-sm shrink-0 transition-all ${d + 1 < t ? "bg-success text-success-foreground shadow-sm" : d + 1 === t ? "bg-primary text-primary-foreground shadow-md" : "bg-secondary text-muted-foreground border border-border"}`, children: d + 1 < t ? /* @__PURE__ */ e(L, { size: 14 }) : d + 1 }),
+    d < a - 1 && /* @__PURE__ */ e("div", { className: `flex-1 h-0.5 mx-2 rounded-full transition-all duration-500 ${d + 1 < t ? "bg-success" : "bg-border"}` })
+  ] }, d)) }),
+  r && /* @__PURE__ */ e("div", { className: "grid gap-2", style: { gridTemplateColumns: `repeat(${a}, 1fr)` }, children: r.map((o, d) => /* @__PURE__ */ e("p", { className: `text-[9px] font-display font-black uppercase tracking-widest text-center truncate ${t >= d + 1 ? "text-foreground" : "text-muted-foreground"}`, children: o }, o)) })
+] }), q = ({ label: t, active: a, onClick: r }) => /* @__PURE__ */ s(
+  "button",
+  {
+    type: "button",
+    onClick: r,
+    className: `flex items-center gap-2.5 px-3 py-2.5 border rounded-2xl text-sm cursor-pointer transition-all text-left w-full ${a ? "border-primary bg-primary/5 text-foreground" : "border-border text-muted-foreground hover:border-primary/40 hover:bg-secondary/60"}`,
+    children: [
+      /* @__PURE__ */ e("div", { className: `w-4 h-4 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${a ? "bg-primary border-primary" : "border-border/70"}`, children: a && /* @__PURE__ */ e(L, { size: 10, className: "text-primary-foreground" }) }),
+      /* @__PURE__ */ e("span", { className: "font-medium", children: t })
+    ]
+  }
+), D = ({ children: t }) => /* @__PURE__ */ e("label", { className: "text-[10px] font-display font-black uppercase tracking-widest text-foreground", children: t }), B = Oe.forwardRef((t, a) => /* @__PURE__ */ e(
+  "input",
+  {
+    ref: a,
+    ...t,
+    className: "w-full px-4 py-3 bg-secondary border border-border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+  }
+)), U = ({ label: t }) => /* @__PURE__ */ e("div", { className: "text-[10px] font-display font-black text-muted-foreground uppercase tracking-[0.35em] border-l-4 border-primary pl-3", children: t }), vi = ["Diabetes", "Hipertensão", "Alzheimer/Demência", "Parkinson", "AVC/Sequelas", "Insuficiência Cardíaca", "Artrite/Osteoporose", "Depressão/Ansiedade"], yi = ["Higiene Pessoal", "Administração de Medicação", "Fisioterapia", "Companhia e Lazer", "Transporte Médico", "Cuidados de Enfermagem", "Preparação de Refeições", "Apoio Noturno"], Ni = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"], wi = ["Manhã (6h–12h)", "Tarde (12h–18h)", "Noite (18h–00h)", "Madrugada (00h–6h)"], Ci = ["Independente", "Mobilidade Parcial", "Cadeira de Rodas", "Acamado"], Qn = ({ onNavigate: t }) => {
+  const [a, r] = z(1), [o, d] = z({ elderName: "", elderAge: "", mobility: "", conditions: [], services: [], days: [], times: [], emergencyName: "", emergencyPhone: "", city: "", notes: "" }), m = (l, u) => d((p) => ({ ...p, [l]: p[l].includes(u) ? p[l].filter((b) => b !== u) : [...p[l], u] })), c = () => {
+    if (a === 1 && !o.elderName) {
+      T.error("Preencha o nome do idoso");
+      return;
+    }
+    if (a === 2 && o.services.length === 0) {
+      T.error("Selecione pelo menos um serviço");
+      return;
+    }
+    a < 3 ? r((l) => l + 1) : (T.success("Perfil guardado!"), t == null || t("kyc"));
+  };
+  return /* @__PURE__ */ e("div", { className: "min-h-screen bg-gradient-to-br from-primary/[0.04] via-background to-background px-4 py-10", children: /* @__PURE__ */ s("div", { className: "max-w-xl mx-auto space-y-8", children: [
+    /* @__PURE__ */ s("div", { className: "text-center space-y-4", children: [
+      /* @__PURE__ */ s("div", { className: "relative inline-block", children: [
+        /* @__PURE__ */ e("div", { className: "w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-glow", children: /* @__PURE__ */ s("svg", { width: "28", height: "28", viewBox: "0 0 24 24", fill: "none", stroke: "white", strokeWidth: "2.5", children: [
+          /* @__PURE__ */ e("path", { d: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" }),
+          /* @__PURE__ */ e("circle", { cx: "9", cy: "7", r: "4" }),
+          /* @__PURE__ */ e("path", { d: "M23 21v-2a4 4 0 0 0-3-3.87" }),
+          /* @__PURE__ */ e("path", { d: "M16 3.13a4 4 0 0 1 0 7.75" })
+        ] }) }),
+        /* @__PURE__ */ e("div", { className: "absolute -bottom-1 -right-1 w-6 h-6 bg-success rounded-lg flex items-center justify-center border-2 border-background", children: /* @__PURE__ */ e(L, { size: 10, className: "text-success-foreground" }) })
+      ] }),
+      /* @__PURE__ */ s("div", { children: [
+        /* @__PURE__ */ e("h1", { className: "text-3xl font-display font-black uppercase tracking-tighter text-foreground", children: "Configure o Cuidado" }),
+        /* @__PURE__ */ s("p", { className: "text-sm text-muted-foreground mt-1", children: [
+          "Família · EVYRA · Passo ",
+          a,
+          " de 3"
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ e(Ya, { step: a, total: 3, labels: ["Dados do Idoso", "Necessidades", "Emergência"] }),
+    /* @__PURE__ */ e(Je, { mode: "wait", children: /* @__PURE__ */ s(
+      I.div,
+      {
+        variants: Oa,
+        initial: "hidden",
+        animate: "show",
+        className: "bg-card rounded-3xl border border-border shadow-elevated p-6 sm:p-8 space-y-6",
+        children: [
+          a === 1 && /* @__PURE__ */ s(I.div, { variants: oe, className: "space-y-6", children: [
+            /* @__PURE__ */ e(U, { label: "Dados do Idoso" }),
+            /* @__PURE__ */ s("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-5", children: [
+              /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+                /* @__PURE__ */ e(D, { children: "Nome do Idoso *" }),
+                /* @__PURE__ */ e(B, { value: o.elderName, onChange: (l) => d((u) => ({ ...u, elderName: l.target.value })), placeholder: "Nome completo" })
+              ] }),
+              /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+                /* @__PURE__ */ e(D, { children: "Idade" }),
+                /* @__PURE__ */ e(B, { type: "number", value: o.elderAge, onChange: (l) => d((u) => ({ ...u, elderAge: l.target.value })), placeholder: "78" })
+              ] })
+            ] }),
+            /* @__PURE__ */ s("div", { className: "space-y-2", children: [
+              /* @__PURE__ */ e(D, { children: "Nível de Mobilidade" }),
+              /* @__PURE__ */ e("div", { className: "grid grid-cols-2 gap-2", children: Ci.map((l) => /* @__PURE__ */ e(
+                "button",
+                {
+                  type: "button",
+                  onClick: () => d((u) => ({ ...u, mobility: l })),
+                  className: `px-3 py-2.5 border rounded-2xl text-sm font-display font-bold transition-all text-left ${o.mobility === l ? "border-primary bg-primary/5 text-foreground" : "border-border text-muted-foreground hover:border-primary/40"}`,
+                  children: l
+                },
+                l
+              )) })
+            ] }),
+            /* @__PURE__ */ s("div", { className: "space-y-2", children: [
+              /* @__PURE__ */ e(D, { children: "Condições Médicas" }),
+              /* @__PURE__ */ e("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-2", children: vi.map((l) => /* @__PURE__ */ e(q, { label: l, active: o.conditions.includes(l), onClick: () => m("conditions", l) }, l)) })
+            ] })
+          ] }),
+          a === 2 && /* @__PURE__ */ s(I.div, { variants: oe, className: "space-y-6", children: [
+            /* @__PURE__ */ e(U, { label: "Necessidades de Cuidado" }),
+            /* @__PURE__ */ s("div", { className: "space-y-2", children: [
+              /* @__PURE__ */ e(D, { children: "Serviços Necessários *" }),
+              /* @__PURE__ */ e("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-2", children: yi.map((l) => /* @__PURE__ */ e(q, { label: l, active: o.services.includes(l), onClick: () => m("services", l) }, l)) })
+            ] }),
+            /* @__PURE__ */ s("div", { className: "border-t border-border pt-5 space-y-5", children: [
+              /* @__PURE__ */ s("div", { className: "space-y-2", children: [
+                /* @__PURE__ */ e(D, { children: "Dias da Semana" }),
+                /* @__PURE__ */ e("div", { className: "grid grid-cols-2 gap-2", children: Ni.map((l) => /* @__PURE__ */ e(q, { label: l, active: o.days.includes(l), onClick: () => m("days", l) }, l)) })
+              ] }),
+              /* @__PURE__ */ s("div", { className: "space-y-2", children: [
+                /* @__PURE__ */ e(D, { children: "Período" }),
+                /* @__PURE__ */ e("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-2", children: wi.map((l) => /* @__PURE__ */ e(q, { label: l, active: o.times.includes(l), onClick: () => m("times", l) }, l)) })
+              ] })
+            ] })
+          ] }),
+          a === 3 && /* @__PURE__ */ s(I.div, { variants: oe, className: "space-y-6", children: [
+            /* @__PURE__ */ e(U, { label: "Contacto de Emergência" }),
+            /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+              /* @__PURE__ */ e(D, { children: "Nome do Contacto *" }),
+              /* @__PURE__ */ e(B, { value: o.emergencyName, onChange: (l) => d((u) => ({ ...u, emergencyName: l.target.value })), placeholder: "Nome completo" })
+            ] }),
+            /* @__PURE__ */ s("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-5", children: [
+              /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+                /* @__PURE__ */ e(D, { children: "Telemóvel *" }),
+                /* @__PURE__ */ e(B, { type: "tel", value: o.emergencyPhone, onChange: (l) => d((u) => ({ ...u, emergencyPhone: l.target.value })), placeholder: "+351 912 345 678" })
+              ] }),
+              /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+                /* @__PURE__ */ e(D, { children: "Cidade" }),
+                /* @__PURE__ */ e(B, { value: o.city, onChange: (l) => d((u) => ({ ...u, city: l.target.value })), placeholder: "Lisboa, Porto..." })
+              ] })
+            ] }),
+            /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+              /* @__PURE__ */ e(D, { children: "Notas Adicionais" }),
+              /* @__PURE__ */ e(
+                "textarea",
+                {
+                  value: o.notes,
+                  onChange: (l) => d((u) => ({ ...u, notes: l.target.value })),
+                  rows: 3,
+                  placeholder: "Informação adicional para o cuidador...",
+                  className: "w-full px-4 py-3 bg-secondary border border-border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                }
+              )
+            ] }),
+            /* @__PURE__ */ s("div", { className: "bg-secondary rounded-2xl p-4 border border-border/60 space-y-2", children: [
+              /* @__PURE__ */ e("p", { className: "text-[9px] font-display font-black uppercase tracking-widest text-muted-foreground mb-2", children: "Resumo" }),
+              [["Idoso", o.elderName || "—"], ["Mobilidade", o.mobility || "—"], ["Serviços", `${o.services.length} selecionados`], ["Emergência", o.emergencyName || "—"]].map(([l, u]) => /* @__PURE__ */ s("div", { className: "flex justify-between text-sm", children: [
+                /* @__PURE__ */ e("span", { className: "text-muted-foreground", children: l }),
+                /* @__PURE__ */ e("span", { className: "font-display font-black text-foreground", children: u })
+              ] }, l))
+            ] })
+          ] })
+        ]
+      },
+      a
+    ) }),
+    /* @__PURE__ */ s("div", { className: "flex gap-3", children: [
+      a > 1 && /* @__PURE__ */ e(S, { variant: "outline", className: "px-5 rounded-2xl", onClick: () => r((l) => l - 1), children: "← Voltar" }),
+      /* @__PURE__ */ s(S, { size: "lg", className: "flex-1 rounded-2xl", onClick: c, children: [
+        a === 3 ? "Completar Registo" : "Continuar",
+        " ",
+        /* @__PURE__ */ e(Re, { size: 16, className: "ml-2" })
+      ] })
+    ] })
+  ] }) });
+}, ki = ["Cuidados a Idosos", "Alzheimer/Demência", "Cuidados Paliativos", "Fisioterapia", "Enfermagem", "Administração de Medicação", "Higiene Pessoal", "Reabilitação", "Apoio Psicológico", "Pediatria"], Si = ["Certificado de Cuidador Formal", "Licenciatura em Enfermagem", "Técnico de Geriatria", "Primeiros Socorros", "HACCP", "Carta de Condução"], Ri = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"], Ii = ["Manhã (6h–12h)", "Tarde (12h–18h)", "Noite (18h–00h)", "Full-time"], Xn = ({ onNavigate: t }) => {
+  const [a, r] = z(1), [o, d] = z({
+    firstName: "",
+    lastName: "",
+    city: "",
+    phone: "",
+    bio: "",
+    specialties: [],
+    experience: "",
+    rate: "",
+    certifications: [],
+    days: [],
+    times: []
+  }), m = (l, u) => d((p) => ({ ...p, [l]: p[l].includes(u) ? p[l].filter((b) => b !== u) : [...p[l], u] })), c = () => {
+    if (a === 1 && (!o.firstName || !o.lastName)) {
+      T.error("Preencha o nome completo");
+      return;
+    }
+    if (a === 2 && o.specialties.length === 0) {
+      T.error("Selecione pelo menos uma especialidade");
+      return;
+    }
+    a < 3 ? r((l) => l + 1) : (T.success("Perfil de cuidador criado!"), t == null || t("kyc"));
+  };
+  return /* @__PURE__ */ e("div", { className: "min-h-screen bg-gradient-to-br from-primary/[0.04] via-background to-background px-4 py-10", children: /* @__PURE__ */ s("div", { className: "max-w-xl mx-auto space-y-8", children: [
+    /* @__PURE__ */ s("div", { className: "text-center space-y-4", children: [
+      /* @__PURE__ */ s("div", { className: "relative inline-block", children: [
+        /* @__PURE__ */ e("div", { className: "w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-glow", children: /* @__PURE__ */ s("svg", { width: "28", height: "28", viewBox: "0 0 24 24", fill: "none", stroke: "white", strokeWidth: "2.5", children: [
+          /* @__PURE__ */ e("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }),
+          /* @__PURE__ */ e("circle", { cx: "12", cy: "7", r: "4" })
+        ] }) }),
+        /* @__PURE__ */ e("div", { className: "absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-lg flex items-center justify-center border-2 border-background", children: /* @__PURE__ */ e("span", { className: "text-primary-foreground text-[8px] font-black", children: "✦" }) })
+      ] }),
+      /* @__PURE__ */ s("div", { children: [
+        /* @__PURE__ */ e("h1", { className: "text-3xl font-display font-black uppercase tracking-tighter text-foreground", children: "Criar Perfil" }),
+        /* @__PURE__ */ s("p", { className: "text-sm text-muted-foreground mt-1", children: [
+          "Cuidador · EVYRA · Passo ",
+          a,
+          " de 3"
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ e(Ya, { step: a, total: 3, labels: ["Dados Pessoais", "Especialidades", "Disponibilidade"] }),
+    /* @__PURE__ */ e(Je, { mode: "wait", children: /* @__PURE__ */ s(
+      I.div,
+      {
+        variants: Oa,
+        initial: "hidden",
+        animate: "show",
+        className: "bg-card rounded-3xl border border-border shadow-elevated p-6 sm:p-8 space-y-6",
+        children: [
+          a === 1 && /* @__PURE__ */ s(I.div, { variants: oe, className: "space-y-5", children: [
+            /* @__PURE__ */ e(U, { label: "Dados Pessoais" }),
+            /* @__PURE__ */ s("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
+              /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+                /* @__PURE__ */ e(D, { children: "Primeiro Nome *" }),
+                /* @__PURE__ */ e(B, { value: o.firstName, onChange: (l) => d((u) => ({ ...u, firstName: l.target.value })), placeholder: "Maria" })
+              ] }),
+              /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+                /* @__PURE__ */ e(D, { children: "Apelido *" }),
+                /* @__PURE__ */ e(B, { value: o.lastName, onChange: (l) => d((u) => ({ ...u, lastName: l.target.value })), placeholder: "Silva" })
+              ] })
+            ] }),
+            /* @__PURE__ */ s("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
+              /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+                /* @__PURE__ */ e(D, { children: "Cidade" }),
+                /* @__PURE__ */ e(B, { value: o.city, onChange: (l) => d((u) => ({ ...u, city: l.target.value })), placeholder: "Lisboa" })
+              ] }),
+              /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+                /* @__PURE__ */ e(D, { children: "Telemóvel" }),
+                /* @__PURE__ */ e(B, { type: "tel", value: o.phone, onChange: (l) => d((u) => ({ ...u, phone: l.target.value })), placeholder: "+351 912 345 678" })
+              ] })
+            ] }),
+            /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+              /* @__PURE__ */ e(D, { children: "Apresentação" }),
+              /* @__PURE__ */ e(
+                "textarea",
+                {
+                  value: o.bio,
+                  onChange: (l) => d((u) => ({ ...u, bio: l.target.value })),
+                  rows: 3,
+                  placeholder: "Descreva a sua experiência e abordagem aos cuidados...",
+                  className: "w-full px-4 py-3 bg-secondary border border-border rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                }
+              )
+            ] }),
+            /* @__PURE__ */ s(
+              "div",
+              {
+                className: "border-2 border-dashed border-border rounded-2xl p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/[0.02] transition-all",
+                onClick: () => T.info("Upload de foto em desenvolvimento"),
+                children: [
+                  /* @__PURE__ */ e("div", { className: "w-14 h-14 bg-secondary rounded-full flex items-center justify-center mx-auto mb-3", children: /* @__PURE__ */ s("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", className: "text-muted-foreground", children: [
+                    /* @__PURE__ */ e("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }),
+                    /* @__PURE__ */ e("circle", { cx: "12", cy: "7", r: "4" })
+                  ] }) }),
+                  /* @__PURE__ */ e("p", { className: "text-sm font-display font-black text-foreground uppercase", children: "Foto de Perfil" }),
+                  /* @__PURE__ */ e("p", { className: "text-xs text-muted-foreground mt-1", children: "Clique para fazer upload" })
+                ]
+              }
+            )
+          ] }),
+          a === 2 && /* @__PURE__ */ s(I.div, { variants: oe, className: "space-y-6", children: [
+            /* @__PURE__ */ e(U, { label: "Especialidades *" }),
+            /* @__PURE__ */ e("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-2", children: ki.map((l) => /* @__PURE__ */ e(q, { label: l, active: o.specialties.includes(l), onClick: () => m("specialties", l) }, l)) }),
+            /* @__PURE__ */ e(U, { label: "Experiência & Tarifas" }),
+            /* @__PURE__ */ s("div", { className: "grid grid-cols-2 gap-4", children: [
+              /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+                /* @__PURE__ */ e(D, { children: "Anos de Experiência" }),
+                /* @__PURE__ */ e(B, { type: "number", value: o.experience, onChange: (l) => d((u) => ({ ...u, experience: l.target.value })), placeholder: "5" })
+              ] }),
+              /* @__PURE__ */ s("div", { className: "space-y-1.5", children: [
+                /* @__PURE__ */ e(D, { children: "Tarifa Horária (€)" }),
+                /* @__PURE__ */ e(B, { type: "number", value: o.rate, onChange: (l) => d((u) => ({ ...u, rate: l.target.value })), placeholder: "20" })
+              ] })
+            ] }),
+            /* @__PURE__ */ e(U, { label: "Certificações" }),
+            /* @__PURE__ */ e("div", { className: "grid grid-cols-1 gap-2", children: Si.map((l) => /* @__PURE__ */ e(q, { label: l, active: o.certifications.includes(l), onClick: () => m("certifications", l) }, l)) })
+          ] }),
+          a === 3 && /* @__PURE__ */ s(I.div, { variants: oe, className: "space-y-6", children: [
+            /* @__PURE__ */ e(U, { label: "Disponibilidade" }),
+            /* @__PURE__ */ s("div", { className: "space-y-2", children: [
+              /* @__PURE__ */ e(D, { children: "Dias Disponíveis" }),
+              /* @__PURE__ */ e("div", { className: "grid grid-cols-2 gap-2", children: Ri.map((l) => /* @__PURE__ */ e(q, { label: l, active: o.days.includes(l), onClick: () => m("days", l) }, l)) })
+            ] }),
+            /* @__PURE__ */ s("div", { className: "space-y-2", children: [
+              /* @__PURE__ */ e(D, { children: "Períodos" }),
+              /* @__PURE__ */ e("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-2", children: Ii.map((l) => /* @__PURE__ */ e(q, { label: l, active: o.times.includes(l), onClick: () => m("times", l) }, l)) })
+            ] }),
+            /* @__PURE__ */ s("div", { className: "bg-primary/5 border border-primary/20 rounded-2xl p-5 space-y-2", children: [
+              /* @__PURE__ */ e("p", { className: "text-[9px] font-display font-black uppercase tracking-widest text-primary mb-3", children: "Resumo do Perfil" }),
+              [
+                ["Nome", `${o.firstName} ${o.lastName}`.trim() || "—"],
+                ["Cidade", o.city || "—"],
+                ["Experiência", o.experience ? `${o.experience} anos` : "—"],
+                ["Tarifa", o.rate ? `€${o.rate}/hora` : "—"],
+                ["Especialidades", `${o.specialties.length} selecionadas`],
+                ["Certificações", `${o.certifications.length} selecionadas`]
+              ].map(([l, u]) => /* @__PURE__ */ s("div", { className: "flex justify-between text-sm", children: [
+                /* @__PURE__ */ e("span", { className: "text-muted-foreground", children: l }),
+                /* @__PURE__ */ e("span", { className: "font-display font-black text-foreground", children: u })
+              ] }, l))
+            ] })
+          ] })
+        ]
+      },
+      a
+    ) }),
+    /* @__PURE__ */ s("div", { className: "flex gap-3", children: [
+      a > 1 && /* @__PURE__ */ e(S, { variant: "outline", className: "px-5 rounded-2xl", onClick: () => r((l) => l - 1), children: "← Voltar" }),
+      /* @__PURE__ */ s(S, { size: "lg", className: "flex-1 rounded-2xl", onClick: c, children: [
+        a === 3 ? "Criar Perfil" : "Continuar",
+        " ",
+        /* @__PURE__ */ e(Re, { size: 16, className: "ml-2" })
+      ] })
+    ] })
+  ] }) });
+}, Zn = ({ onNavigate: t }) => {
+  const [a, r] = z("UNVERIFIED"), [o, d] = z(!1), [m, c] = z(!1), l = { UNVERIFIED: "PENDING", PENDING: "VERIFIED", VERIFIED: "REJECTED", REJECTED: "UNVERIFIED" }, u = () => {
+    c(!0), setTimeout(() => {
+      c(!1), r("PENDING"), d(!0);
+    }, 900);
+  }, b = {
+    UNVERIFIED: { icon: "🛡️", bg: "bg-secondary", title: "Não Verificado", desc: "Inicie a verificação para desbloquear todas as funcionalidades.", badgeCls: "bg-secondary text-muted-foreground border-border" },
+    PENDING: { icon: "⏳", bg: "bg-warning/10", title: "Em Verificação", desc: "O processo está em curso. Aguarde.", badgeCls: "bg-warning/10 text-warning border-warning/30" },
+    VERIFIED: { icon: "✅", bg: "bg-success/10", title: "Verificado", desc: "Identidade confirmada. Conta totalmente ativa.", badgeCls: "bg-success/10 text-success border-success/30" },
+    REJECTED: { icon: "❌", bg: "bg-destructive/10", title: "Rejeitado", desc: "A verificação falhou. Tente com documentos válidos.", badgeCls: "bg-destructive/10 text-destructive border-destructive/30" }
+  }[a];
+  return /* @__PURE__ */ s("div", { className: "min-h-screen bg-gradient-to-br from-primary/[0.04] via-background to-background px-4 py-10", children: [
+    o && /* @__PURE__ */ e("div", { className: "fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 backdrop-blur-sm", children: /* @__PURE__ */ s(I.div, { initial: { opacity: 0, scale: 0.95 }, animate: { opacity: 1, scale: 1 }, className: "w-full max-w-md mx-4 bg-card rounded-3xl border border-border shadow-elevated overflow-hidden", children: [
+      /* @__PURE__ */ s("div", { className: "flex items-center justify-between px-6 py-4 border-b border-border", children: [
+        /* @__PURE__ */ s("div", { className: "flex items-center gap-2.5", children: [
+          /* @__PURE__ */ e("div", { className: "w-7 h-7 bg-primary rounded-lg flex items-center justify-center", children: /* @__PURE__ */ e(Ve, { size: 14, className: "text-primary-foreground" }) }),
+          /* @__PURE__ */ e("span", { className: "text-sm font-display font-black uppercase tracking-tight text-foreground", children: "Verificação Didit" })
+        ] }),
+        /* @__PURE__ */ e("button", { onClick: () => {
+          d(!1), r("VERIFIED");
+        }, className: "text-muted-foreground hover:text-foreground transition-colors p-1", children: "✕" })
+      ] }),
+      /* @__PURE__ */ s("div", { className: "p-8 text-center space-y-5", children: [
+        /* @__PURE__ */ e("div", { className: "w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto text-4xl", children: "📸" }),
+        /* @__PURE__ */ s("div", { children: [
+          /* @__PURE__ */ e("p", { className: "font-display font-black text-foreground uppercase", children: "Documento de Identidade" }),
+          /* @__PURE__ */ e("p", { className: "text-sm text-muted-foreground mt-1", children: "Posicione o BI ou Passaporte em frente à câmara" })
+        ] }),
+        /* @__PURE__ */ e("div", { className: "w-full h-36 bg-secondary rounded-2xl border-2 border-dashed border-border flex items-center justify-center", children: /* @__PURE__ */ s("div", { className: "text-center", children: [
+          /* @__PURE__ */ e(Ze, { size: 28, className: "mx-auto text-muted-foreground" }),
+          /* @__PURE__ */ e("p", { className: "text-xs text-muted-foreground mt-2 font-display font-bold", children: "Câmara Didit" })
+        ] }) }),
+        /* @__PURE__ */ e(S, { size: "lg", className: "w-full rounded-2xl", onClick: () => {
+          d(!1), r("VERIFIED");
+        }, children: "Simular Aprovação ✓" })
+      ] })
+    ] }) }),
+    /* @__PURE__ */ s("div", { className: "max-w-xl mx-auto space-y-6", children: [
+      /* @__PURE__ */ s("div", { className: "text-center space-y-3", children: [
+        /* @__PURE__ */ e("div", { className: "w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-glow", children: /* @__PURE__ */ e(Ve, { size: 28, className: "text-primary-foreground" }) }),
+        /* @__PURE__ */ s("div", { children: [
+          /* @__PURE__ */ e("h1", { className: "text-3xl font-display font-black uppercase tracking-tighter text-foreground", children: "Verificação KYC" }),
+          /* @__PURE__ */ e("p", { className: "text-sm text-muted-foreground mt-1", children: "Identidade · EVYRA" })
+        ] })
+      ] }),
+      /* @__PURE__ */ s(I.div, { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, className: "bg-card rounded-3xl border border-border shadow-elevated p-8 text-center space-y-5", children: [
+        /* @__PURE__ */ e("div", { className: `w-20 h-20 ${b.bg} rounded-2xl flex items-center justify-center mx-auto text-4xl`, children: b.icon }),
+        /* @__PURE__ */ e("span", { className: `inline-flex text-[9px] font-display font-black uppercase tracking-widest px-3 py-1.5 rounded-full border ${b.badgeCls}`, children: b.title }),
+        /* @__PURE__ */ e("p", { className: "text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed", children: b.desc }),
+        /* @__PURE__ */ s("div", { className: "flex flex-wrap gap-3 justify-center", children: [
+          a === "UNVERIFIED" && /* @__PURE__ */ e(S, { size: "lg", className: "rounded-2xl", onClick: u, disabled: m, children: m ? /* @__PURE__ */ s(se, { children: [
+            /* @__PURE__ */ e(Ye, { size: 15, className: "animate-spin mr-2" }),
+            "A iniciar..."
+          ] }) : /* @__PURE__ */ s(se, { children: [
+            /* @__PURE__ */ e(ee, { size: 16, className: "mr-2" }),
+            "Iniciar Verificação"
+          ] }) }),
+          a === "PENDING" && /* @__PURE__ */ e(S, { size: "lg", className: "rounded-2xl", onClick: () => d(!0), children: "Continuar" }),
+          a === "VERIFIED" && /* @__PURE__ */ s(S, { size: "lg", className: "rounded-2xl bg-success hover:bg-success/90", onClick: () => t == null ? void 0 : t("dashboard"), children: [
+            "Ir para Dashboard ",
+            /* @__PURE__ */ e(Re, { size: 15, className: "ml-2" })
+          ] }),
+          a === "REJECTED" && /* @__PURE__ */ e(S, { size: "lg", className: "rounded-2xl", onClick: u, children: "Nova Tentativa" }),
+          /* @__PURE__ */ e(S, { variant: "outline", size: "sm", className: "rounded-2xl", onClick: () => r(l[a]), children: "Demo →" })
+        ] })
+      ] }),
+      /* @__PURE__ */ e("div", { className: "grid grid-cols-3 gap-3", children: [[/* @__PURE__ */ s("svg", { width: "20", height: "20", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
+        /* @__PURE__ */ e("rect", { x: "3", y: "4", width: "18", height: "16", rx: "2" }),
+        /* @__PURE__ */ e("path", { d: "M7 8h2m0 0a2 2 0 1 1 4 0H9" }),
+        /* @__PURE__ */ e("line", { x1: "7", y1: "16", x2: "17", y2: "16" }),
+        /* @__PURE__ */ e("line", { x1: "7", y1: "12", x2: "17", y2: "12" })
+      ] }, "id"), "Documento ID", "BI ou Passaporte"], [/* @__PURE__ */ e(Ze, { size: 20 }, "cam"), "Câmara", "Em boas condições"], [/* @__PURE__ */ e(ca, { size: 20 }, "sun"), "Iluminação", "Sem reflexos"]].map(([C, w, M]) => /* @__PURE__ */ s("div", { className: "bg-card rounded-2xl border border-border p-4 text-center space-y-2", children: [
+        /* @__PURE__ */ e("div", { className: "w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mx-auto text-primary", children: C }),
+        /* @__PURE__ */ e("p", { className: "text-[10px] font-display font-black uppercase text-foreground", children: w }),
+        /* @__PURE__ */ e("p", { className: "text-[10px] text-muted-foreground leading-relaxed", children: M })
+      ] }, w)) }),
+      /* @__PURE__ */ s("div", { className: "bg-primary/5 border border-primary/20 rounded-2xl p-5", children: [
+        /* @__PURE__ */ e("p", { className: "text-[10px] font-display font-black uppercase tracking-widest text-foreground mb-3", children: "Benefícios" }),
+        /* @__PURE__ */ e("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-2", children: ["Acesso completo à plataforma", "Maior confiança de famílias", "Contratos e pagamentos ativos", "Perfil com selo verificado"].map((C) => /* @__PURE__ */ s("div", { className: "flex items-center gap-2.5", children: [
+          /* @__PURE__ */ e("div", { className: "w-5 h-5 rounded-full bg-success/10 flex items-center justify-center shrink-0", children: /* @__PURE__ */ e(L, { size: 10, className: "text-success" }) }),
+          /* @__PURE__ */ e("span", { className: "text-xs text-foreground", children: C })
+        ] }, C)) })
+      ] })
+    ] })
+  ] });
+}, Ka = qa({ theme: "light", toggleTheme: () => {
 } });
-function _n({ children: a }) {
-  const [t, r] = I(() => typeof window < "u" && localStorage.getItem("evyra-theme") || "light");
-  Me(() => {
-    const n = document.documentElement;
-    n.classList.remove("light", "dark"), n.classList.add(t), localStorage.setItem("evyra-theme", t);
-  }, [t]);
-  const s = () => r((n) => n === "light" ? "dark" : "light");
-  return /* @__PURE__ */ e(Aa.Provider, { value: { theme: t, toggleTheme: s }, children: a });
+function ed({ children: t }) {
+  const [a, r] = z(() => typeof window < "u" && localStorage.getItem("evyra-theme") || "light");
+  Le(() => {
+    const d = document.documentElement;
+    d.classList.remove("light", "dark"), d.classList.add(a), localStorage.setItem("evyra-theme", a);
+  }, [a]);
+  const o = () => r((d) => d === "light" ? "dark" : "light");
+  return /* @__PURE__ */ e(Ka.Provider, { value: { theme: a, toggleTheme: o }, children: t });
 }
-const mi = () => La(Aa), ui = [
+const Ti = () => Wa(Ka), Pi = [
   { id: "1", type: "proposal", title: "Nova Proposta Recebida", desc: "Mariana Costa enviou uma proposta para Apoio Pós-Operatório.", time: "2 min", read: !1, avatar: "https://i.pravatar.cc/100?u=prop0" },
   { id: "2", type: "message", title: "Nova Mensagem", desc: 'João Pedro: "Olá, gostaria de discutir os detalhes..."', time: "15 min", read: !1, avatar: "https://i.pravatar.cc/100?u=prop1" },
   { id: "3", type: "status", title: "Proposta Aceite", desc: "A sua proposta para Cuidados Mensais foi aceite.", time: "1h", read: !1 },
   { id: "4", type: "message", title: "Nova Mensagem", desc: 'Ana Ferreira: "Confirmo disponibilidade para amanhã."', time: "2h", read: !0, avatar: "https://i.pravatar.cc/100?u=prop2" },
   { id: "5", type: "proposal", title: "Proposta Atualizada", desc: "Carlos Silva atualizou o orçamento para 890€.", time: "3h", read: !0, avatar: "https://i.pravatar.cc/100?u=prop3" }
-], qe = [
+], sa = [
   { type: "message", title: "Nova Mensagem", desc: 'Sofia Lopes: "Podemos agendar para sexta-feira?"', avatar: "https://i.pravatar.cc/100?u=prop4" },
   { type: "proposal", title: "Nova Proposta Recebida", desc: "Ricardo Mendes candidatou-se a Fisioterapia Domiciliária.", avatar: "https://i.pravatar.cc/100?u=prop5" },
   { type: "status", title: "Pagamento Confirmado", desc: "O pagamento de 450€ foi processado com sucesso." }
-], pi = {
-  proposal: B,
-  message: he,
-  status: aa
-}, fi = {
+], zi = {
+  proposal: G,
+  message: Ce,
+  status: ua
+}, Di = {
   proposal: "bg-primary/10 text-primary",
   message: "bg-accent text-accent-foreground",
   status: "bg-success/10 text-success"
-}, jn = ({ sidebarOpen: a, onMobileMenuToggle: t }) => {
-  const { theme: r, toggleTheme: s } = mi(), [n, c] = I(ui), [l, f] = I(!1), g = He(null), u = He(0), v = n.filter((p) => !p.read).length;
-  Me(() => {
-    const p = setInterval(() => {
-      if (u.current < qe.length) {
-        const y = qe[u.current];
-        u.current++, c((w) => [
+}, ad = ({ sidebarOpen: t, onMobileMenuToggle: a }) => {
+  const { theme: r, toggleTheme: o } = Ti(), [d, m] = z(Pi), [c, l] = z(!1), u = Xe(null), p = Xe(0), b = d.filter((g) => !g.read).length;
+  Le(() => {
+    const g = setInterval(() => {
+      if (p.current < sa.length) {
+        const y = sa[p.current];
+        p.current++, m((k) => [
           { ...y, id: `new-${Date.now()}`, read: !1, time: "agora" },
-          ...w
+          ...k
         ]);
       }
     }, 3e4);
-    return () => clearInterval(p);
-  }, []), Me(() => {
-    const p = (y) => {
-      g.current && !g.current.contains(y.target) && f(!1);
+    return () => clearInterval(g);
+  }, []), Le(() => {
+    const g = (y) => {
+      u.current && !u.current.contains(y.target) && l(!1);
     };
-    return l && document.addEventListener("mousedown", p), () => document.removeEventListener("mousedown", p);
-  }, [l]);
-  const S = () => {
-    c((p) => p.map((y) => ({ ...y, read: !0 })));
-  }, R = (p) => {
-    c((y) => y.map((w) => w.id === p ? { ...w, read: !0 } : w));
-  }, A = (p) => {
-    c((y) => y.filter((w) => w.id !== p));
+    return c && document.addEventListener("mousedown", g), () => document.removeEventListener("mousedown", g);
+  }, [c]);
+  const C = () => {
+    m((g) => g.map((y) => ({ ...y, read: !0 })));
+  }, w = (g) => {
+    m((y) => y.map((k) => k.id === g ? { ...k, read: !0 } : k));
+  }, M = (g) => {
+    m((y) => y.filter((k) => k.id !== g));
   };
-  return /* @__PURE__ */ d("header", { className: "h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 flex items-center justify-between", children: [
-    /* @__PURE__ */ d("div", { className: "flex items-center gap-4 flex-1", children: [
+  return /* @__PURE__ */ s("header", { className: "h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 flex items-center justify-between", children: [
+    /* @__PURE__ */ s("div", { className: "flex items-center gap-4 flex-1", children: [
       /* @__PURE__ */ e(
         "button",
         {
-          onClick: t,
+          onClick: a,
           className: "p-2 text-muted-foreground hover:bg-accent rounded-xl transition-colors md:hidden",
-          children: /* @__PURE__ */ e(ea, { size: 22 })
+          children: /* @__PURE__ */ e(ma, { size: 22 })
         }
       ),
-      /* @__PURE__ */ d("div", { className: "relative w-full max-w-md hidden md:block", children: [
-        /* @__PURE__ */ e(ne, { size: 16, className: "absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" }),
+      /* @__PURE__ */ s("div", { className: "relative w-full max-w-md hidden md:block", children: [
+        /* @__PURE__ */ e(pe, { size: 16, className: "absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" }),
         /* @__PURE__ */ e(
           "input",
           {
@@ -2689,38 +3093,38 @@ const mi = () => La(Aa), ui = [
         )
       ] })
     ] }),
-    /* @__PURE__ */ d("div", { className: "flex items-center gap-2 md:gap-3", children: [
+    /* @__PURE__ */ s("div", { className: "flex items-center gap-2 md:gap-3", children: [
       /* @__PURE__ */ e(
         "button",
         {
-          onClick: s,
+          onClick: o,
           className: "p-2.5 text-muted-foreground hover:bg-accent rounded-xl transition-colors",
           "aria-label": "Toggle theme",
-          children: r === "dark" ? /* @__PURE__ */ e(Xa, { size: 20 }) : /* @__PURE__ */ e(Za, { size: 20 })
+          children: r === "dark" ? /* @__PURE__ */ e(ca, { size: 20 }) : /* @__PURE__ */ e(lt, { size: 20 })
         }
       ),
-      /* @__PURE__ */ d("div", { className: "relative", ref: g, children: [
-        /* @__PURE__ */ d(
+      /* @__PURE__ */ s("div", { className: "relative", ref: u, children: [
+        /* @__PURE__ */ s(
           "button",
           {
-            onClick: () => f(!l),
+            onClick: () => l(!c),
             className: "p-2.5 text-muted-foreground hover:bg-accent rounded-xl relative transition-colors",
             children: [
-              /* @__PURE__ */ e(be, { size: 20 }),
-              v > 0 && /* @__PURE__ */ e(
-                E.span,
+              /* @__PURE__ */ e(we, { size: 20 }),
+              b > 0 && /* @__PURE__ */ e(
+                I.span,
                 {
                   initial: { scale: 0 },
                   animate: { scale: 1 },
                   className: "absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-destructive text-destructive-foreground rounded-full text-[10px] font-bold flex items-center justify-center px-1 border-2 border-card",
-                  children: v
+                  children: b
                 }
               )
             ]
           }
         ),
-        /* @__PURE__ */ e(Mt, { children: l && /* @__PURE__ */ d(
-          E.div,
+        /* @__PURE__ */ e(Je, { children: c && /* @__PURE__ */ s(
+          I.div,
           {
             initial: { opacity: 0, y: 8, scale: 0.96 },
             animate: { opacity: 1, y: 0, scale: 1 },
@@ -2728,63 +3132,63 @@ const mi = () => La(Aa), ui = [
             transition: { duration: 0.2, ease: "easeOut" },
             className: "absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-96 bg-card border border-border rounded-2xl shadow-elevated overflow-hidden z-50",
             children: [
-              /* @__PURE__ */ d("div", { className: "px-5 py-4 border-b border-border flex items-center justify-between", children: [
-                /* @__PURE__ */ d("div", { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ s("div", { className: "px-5 py-4 border-b border-border flex items-center justify-between", children: [
+                /* @__PURE__ */ s("div", { className: "flex items-center gap-2", children: [
                   /* @__PURE__ */ e("h3", { className: "font-display font-black text-foreground uppercase text-sm tracking-wider", children: "Notificações" }),
-                  v > 0 && /* @__PURE__ */ d("span", { className: "bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-lg", children: [
-                    v,
+                  b > 0 && /* @__PURE__ */ s("span", { className: "bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-lg", children: [
+                    b,
                     " novas"
                   ] })
                 ] }),
-                v > 0 && /* @__PURE__ */ e(
+                b > 0 && /* @__PURE__ */ e(
                   "button",
                   {
-                    onClick: S,
+                    onClick: C,
                     className: "text-xs font-semibold text-primary hover:text-primary/80 transition-colors",
                     children: "Marcar todas como lidas"
                   }
                 )
               ] }),
-              /* @__PURE__ */ e("div", { className: "max-h-[400px] overflow-y-auto", children: n.length === 0 ? /* @__PURE__ */ d("div", { className: "py-12 text-center text-muted-foreground", children: [
-                /* @__PURE__ */ e(be, { size: 32, className: "mx-auto mb-3 opacity-30" }),
+              /* @__PURE__ */ e("div", { className: "max-h-[400px] overflow-y-auto", children: d.length === 0 ? /* @__PURE__ */ s("div", { className: "py-12 text-center text-muted-foreground", children: [
+                /* @__PURE__ */ e(we, { size: 32, className: "mx-auto mb-3 opacity-30" }),
                 /* @__PURE__ */ e("p", { className: "text-sm font-medium", children: "Sem notificações" })
-              ] }) : n.map((p, y) => {
-                const w = pi[p.type];
-                return /* @__PURE__ */ d(
-                  E.div,
+              ] }) : d.map((g, y) => {
+                const k = zi[g.type];
+                return /* @__PURE__ */ s(
+                  I.div,
                   {
                     initial: { opacity: 0, x: -12 },
                     animate: { opacity: 1, x: 0 },
                     transition: { delay: y * 0.03 },
-                    className: o(
+                    className: i(
                       "flex items-start gap-3 px-5 py-3.5 hover:bg-accent/50 transition-colors cursor-pointer group relative",
-                      !p.read && "bg-primary/[0.03]"
+                      !g.read && "bg-primary/[0.03]"
                     ),
-                    onClick: () => R(p.id),
+                    onClick: () => w(g.id),
                     children: [
-                      !p.read && /* @__PURE__ */ e("span", { className: "absolute left-1.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-primary rounded-full" }),
-                      p.avatar ? /* @__PURE__ */ e("div", { className: "w-9 h-9 rounded-xl overflow-hidden shrink-0 ring-2 ring-secondary", children: /* @__PURE__ */ e("img", { src: p.avatar, alt: "", className: "w-full h-full object-cover" }) }) : /* @__PURE__ */ e("div", { className: o("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", fi[p.type]), children: /* @__PURE__ */ e(w, { size: 16 }) }),
-                      /* @__PURE__ */ d("div", { className: "flex-1 min-w-0", children: [
-                        /* @__PURE__ */ e("p", { className: o("text-sm font-semibold text-foreground truncate", !p.read && "font-bold"), children: p.title }),
-                        /* @__PURE__ */ e("p", { className: "text-xs text-muted-foreground line-clamp-2 mt-0.5", children: p.desc }),
-                        /* @__PURE__ */ d("div", { className: "flex items-center gap-1 mt-1.5", children: [
-                          /* @__PURE__ */ e(Le, { size: 10, className: "text-muted-foreground/50" }),
-                          /* @__PURE__ */ e("span", { className: "text-[10px] text-muted-foreground/60 font-medium", children: p.time })
+                      !g.read && /* @__PURE__ */ e("span", { className: "absolute left-1.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-primary rounded-full" }),
+                      g.avatar ? /* @__PURE__ */ e("div", { className: "w-9 h-9 rounded-xl overflow-hidden shrink-0 ring-2 ring-secondary", children: /* @__PURE__ */ e("img", { src: g.avatar, alt: "", className: "w-full h-full object-cover" }) }) : /* @__PURE__ */ e("div", { className: i("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", Di[g.type]), children: /* @__PURE__ */ e(k, { size: 16 }) }),
+                      /* @__PURE__ */ s("div", { className: "flex-1 min-w-0", children: [
+                        /* @__PURE__ */ e("p", { className: i("text-sm font-semibold text-foreground truncate", !g.read && "font-bold"), children: g.title }),
+                        /* @__PURE__ */ e("p", { className: "text-xs text-muted-foreground line-clamp-2 mt-0.5", children: g.desc }),
+                        /* @__PURE__ */ s("div", { className: "flex items-center gap-1 mt-1.5", children: [
+                          /* @__PURE__ */ e(Ke, { size: 10, className: "text-muted-foreground/50" }),
+                          /* @__PURE__ */ e("span", { className: "text-[10px] text-muted-foreground/60 font-medium", children: g.time })
                         ] })
                       ] }),
                       /* @__PURE__ */ e(
                         "button",
                         {
-                          onClick: (m) => {
-                            m.stopPropagation(), A(p.id);
+                          onClick: (f) => {
+                            f.stopPropagation(), M(g.id);
                           },
                           className: "opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive rounded-lg transition-all shrink-0",
-                          children: /* @__PURE__ */ e(ee, { size: 14 })
+                          children: /* @__PURE__ */ e(ne, { size: 14 })
                         }
                       )
                     ]
                   },
-                  p.id
+                  g.id
                 );
               }) })
             ]
@@ -2794,337 +3198,337 @@ const mi = () => La(Aa), ui = [
       /* @__PURE__ */ e("div", { className: "w-10 h-10 bg-secondary rounded-xl border-2 border-card shadow-card overflow-hidden ring-2 ring-secondary cursor-pointer", children: /* @__PURE__ */ e("img", { src: "https://i.pravatar.cc/100?u=company", alt: "User", className: "w-full h-full object-cover" }) })
     ] })
   ] });
-}, G = ({
-  icon: a,
-  label: t,
+}, H = ({
+  icon: t,
+  label: a,
   desc: r,
-  active: s,
-  onClick: n,
-  isOpen: c,
-  count: l,
-  variant: f = "default",
-  badge: g
-}) => /* @__PURE__ */ d(
+  active: o,
+  onClick: d,
+  isOpen: m,
+  count: c,
+  variant: l = "default",
+  badge: u
+}) => /* @__PURE__ */ s(
   "button",
   {
-    onClick: n,
-    className: o(
+    onClick: d,
+    className: i(
       "w-full flex items-center justify-between p-3 rounded-2xl transition-all duration-200 relative group",
-      s ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+      o ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:bg-accent hover:text-foreground"
     ),
     children: [
-      /* @__PURE__ */ d("div", { className: "flex items-center gap-3 min-w-0", children: [
-        /* @__PURE__ */ e(a, { size: 18, className: o(
+      /* @__PURE__ */ s("div", { className: "flex items-center gap-3 min-w-0", children: [
+        /* @__PURE__ */ e(t, { size: 18, className: i(
           "shrink-0",
-          s ? "text-primary-foreground" : f === "danger" ? "text-destructive" : "text-muted-foreground group-hover:text-primary transition-colors"
+          o ? "text-primary-foreground" : l === "danger" ? "text-destructive" : "text-muted-foreground group-hover:text-primary transition-colors"
         ) }),
-        c && /* @__PURE__ */ d("div", { className: "min-w-0 text-left", children: [
-          /* @__PURE__ */ e("span", { className: o(
+        m && /* @__PURE__ */ s("div", { className: "min-w-0 text-left", children: [
+          /* @__PURE__ */ e("span", { className: i(
             "text-sm font-display font-bold tracking-tight block",
-            s ? "text-primary-foreground" : f === "danger" ? "text-destructive" : "text-foreground"
-          ), children: t }),
+            o ? "text-primary-foreground" : l === "danger" ? "text-destructive" : "text-foreground"
+          ), children: a }),
           r && /* @__PURE__ */ e("span", { className: "text-[10px] opacity-60 font-medium block leading-none mt-0.5 truncate", children: r })
         ] })
       ] }),
-      c && (l || g) && /* @__PURE__ */ e("span", { className: o(
+      m && (c || u) && /* @__PURE__ */ e("span", { className: i(
         "px-2 py-0.5 rounded-lg text-[9px] font-bold font-display uppercase tracking-widest shrink-0",
-        s ? "bg-primary-foreground/20 text-primary-foreground" : "bg-primary/10 text-primary"
-      ), children: l || g })
+        o ? "bg-primary-foreground/20 text-primary-foreground" : "bg-primary/10 text-primary"
+      ), children: c || u })
     ]
   }
-), Q = ({ label: a, isOpen: t }) => /* @__PURE__ */ e("div", { className: "pt-5 pb-1.5 px-3", children: t ? /* @__PURE__ */ e("p", { className: "text-[9px] font-display font-black text-muted-foreground/50 uppercase tracking-[0.3em]", children: a }) : /* @__PURE__ */ e("div", { className: "h-px bg-border mx-auto w-8" }) }), Y = {
+), te = ({ label: t, isOpen: a }) => /* @__PURE__ */ e("div", { className: "pt-5 pb-1.5 px-3", children: a ? /* @__PURE__ */ e("p", { className: "text-[9px] font-display font-black text-muted-foreground/50 uppercase tracking-[0.3em]", children: t }) : /* @__PURE__ */ e("div", { className: "h-px bg-border mx-auto w-8" }) }), J = {
   main: [
-    { id: "dashboard-caregiver", icon: Oe, label: "Dashboard Cuidador", desc: "Visão do cuidador" },
-    { id: "dashboard-family", icon: $e, label: "Dashboard Família", desc: "Visão da família" },
-    { id: "marketplace", icon: ne, label: "Explorar Talentos", desc: "Pesquisar cuidadores" },
-    { id: "demandas", icon: se, label: "Demandas", desc: "Publicar necessidades", count: "3" },
-    { id: "search-cuidadores", icon: V, label: "Procurar Cuidadores", desc: "Encontrar profissional" },
-    { id: "entrevistas", icon: Se, label: "Entrevistas", desc: "Agendadas e pendentes" },
-    { id: "propostas", icon: B, label: "Propostas", desc: "Recebidas e enviadas", count: "2" },
-    { id: "chat", icon: he, label: "Mensagens", desc: "Conversas ativas", count: "5" }
+    { id: "dashboard-caregiver", icon: ea, label: "Dashboard Cuidador", desc: "Visão do cuidador" },
+    { id: "dashboard-family", icon: aa, label: "Dashboard Família", desc: "Visão da família" },
+    { id: "marketplace", icon: pe, label: "Explorar Talentos", desc: "Pesquisar cuidadores" },
+    { id: "demandas", icon: me, label: "Demandas", desc: "Publicar necessidades", count: "3" },
+    { id: "search-cuidadores", icon: O, label: "Procurar Cuidadores", desc: "Encontrar profissional" },
+    { id: "entrevistas", icon: Ae, label: "Entrevistas", desc: "Agendadas e pendentes" },
+    { id: "propostas", icon: G, label: "Propostas", desc: "Recebidas e enviadas", count: "2" },
+    { id: "chat", icon: Ce, label: "Mensagens", desc: "Conversas ativas", count: "5" }
   ],
   recruit: [
-    { id: "contratos", icon: B, label: "Contratos", desc: "Ativos e histórico", count: "1" },
-    { id: "database", icon: V, label: "Base de Dados", desc: "Pool de candidatos" },
-    { id: "payments", icon: me, label: "Pagamentos & Escrow", desc: "Transações e saldo" },
-    { id: "verificacao", icon: ae, label: "Verificação KYC", desc: "Estado de identidade" },
-    { id: "profile", icon: V, label: "Meu Perfil", desc: "Editar informação" },
-    { id: "wallet", icon: Te, label: "Carteira", desc: "Saldo detalhado", badge: "novo" },
-    { id: "notificacoes", icon: be, label: "Notificações", desc: "Alertas recentes", badge: "novo" }
+    { id: "contratos", icon: G, label: "Contratos", desc: "Ativos e histórico", count: "1" },
+    { id: "database", icon: O, label: "Base de Dados", desc: "Pool de candidatos" },
+    { id: "payments", icon: he, label: "Pagamentos & Escrow", desc: "Transações e saldo" },
+    { id: "verificacao", icon: ee, label: "Verificação KYC", desc: "Estado de identidade" },
+    { id: "profile", icon: O, label: "Meu Perfil", desc: "Editar informação" },
+    { id: "wallet", icon: Me, label: "Carteira", desc: "Saldo detalhado", badge: "novo" },
+    { id: "notificacoes", icon: we, label: "Notificações", desc: "Alertas recentes", badge: "novo" }
   ],
   flows: [
-    { id: "cuidador-detail", icon: V, label: "Detalhe Cuidador", desc: "Perfil público", badge: "novo" },
-    { id: "nova-demanda", icon: se, label: "Nova Demanda", desc: "Publicar necessidade", badge: "novo" },
-    { id: "novo-contrato", icon: B, label: "Novo Contrato", desc: "Criar contrato", badge: "novo" },
-    { id: "proposal-flow", icon: Se, label: "Proposal Flow", desc: "Aceitar proposta", badge: "novo" }
+    { id: "cuidador-detail", icon: O, label: "Detalhe Cuidador", desc: "Perfil público", badge: "novo" },
+    { id: "nova-demanda", icon: me, label: "Nova Demanda", desc: "Publicar necessidade", badge: "novo" },
+    { id: "novo-contrato", icon: G, label: "Novo Contrato", desc: "Criar contrato", badge: "novo" },
+    { id: "proposal-flow", icon: Ae, label: "Proposal Flow", desc: "Aceitar proposta", badge: "novo" }
   ],
   auth: [
-    { id: "login", icon: tt, label: "Login", desc: "Página de entrada", badge: "novo" },
-    { id: "register", icon: rt, label: "Registro", desc: "Criação de conta", badge: "novo" },
-    { id: "family-setup", icon: H, label: "Family Setup", desc: "Wizard família", badge: "novo" },
-    { id: "profile-setup", icon: V, label: "Profile Setup", desc: "Wizard cuidador", badge: "novo" },
-    { id: "kyc", icon: ot, label: "Verificação KYC", desc: "Identidade Didit", badge: "novo" }
+    { id: "login", icon: ut, label: "Login", desc: "Página de entrada", badge: "novo" },
+    { id: "register", icon: pt, label: "Registro", desc: "Criação de conta", badge: "novo" },
+    { id: "family-setup", icon: Y, label: "Family Setup", desc: "Wizard família", badge: "novo" },
+    { id: "profile-setup", icon: O, label: "Profile Setup", desc: "Wizard cuidador", badge: "novo" },
+    { id: "kyc", icon: Ve, label: "Verificação KYC", desc: "Identidade Didit", badge: "novo" }
   ],
   family: [
-    { id: "family-member", icon: H, label: "Familiar Cuidado", desc: "Perfil do dependente", badge: "novo" },
-    { id: "family-search", icon: ne, label: "Procurar Cuidadores", desc: "Busca avançada", badge: "novo" },
-    { id: "family-demandas", icon: se, label: "Minhas Demandas", desc: "Vagas publicadas", badge: "novo" },
-    { id: "family-agenda", icon: st, label: "Agenda", desc: "Turnos da semana", badge: "novo" },
-    { id: "family-care-plan", icon: it, label: "Plano de Cuidados", desc: "Medicação & rotina", badge: "novo" },
-    { id: "family-emergency", icon: nt, label: "Emergências SOS", desc: "Contactos rápidos", badge: "novo" },
-    { id: "family-payments", icon: Te, label: "Pagamentos Família", desc: "Faturas & recibos", badge: "novo" },
-    { id: "family-contracts", icon: B, label: "Contratos Família", desc: "Em vigor", badge: "novo" },
-    { id: "family-favorites", icon: de, label: "Favoritos", desc: "Cuidadores guardados", badge: "novo" },
-    { id: "family-review", icon: de, label: "Avaliar Cuidador", desc: "Review pós-contrato", badge: "novo" },
-    { id: "family-chat", icon: he, label: "Chat Família", desc: "Falar com cuidadora", badge: "novo" }
+    { id: "family-member", icon: Y, label: "Familiar Cuidado", desc: "Perfil do dependente", badge: "novo" },
+    { id: "family-search", icon: pe, label: "Procurar Cuidadores", desc: "Busca avançada", badge: "novo" },
+    { id: "family-demandas", icon: me, label: "Minhas Demandas", desc: "Vagas publicadas", badge: "novo" },
+    { id: "family-agenda", icon: ft, label: "Agenda", desc: "Turnos da semana", badge: "novo" },
+    { id: "family-care-plan", icon: gt, label: "Plano de Cuidados", desc: "Medicação & rotina", badge: "novo" },
+    { id: "family-emergency", icon: bt, label: "Emergências SOS", desc: "Contactos rápidos", badge: "novo" },
+    { id: "family-payments", icon: Me, label: "Pagamentos Família", desc: "Faturas & recibos", badge: "novo" },
+    { id: "family-contracts", icon: G, label: "Contratos Família", desc: "Em vigor", badge: "novo" },
+    { id: "family-favorites", icon: fe, label: "Favoritos", desc: "Cuidadores guardados", badge: "novo" },
+    { id: "family-review", icon: fe, label: "Avaliar Cuidador", desc: "Review pós-contrato", badge: "novo" },
+    { id: "family-chat", icon: Ce, label: "Chat Família", desc: "Falar com cuidadora", badge: "novo" }
   ],
   admin: [
-    { id: "admin", icon: $e, label: "Admin Dashboard", desc: "Painel de gestão", badge: "novo" },
-    { id: "help", icon: dt, label: "Centro de Ajuda", desc: "FAQ & suporte", badge: "novo" }
+    { id: "admin", icon: aa, label: "Admin Dashboard", desc: "Painel de gestão", badge: "novo" },
+    { id: "help", icon: ht, label: "Centro de Ajuda", desc: "FAQ & suporte", badge: "novo" }
   ],
   uikit: [
-    { id: "ui-buttons", icon: Ke, label: "Botões" },
-    { id: "ui-forms", icon: B, label: "Formulários" },
-    { id: "ui-cards", icon: Te, label: "Cards & Badges" },
-    { id: "ui-feedback", icon: be, label: "Feedback & Alerts" },
-    { id: "ui-data", icon: Oe, label: "Dados & Tabelas" },
-    { id: "ui-navigation", icon: lt, label: "Navegação" },
-    { id: "ui-overlays", icon: Ke, label: "Overlays & Modais" },
-    { id: "ui-misc", icon: Se, label: "Utilitários" },
-    { id: "ui-colors", icon: ct, label: "Paleta de Cores" },
-    { id: "ui-health-icons", icon: H, label: "Ícones Health" },
-    { id: "ui-bottom-nav", icon: mt, label: "Bottom Nav" },
-    { id: "ui-specialty-modals", icon: ut, label: "Modais Especiais" },
-    { id: "ui-bloom-custom", icon: pt, label: "Bloom Custom" },
-    { id: "ui-status-badge", icon: ft, label: "Status Badges" },
-    { id: "ui-special-inputs", icon: gt, label: "Inputs Especiais" },
-    { id: "ui-mobile-audit", icon: bt, label: "Mobile UI Audit" }
+    { id: "ui-buttons", icon: ta, label: "Botões" },
+    { id: "ui-forms", icon: G, label: "Formulários" },
+    { id: "ui-cards", icon: Me, label: "Cards & Badges" },
+    { id: "ui-feedback", icon: we, label: "Feedback & Alerts" },
+    { id: "ui-data", icon: ea, label: "Dados & Tabelas" },
+    { id: "ui-navigation", icon: xt, label: "Navegação" },
+    { id: "ui-overlays", icon: ta, label: "Overlays & Modais" },
+    { id: "ui-misc", icon: Ae, label: "Utilitários" },
+    { id: "ui-colors", icon: vt, label: "Paleta de Cores" },
+    { id: "ui-health-icons", icon: Y, label: "Ícones Health" },
+    { id: "ui-bottom-nav", icon: yt, label: "Bottom Nav" },
+    { id: "ui-specialty-modals", icon: Nt, label: "Modais Especiais" },
+    { id: "ui-bloom-custom", icon: wt, label: "Bloom Custom" },
+    { id: "ui-status-badge", icon: Ct, label: "Status Badges" },
+    { id: "ui-special-inputs", icon: kt, label: "Inputs Especiais" },
+    { id: "ui-mobile-audit", icon: St, label: "Mobile UI Audit" }
   ]
-}, We = ({ currentView: a, setCurrentView: t, isOpen: r, setIsOpen: s, onNavigate: n }) => {
-  const c = (l) => {
-    t(l), n == null || n();
+}, ia = ({ currentView: t, setCurrentView: a, isOpen: r, setIsOpen: o, onNavigate: d }) => {
+  const m = (c) => {
+    a(c), d == null || d();
   };
-  return /* @__PURE__ */ d("div", { className: "flex flex-col h-full p-4", children: [
-    /* @__PURE__ */ d("div", { className: "flex items-center justify-between mb-6 px-1 pt-1", children: [
-      r ? /* @__PURE__ */ d("div", { className: "flex items-center gap-3", children: [
-        /* @__PURE__ */ e("div", { className: "w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-glow", children: /* @__PURE__ */ e(H, { size: 20, className: "text-primary-foreground", fill: "currentColor" }) }),
-        /* @__PURE__ */ d("div", { children: [
+  return /* @__PURE__ */ s("div", { className: "flex flex-col h-full p-4", children: [
+    /* @__PURE__ */ s("div", { className: "flex items-center justify-between mb-6 px-1 pt-1", children: [
+      r ? /* @__PURE__ */ s("div", { className: "flex items-center gap-3", children: [
+        /* @__PURE__ */ e("div", { className: "w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-glow", children: /* @__PURE__ */ e(Y, { size: 20, className: "text-primary-foreground", fill: "currentColor" }) }),
+        /* @__PURE__ */ s("div", { children: [
           /* @__PURE__ */ e("h1", { className: "text-base font-display font-black tracking-tighter text-primary leading-none", children: "EVYRA" }),
           /* @__PURE__ */ e("p", { className: "text-[9px] font-display font-bold text-muted-foreground uppercase tracking-widest mt-0.5", children: "UI Kit" })
         ] })
-      ] }) : /* @__PURE__ */ e("div", { className: "w-10 h-10 bg-primary rounded-xl flex items-center justify-center mx-auto shadow-glow", children: /* @__PURE__ */ e(H, { size: 20, className: "text-primary-foreground", fill: "currentColor" }) }),
-      /* @__PURE__ */ e("button", { onClick: () => s(!r), className: "p-2 hover:bg-accent rounded-xl transition-colors text-muted-foreground hidden md:block", children: /* @__PURE__ */ e(ea, { size: 18 }) })
+      ] }) : /* @__PURE__ */ e("div", { className: "w-10 h-10 bg-primary rounded-xl flex items-center justify-center mx-auto shadow-glow", children: /* @__PURE__ */ e(Y, { size: 20, className: "text-primary-foreground", fill: "currentColor" }) }),
+      /* @__PURE__ */ e("button", { onClick: () => o(!r), className: "p-2 hover:bg-accent rounded-xl transition-colors text-muted-foreground hidden md:block", children: /* @__PURE__ */ e(ma, { size: 18 }) })
     ] }),
-    r && /* @__PURE__ */ d("div", { className: "mx-1 mb-4 px-3 py-2.5 bg-primary/5 border border-primary/20 rounded-2xl", children: [
+    r && /* @__PURE__ */ s("div", { className: "mx-1 mb-4 px-3 py-2.5 bg-primary/5 border border-primary/20 rounded-2xl", children: [
       /* @__PURE__ */ e("p", { className: "text-[9px] font-display font-black uppercase tracking-widest text-primary", children: "13 páginas novas" }),
       /* @__PURE__ */ e("p", { className: "text-xs text-muted-foreground mt-0.5", children: "Prontas para o repositório" })
     ] }),
-    /* @__PURE__ */ d("nav", { className: "flex-1 space-y-0.5 overflow-y-auto scrollbar-hide", children: [
-      Y.main.map((l) => /* @__PURE__ */ e(
-        G,
+    /* @__PURE__ */ s("nav", { className: "flex-1 space-y-0.5 overflow-y-auto scrollbar-hide", children: [
+      J.main.map((c) => /* @__PURE__ */ e(
+        H,
         {
-          icon: l.icon,
-          label: l.label,
-          desc: r ? l.desc : void 0,
-          active: a === l.id,
-          onClick: () => c(l.id),
+          icon: c.icon,
+          label: c.label,
+          desc: r ? c.desc : void 0,
+          active: t === c.id,
+          onClick: () => m(c.id),
           isOpen: r,
-          count: l.count
+          count: c.count
         },
-        l.id
+        c.id
       )),
-      /* @__PURE__ */ e(Q, { label: "Recrutamento", isOpen: r }),
-      Y.recruit.map((l) => /* @__PURE__ */ e(
-        G,
+      /* @__PURE__ */ e(te, { label: "Recrutamento", isOpen: r }),
+      J.recruit.map((c) => /* @__PURE__ */ e(
+        H,
         {
-          icon: l.icon,
-          label: l.label,
-          desc: r ? l.desc : void 0,
-          active: a === l.id,
-          onClick: () => c(l.id),
+          icon: c.icon,
+          label: c.label,
+          desc: r ? c.desc : void 0,
+          active: t === c.id,
+          onClick: () => m(c.id),
           isOpen: r,
-          badge: l.badge
+          badge: c.badge
         },
-        l.id
+        c.id
       )),
-      /* @__PURE__ */ e(Q, { label: "Novos Fluxos", isOpen: r }),
-      Y.flows.map((l) => /* @__PURE__ */ e(
-        G,
+      /* @__PURE__ */ e(te, { label: "Novos Fluxos", isOpen: r }),
+      J.flows.map((c) => /* @__PURE__ */ e(
+        H,
         {
-          icon: l.icon,
-          label: l.label,
-          desc: r ? l.desc : void 0,
-          active: a === l.id,
-          onClick: () => c(l.id),
+          icon: c.icon,
+          label: c.label,
+          desc: r ? c.desc : void 0,
+          active: t === c.id,
+          onClick: () => m(c.id),
           isOpen: r,
-          badge: l.badge
+          badge: c.badge
         },
-        l.id
+        c.id
       )),
-      /* @__PURE__ */ e(Q, { label: "Auth & Onboarding", isOpen: r }),
-      Y.auth.map((l) => /* @__PURE__ */ e(
-        G,
+      /* @__PURE__ */ e(te, { label: "Auth & Onboarding", isOpen: r }),
+      J.auth.map((c) => /* @__PURE__ */ e(
+        H,
         {
-          icon: l.icon,
-          label: l.label,
-          desc: r ? l.desc : void 0,
-          active: a === l.id,
-          onClick: () => c(l.id),
+          icon: c.icon,
+          label: c.label,
+          desc: r ? c.desc : void 0,
+          active: t === c.id,
+          onClick: () => m(c.id),
           isOpen: r,
-          badge: l.badge
+          badge: c.badge
         },
-        l.id
+        c.id
       )),
-      /* @__PURE__ */ e(Q, { label: "Família", isOpen: r }),
-      Y.family.map((l) => /* @__PURE__ */ e(
-        G,
+      /* @__PURE__ */ e(te, { label: "Família", isOpen: r }),
+      J.family.map((c) => /* @__PURE__ */ e(
+        H,
         {
-          icon: l.icon,
-          label: l.label,
-          desc: r ? l.desc : void 0,
-          active: a === l.id,
-          onClick: () => c(l.id),
+          icon: c.icon,
+          label: c.label,
+          desc: r ? c.desc : void 0,
+          active: t === c.id,
+          onClick: () => m(c.id),
           isOpen: r,
-          badge: l.badge
+          badge: c.badge
         },
-        l.id
+        c.id
       )),
-      /* @__PURE__ */ e(Q, { label: "Admin & Suporte", isOpen: r }),
-      Y.admin.map((l) => /* @__PURE__ */ e(
-        G,
+      /* @__PURE__ */ e(te, { label: "Admin & Suporte", isOpen: r }),
+      J.admin.map((c) => /* @__PURE__ */ e(
+        H,
         {
-          icon: l.icon,
-          label: l.label,
-          desc: r ? l.desc : void 0,
-          active: a === l.id,
-          onClick: () => c(l.id),
+          icon: c.icon,
+          label: c.label,
+          desc: r ? c.desc : void 0,
+          active: t === c.id,
+          onClick: () => m(c.id),
           isOpen: r,
-          badge: l.badge
+          badge: c.badge
         },
-        l.id
+        c.id
       )),
-      /* @__PURE__ */ e(Q, { label: "UI Kit", isOpen: r }),
-      Y.uikit.map((l) => /* @__PURE__ */ e(
-        G,
+      /* @__PURE__ */ e(te, { label: "UI Kit", isOpen: r }),
+      J.uikit.map((c) => /* @__PURE__ */ e(
+        H,
         {
-          icon: l.icon,
-          label: l.label,
-          active: a === l.id,
-          onClick: () => c(l.id),
+          icon: c.icon,
+          label: c.label,
+          active: t === c.id,
+          onClick: () => m(c.id),
           isOpen: r
         },
-        l.id
+        c.id
       ))
     ] }),
-    /* @__PURE__ */ d("div", { className: "pt-4 border-t border-border space-y-1", children: [
-      /* @__PURE__ */ e(G, { icon: et, label: "Definições", active: !1, isOpen: r }),
-      /* @__PURE__ */ e(G, { icon: at, label: "Sair", active: !1, isOpen: r, variant: "danger" })
+    /* @__PURE__ */ s("div", { className: "pt-4 border-t border-border space-y-1", children: [
+      /* @__PURE__ */ e(H, { icon: ct, label: "Definições", active: !1, isOpen: r }),
+      /* @__PURE__ */ e(H, { icon: mt, label: "Sair", active: !1, isOpen: r, variant: "danger" })
     ] })
   ] });
-}, En = ({
-  currentView: a,
-  setCurrentView: t,
+}, td = ({
+  currentView: t,
+  setCurrentView: a,
   isOpen: r,
-  setIsOpen: s,
-  isMobileOpen: n,
-  setIsMobileOpen: c
-}) => /* @__PURE__ */ d(xe, { children: [
-  /* @__PURE__ */ e("aside", { className: o(
+  setIsOpen: o,
+  isMobileOpen: d,
+  setIsMobileOpen: m
+}) => /* @__PURE__ */ s(se, { children: [
+  /* @__PURE__ */ e("aside", { className: i(
     "fixed top-0 left-0 h-full bg-card border-r border-border z-50 transition-all duration-500 ease-in-out flex-col hidden md:flex",
     r ? "w-72" : "w-20"
-  ), children: /* @__PURE__ */ e(We, { currentView: a, setCurrentView: t, isOpen: r, setIsOpen: s }) }),
-  n && /* @__PURE__ */ e("div", { className: "fixed inset-0 bg-foreground/40 backdrop-blur-sm z-50 md:hidden", onClick: () => c(!1) }),
-  /* @__PURE__ */ d("aside", { className: o(
+  ), children: /* @__PURE__ */ e(ia, { currentView: t, setCurrentView: a, isOpen: r, setIsOpen: o }) }),
+  d && /* @__PURE__ */ e("div", { className: "fixed inset-0 bg-foreground/40 backdrop-blur-sm z-50 md:hidden", onClick: () => m(!1) }),
+  /* @__PURE__ */ s("aside", { className: i(
     "fixed top-0 left-0 h-full w-72 bg-card border-r border-border z-[60] transition-transform duration-300 ease-in-out md:hidden",
-    n ? "translate-x-0" : "-translate-x-full"
+    d ? "translate-x-0" : "-translate-x-full"
   ), children: [
-    /* @__PURE__ */ e("div", { className: "absolute top-4 right-4", children: /* @__PURE__ */ e("button", { onClick: () => c(!1), className: "p-2 hover:bg-accent rounded-xl transition-colors text-muted-foreground", children: /* @__PURE__ */ e(ee, { size: 20 }) }) }),
+    /* @__PURE__ */ e("div", { className: "absolute top-4 right-4", children: /* @__PURE__ */ e("button", { onClick: () => m(!1), className: "p-2 hover:bg-accent rounded-xl transition-colors text-muted-foreground", children: /* @__PURE__ */ e(ne, { size: 20 }) }) }),
     /* @__PURE__ */ e(
-      We,
+      ia,
       {
-        currentView: a,
-        setCurrentView: t,
+        currentView: t,
+        setCurrentView: a,
         isOpen: !0,
-        setIsOpen: s,
-        onNavigate: () => c(!1)
+        setIsOpen: o,
+        onNavigate: () => m(!1)
       }
     )
   ] })
-] }), Ln = ({ open: a, onClose: t, profile: r }) => {
-  const [s, n] = I(!1);
-  return a ? /* @__PURE__ */ e(
-    E.div,
+] }), rd = ({ open: t, onClose: a, profile: r }) => {
+  const [o, d] = z(!1);
+  return t ? /* @__PURE__ */ e(
+    I.div,
     {
       initial: { opacity: 0 },
       animate: { opacity: 1 },
       exit: { opacity: 0 },
       className: "fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-foreground/50 backdrop-blur-sm",
-      onClick: t,
-      children: /* @__PURE__ */ d(
-        E.div,
+      onClick: a,
+      children: /* @__PURE__ */ s(
+        I.div,
         {
           initial: { opacity: 0, y: 80, scale: 0.95 },
           animate: { opacity: 1, y: 0, scale: 1 },
           exit: { opacity: 0, y: 60, scale: 0.95 },
           transition: { type: "spring", damping: 25, stiffness: 300 },
           className: "bg-card w-full max-w-lg rounded-t-3xl md:rounded-3xl shadow-elevated border border-border relative max-h-[90vh] overflow-y-auto",
-          onClick: (c) => c.stopPropagation(),
+          onClick: (m) => m.stopPropagation(),
           children: [
-            /* @__PURE__ */ d("div", { className: "h-28 bg-gradient-to-br from-primary/20 via-info/10 to-primary/5 rounded-t-3xl relative", children: [
-              /* @__PURE__ */ e("button", { onClick: t, className: "absolute top-4 right-4 p-2 bg-card/80 backdrop-blur-sm rounded-xl text-muted-foreground hover:text-foreground transition-all", children: /* @__PURE__ */ e(ee, { size: 18 }) }),
+            /* @__PURE__ */ s("div", { className: "h-28 bg-gradient-to-br from-primary/20 via-info/10 to-primary/5 rounded-t-3xl relative", children: [
+              /* @__PURE__ */ e("button", { onClick: a, className: "absolute top-4 right-4 p-2 bg-card/80 backdrop-blur-sm rounded-xl text-muted-foreground hover:text-foreground transition-all", children: /* @__PURE__ */ e(ne, { size: 18 }) }),
               /* @__PURE__ */ e(
                 "button",
                 {
                   onClick: () => {
-                    n(!s), P(s ? "Removido dos favoritos" : "Adicionado aos favoritos");
+                    d(!o), T(o ? "Removido dos favoritos" : "Adicionado aos favoritos");
                   },
                   className: "absolute top-4 left-4 p-2 bg-card/80 backdrop-blur-sm rounded-xl transition-all",
-                  children: /* @__PURE__ */ e(H, { size: 18, className: s ? "text-destructive fill-destructive" : "text-muted-foreground" })
+                  children: /* @__PURE__ */ e(Y, { size: 18, className: o ? "text-destructive fill-destructive" : "text-muted-foreground" })
                 }
               )
             ] }),
             /* @__PURE__ */ e("div", { className: "flex justify-center -mt-12 relative z-10", children: /* @__PURE__ */ e("div", { className: "w-24 h-24 rounded-2xl bg-secondary overflow-hidden border-4 border-card shadow-elevated", children: /* @__PURE__ */ e("img", { src: `https://i.pravatar.cc/200?u=care${r.avatarId}`, alt: r.name, className: "w-full h-full object-cover" }) }) }),
-            /* @__PURE__ */ d("div", { className: "p-6 pt-4 space-y-6", children: [
-              /* @__PURE__ */ d("div", { className: "text-center", children: [
-                /* @__PURE__ */ d("div", { className: "flex items-center justify-center gap-2 mb-1", children: [
+            /* @__PURE__ */ s("div", { className: "p-6 pt-4 space-y-6", children: [
+              /* @__PURE__ */ s("div", { className: "text-center", children: [
+                /* @__PURE__ */ s("div", { className: "flex items-center justify-center gap-2 mb-1", children: [
                   /* @__PURE__ */ e("h2", { className: "text-xl font-display font-black text-foreground uppercase tracking-tight", children: r.name }),
-                  /* @__PURE__ */ e(ae, { size: 18, className: "text-success" })
+                  /* @__PURE__ */ e(ee, { size: 18, className: "text-success" })
                 ] }),
                 /* @__PURE__ */ e("p", { className: "text-sm text-muted-foreground font-medium", children: r.role }),
-                /* @__PURE__ */ d("div", { className: "flex items-center justify-center gap-4 mt-3", children: [
-                  /* @__PURE__ */ d("span", { className: "flex items-center gap-1 text-sm font-bold text-warning", children: [
-                    /* @__PURE__ */ e(de, { size: 16, className: "fill-current" }),
+                /* @__PURE__ */ s("div", { className: "flex items-center justify-center gap-4 mt-3", children: [
+                  /* @__PURE__ */ s("span", { className: "flex items-center gap-1 text-sm font-bold text-warning", children: [
+                    /* @__PURE__ */ e(fe, { size: 16, className: "fill-current" }),
                     " ",
                     r.rating
                   ] }),
-                  /* @__PURE__ */ d("span", { className: "text-sm text-muted-foreground flex items-center gap-1", children: [
-                    /* @__PURE__ */ e(ht, { size: 14 }),
+                  /* @__PURE__ */ s("span", { className: "text-sm text-muted-foreground flex items-center gap-1", children: [
+                    /* @__PURE__ */ e(Rt, { size: 14 }),
                     " ",
                     r.location || "Porto, PT"
                   ] })
                 ] })
               ] }),
               /* @__PURE__ */ e("div", { className: "grid grid-cols-3 gap-3", children: [
-                { label: "Experiência", value: r.experience || "8 anos", icon: xt },
-                { label: "Projetos", value: "24", icon: se },
-                { label: "Tempo Resp.", value: "< 2h", icon: Le }
-              ].map((c) => /* @__PURE__ */ d("div", { className: "bg-secondary/50 rounded-xl p-3 text-center", children: [
-                /* @__PURE__ */ e(c.icon, { size: 16, className: "mx-auto text-primary mb-1" }),
-                /* @__PURE__ */ e("p", { className: "text-sm font-display font-black text-foreground", children: c.value }),
-                /* @__PURE__ */ e("p", { className: "text-[9px] font-display font-medium text-muted-foreground uppercase tracking-widest", children: c.label })
-              ] }, c.label)) }),
-              /* @__PURE__ */ d("div", { children: [
+                { label: "Experiência", value: r.experience || "8 anos", icon: It },
+                { label: "Projetos", value: "24", icon: me },
+                { label: "Tempo Resp.", value: "< 2h", icon: Ke }
+              ].map((m) => /* @__PURE__ */ s("div", { className: "bg-secondary/50 rounded-xl p-3 text-center", children: [
+                /* @__PURE__ */ e(m.icon, { size: 16, className: "mx-auto text-primary mb-1" }),
+                /* @__PURE__ */ e("p", { className: "text-sm font-display font-black text-foreground", children: m.value }),
+                /* @__PURE__ */ e("p", { className: "text-[9px] font-display font-medium text-muted-foreground uppercase tracking-widest", children: m.label })
+              ] }, m.label)) }),
+              /* @__PURE__ */ s("div", { children: [
                 /* @__PURE__ */ e("p", { className: "text-xs font-display font-bold text-foreground uppercase tracking-widest mb-2", children: "Sobre" }),
                 /* @__PURE__ */ e("p", { className: "text-sm text-muted-foreground leading-relaxed", children: r.bio || "Especialista com mais de 8 anos de experiência em contexto hospitalar e domiciliário. Certificada em cuidados intensivos, apoio pós-operatório e gestão de medicação." })
               ] }),
-              /* @__PURE__ */ d("div", { children: [
+              /* @__PURE__ */ s("div", { children: [
                 /* @__PURE__ */ e("p", { className: "text-xs font-display font-bold text-foreground uppercase tracking-widest mb-2", children: "Competências" }),
-                /* @__PURE__ */ e("div", { className: "flex flex-wrap gap-2", children: (r.skills || ["Drenagem", "Curativos", "Diabetes", "Pós-Operatório", "Geriatria"]).map((c) => /* @__PURE__ */ e("span", { className: "text-[10px] font-display font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg uppercase tracking-widest", children: c }, c)) })
+                /* @__PURE__ */ e("div", { className: "flex flex-wrap gap-2", children: (r.skills || ["Drenagem", "Curativos", "Diabetes", "Pós-Operatório", "Geriatria"]).map((m) => /* @__PURE__ */ e("span", { className: "text-[10px] font-display font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg uppercase tracking-widest", children: m }, m)) })
               ] }),
-              /* @__PURE__ */ d("div", { className: "bg-secondary/50 rounded-2xl p-4 flex items-center justify-between", children: [
-                /* @__PURE__ */ d("div", { children: [
+              /* @__PURE__ */ s("div", { className: "bg-secondary/50 rounded-2xl p-4 flex items-center justify-between", children: [
+                /* @__PURE__ */ s("div", { children: [
                   /* @__PURE__ */ e("p", { className: "text-[10px] font-display font-bold text-muted-foreground uppercase tracking-widest", children: "Preço Base" }),
-                  /* @__PURE__ */ d("p", { className: "text-2xl font-display font-black text-foreground tracking-tighter", children: [
+                  /* @__PURE__ */ s("p", { className: "text-2xl font-display font-black text-foreground tracking-tighter", children: [
                     r.price,
                     "€",
                     /* @__PURE__ */ e("span", { className: "text-sm text-muted-foreground font-medium ml-1", children: "/h" })
@@ -3132,21 +3536,21 @@ const mi = () => La(Aa), ui = [
                 ] }),
                 /* @__PURE__ */ e("div", { className: "flex items-center gap-2", children: /* @__PURE__ */ e("span", { className: "px-3 py-1 text-[9px] font-display font-bold rounded-lg uppercase tracking-widest bg-success/10 text-success", children: "Disponível" }) })
               ] }),
-              /* @__PURE__ */ d("div", { className: "flex gap-3", children: [
-                /* @__PURE__ */ d(_, { variant: "default", size: "lg", className: "flex-1", onClick: () => {
-                  P.success("Proposta de recrutamento enviada!"), t();
+              /* @__PURE__ */ s("div", { className: "flex gap-3", children: [
+                /* @__PURE__ */ s(S, { variant: "default", size: "lg", className: "flex-1", onClick: () => {
+                  T.success("Proposta de recrutamento enviada!"), a();
                 }, children: [
-                  /* @__PURE__ */ e(se, { size: 16 }),
+                  /* @__PURE__ */ e(me, { size: 16 }),
                   " Propor Recrutamento"
                 ] }),
-                /* @__PURE__ */ e(_, { variant: "outline", size: "lg", onClick: () => {
-                  P.info("Chat aberto com " + r.name), t();
-                }, children: /* @__PURE__ */ e(he, { size: 16 }) }),
-                /* @__PURE__ */ e(_, { variant: "outline", size: "lg", onClick: () => P.info("A ligar..."), children: /* @__PURE__ */ e(vt, { size: 16 }) })
+                /* @__PURE__ */ e(S, { variant: "outline", size: "lg", onClick: () => {
+                  T.info("Chat aberto com " + r.name), a();
+                }, children: /* @__PURE__ */ e(Ce, { size: 16 }) }),
+                /* @__PURE__ */ e(S, { variant: "outline", size: "lg", onClick: () => T.info("A ligar..."), children: /* @__PURE__ */ e(Tt, { size: 16 }) })
               ] }),
-              /* @__PURE__ */ d("div", { children: [
+              /* @__PURE__ */ s("div", { children: [
                 /* @__PURE__ */ e("p", { className: "text-xs font-display font-bold text-foreground uppercase tracking-widest mb-3", children: "Disponibilidade" }),
-                /* @__PURE__ */ e("div", { className: "grid grid-cols-7 gap-1.5", children: ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((c, l) => /* @__PURE__ */ e("div", { className: `text-center p-2 rounded-xl text-[10px] font-display font-bold uppercase ${l < 5 ? "bg-success/10 text-success" : "bg-secondary text-muted-foreground"}`, children: c }, c)) })
+                /* @__PURE__ */ e("div", { className: "grid grid-cols-7 gap-1.5", children: ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((m, c) => /* @__PURE__ */ e("div", { className: `text-center p-2 rounded-xl text-[10px] font-display font-bold uppercase ${c < 5 ? "bg-success/10 text-success" : "bg-secondary text-muted-foreground"}`, children: m }, m)) })
               ] })
             ] })
           ]
@@ -3154,88 +3558,88 @@ const mi = () => La(Aa), ui = [
       )
     }
   ) : null;
-}, gi = ({ title: a, desc: t }) => /* @__PURE__ */ d("div", { className: "space-y-1 sm:space-y-2", children: [
-  /* @__PURE__ */ e("h2", { className: "text-xl sm:text-3xl md:text-4xl font-display font-black text-foreground tracking-tighter leading-tight sm:leading-none uppercase break-words", children: a }),
-  /* @__PURE__ */ e("p", { className: "text-xs sm:text-base text-muted-foreground font-medium", children: t })
-] }), De = ({ title: a, children: t }) => /* @__PURE__ */ d("section", { className: "space-y-4", children: [
-  /* @__PURE__ */ e("h4", { className: "text-[10px] font-display font-black text-muted-foreground uppercase tracking-[0.4em] border-l-4 border-primary pl-4", children: a }),
-  /* @__PURE__ */ e("div", { className: "bg-card p-4 sm:p-8 rounded-3xl border border-border shadow-card relative overflow-hidden", children: t })
-] }), pe = ({ label: a, value: t, icon: r, colorClass: s }) => /* @__PURE__ */ d("div", { className: "bg-card p-3 sm:p-7 rounded-3xl border border-border shadow-card space-y-2 sm:space-y-4 hover:shadow-elevated transition-all group", children: [
-  /* @__PURE__ */ e("div", { className: o("w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-secondary flex items-center justify-center group-hover:scale-110 transition-transform", s || "text-primary"), children: /* @__PURE__ */ e(r, { size: 18, className: "sm:!size-[22px]" }) }),
-  /* @__PURE__ */ d("div", { children: [
-    /* @__PURE__ */ e("div", { className: "text-[9px] sm:text-[10px] font-display font-black text-muted-foreground uppercase tracking-widest leading-tight", children: a }),
-    /* @__PURE__ */ e("div", { className: "text-lg sm:text-3xl font-display font-black text-foreground tracking-tighter leading-none mt-1 break-all", children: t })
+}, Ai = ({ title: t, desc: a }) => /* @__PURE__ */ s("div", { className: "space-y-1 sm:space-y-2", children: [
+  /* @__PURE__ */ e("h2", { className: "text-xl sm:text-3xl md:text-4xl font-display font-black text-foreground tracking-tighter leading-tight sm:leading-none uppercase break-words", children: t }),
+  /* @__PURE__ */ e("p", { className: "text-xs sm:text-base text-muted-foreground font-medium", children: a })
+] }), Fe = ({ title: t, children: a }) => /* @__PURE__ */ s("section", { className: "space-y-4", children: [
+  /* @__PURE__ */ e("h4", { className: "text-[10px] font-display font-black text-muted-foreground uppercase tracking-[0.4em] border-l-4 border-primary pl-4", children: t }),
+  /* @__PURE__ */ e("div", { className: "bg-card p-4 sm:p-8 rounded-3xl border border-border shadow-card relative overflow-hidden", children: a })
+] }), ve = ({ label: t, value: a, icon: r, colorClass: o }) => /* @__PURE__ */ s("div", { className: "bg-card p-3 sm:p-7 rounded-3xl border border-border shadow-card space-y-2 sm:space-y-4 hover:shadow-elevated transition-all group", children: [
+  /* @__PURE__ */ e("div", { className: i("w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-secondary flex items-center justify-center group-hover:scale-110 transition-transform", o || "text-primary"), children: /* @__PURE__ */ e(r, { size: 18, className: "sm:!size-[22px]" }) }),
+  /* @__PURE__ */ s("div", { children: [
+    /* @__PURE__ */ e("div", { className: "text-[9px] sm:text-[10px] font-display font-black text-muted-foreground uppercase tracking-widest leading-tight", children: t }),
+    /* @__PURE__ */ e("div", { className: "text-lg sm:text-3xl font-display font-black text-foreground tracking-tighter leading-none mt-1 break-all", children: a })
   ] })
-] }), bi = {
+] }), Mi = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.06 } }
-}, X = {
+}, re = {
   hidden: { opacity: 0, y: 16 },
   show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } }
-}, Je = {
+}, na = {
   caregiver: { activeContracts: 3, totalHours: 248, rating: 4.9, totalReviews: 27 },
   family: { activeContracts: 1, totalHours: 96, rating: 5, totalReviews: 4 }
-}, hi = [
+}, Ei = [
   { type: "credit", description: "Pagamento recebido — Contrato #1042", amount: 320, date: "2026-04-14" },
   { type: "debit", description: "Comissão plataforma", amount: 32, date: "2026-04-14" },
   { type: "credit", description: "Pagamento recebido — Contrato #1038", amount: 180, date: "2026-04-12" },
   { type: "credit", description: "Bónus avaliação 5 estrelas", amount: 10, date: "2026-04-11" },
   { type: "debit", description: "Comissão plataforma", amount: 18, date: "2026-04-10" }
-], xi = [
-  { title: "Pagamento Garantido", sub: "Receba pontualmente", icon: me },
-  { title: "Perfil Verificado", sub: "Mais famílias confiam", icon: ae },
-  { title: "Reputação Pública", sub: "Avaliações verificáveis", icon: de },
-  { title: "Proteção Jurídica", sub: "Contrato formal", icon: wt }
-], vi = [
-  { title: "Cuidadores Verificados", sub: "KYC e antecedentes", icon: ae },
-  { title: "Contratos Jurídicos", sub: "Assinatura digital", icon: B },
-  { title: "Pagamento Seguro", sub: "Proteção financeira", icon: me },
-  { title: "Recibos Fiscais", sub: "Válidos para IRS", icon: Ct }
-], yi = [
-  { label: "Completar verificação KYC", href: "#", icon: ae }
-], Ni = [
-  { label: "Ativar conta (pagamento)", href: "#", icon: me },
-  { label: "Completar verificação KYC", href: "#", icon: ae },
-  { label: "Completar perfil do familiar", href: "#", icon: V }
-], _a = ({ role: a = "caregiver" }) => {
-  const t = a === "caregiver" ? Je.caregiver : Je.family, r = a === "caregiver" ? xi : vi, s = a === "caregiver" ? yi : Ni;
-  return /* @__PURE__ */ d("div", { className: "space-y-6 sm:space-y-8 animate-fade-in", children: [
+], _i = [
+  { title: "Pagamento Garantido", sub: "Receba pontualmente", icon: he },
+  { title: "Perfil Verificado", sub: "Mais famílias confiam", icon: ee },
+  { title: "Reputação Pública", sub: "Avaliações verificáveis", icon: fe },
+  { title: "Proteção Jurídica", sub: "Contrato formal", icon: Dt }
+], ji = [
+  { title: "Cuidadores Verificados", sub: "KYC e antecedentes", icon: ee },
+  { title: "Contratos Jurídicos", sub: "Assinatura digital", icon: G },
+  { title: "Pagamento Seguro", sub: "Proteção financeira", icon: he },
+  { title: "Recibos Fiscais", sub: "Válidos para IRS", icon: At }
+], Fi = [
+  { label: "Completar verificação KYC", href: "#", icon: ee }
+], Li = [
+  { label: "Ativar conta (pagamento)", href: "#", icon: he },
+  { label: "Completar verificação KYC", href: "#", icon: ee },
+  { label: "Completar perfil do familiar", href: "#", icon: O }
+], Ua = ({ role: t = "caregiver" }) => {
+  const a = t === "caregiver" ? na.caregiver : na.family, r = t === "caregiver" ? _i : ji, o = t === "caregiver" ? Fi : Li;
+  return /* @__PURE__ */ s("div", { className: "space-y-6 sm:space-y-8 animate-fade-in", children: [
     /* @__PURE__ */ e(
-      gi,
+      Ai,
       {
-        title: a === "caregiver" ? "Dashboard Cuidador" : "Dashboard Família",
-        desc: a === "caregiver" ? "Visão geral da sua atividade como cuidador." : "Visão geral do cuidado familiar e contratos ativos."
+        title: t === "caregiver" ? "Dashboard Cuidador" : "Dashboard Família",
+        desc: t === "caregiver" ? "Visão geral da sua atividade como cuidador." : "Visão geral do cuidado familiar e contratos ativos."
       }
     ),
-    /* @__PURE__ */ d(E.div, { variants: bi, initial: "hidden", animate: "show", children: [
-      /* @__PURE__ */ e(E.div, { variants: X, className: "bg-card rounded-3xl p-5 sm:p-7 border border-border shadow-card", children: /* @__PURE__ */ d("div", { className: "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3", children: [
-        /* @__PURE__ */ d("div", { children: [
-          /* @__PURE__ */ d("h2", { className: "text-2xl sm:text-3xl font-display font-black text-foreground tracking-tighter leading-none uppercase", children: [
+    /* @__PURE__ */ s(I.div, { variants: Mi, initial: "hidden", animate: "show", children: [
+      /* @__PURE__ */ e(I.div, { variants: re, className: "bg-card rounded-3xl p-5 sm:p-7 border border-border shadow-card", children: /* @__PURE__ */ s("div", { className: "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3", children: [
+        /* @__PURE__ */ s("div", { children: [
+          /* @__PURE__ */ s("h2", { className: "text-2xl sm:text-3xl font-display font-black text-foreground tracking-tighter leading-none uppercase", children: [
             "Olá, ",
-            a === "caregiver" ? "Helena" : "João"
+            t === "caregiver" ? "Helena" : "João"
           ] }),
-          /* @__PURE__ */ e("p", { className: "text-sm text-muted-foreground font-medium mt-1", children: a === "caregiver" ? "Enfermeira Especializada" : "Gestor Familiar" })
+          /* @__PURE__ */ e("p", { className: "text-sm text-muted-foreground font-medium mt-1", children: t === "caregiver" ? "Enfermeira Especializada" : "Gestor Familiar" })
         ] }),
-        /* @__PURE__ */ d("span", { className: "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-display font-bold uppercase tracking-widest bg-success/10 text-success border border-success/30 w-fit", children: [
-          /* @__PURE__ */ e(aa, { size: 12 }),
+        /* @__PURE__ */ s("span", { className: "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-display font-bold uppercase tracking-widest bg-success/10 text-success border border-success/30 w-fit", children: [
+          /* @__PURE__ */ e(ua, { size: 12 }),
           " Conta Ativa"
         ] })
       ] }) }),
-      /* @__PURE__ */ d(E.div, { variants: X, className: "grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mt-5", children: [
-        /* @__PURE__ */ e(pe, { label: "Contratos Ativos", value: String(t.activeContracts), icon: B, colorClass: "text-primary" }),
-        /* @__PURE__ */ e(pe, { label: "Horas Totais", value: `${t.totalHours}h`, icon: Le, colorClass: "text-warning" }),
-        /* @__PURE__ */ e(pe, { label: "Avaliação", value: String(t.rating), icon: de, colorClass: "text-info" }),
-        /* @__PURE__ */ e(pe, { label: "Avaliações", value: String(t.totalReviews), icon: V, colorClass: "text-success" })
+      /* @__PURE__ */ s(I.div, { variants: re, className: "grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mt-5", children: [
+        /* @__PURE__ */ e(ve, { label: "Contratos Ativos", value: String(a.activeContracts), icon: G, colorClass: "text-primary" }),
+        /* @__PURE__ */ e(ve, { label: "Horas Totais", value: `${a.totalHours}h`, icon: Ke, colorClass: "text-warning" }),
+        /* @__PURE__ */ e(ve, { label: "Avaliação", value: String(a.rating), icon: fe, colorClass: "text-info" }),
+        /* @__PURE__ */ e(ve, { label: "Avaliações", value: String(a.totalReviews), icon: O, colorClass: "text-success" })
       ] }),
-      /* @__PURE__ */ d(E.div, { variants: X, className: "grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5", children: [
-        a === "family" ? /* @__PURE__ */ e(
+      /* @__PURE__ */ s(I.div, { variants: re, className: "grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5", children: [
+        t === "family" ? /* @__PURE__ */ e(
           "div",
           {
             className: "bg-card rounded-3xl p-5 sm:p-7 border border-border shadow-card hover:shadow-elevated hover:border-primary/30 transition-all cursor-pointer group",
-            onClick: () => P.info("Navegar para pesquisa de cuidadores"),
-            children: /* @__PURE__ */ d("div", { className: "flex items-center gap-3", children: [
-              /* @__PURE__ */ e("div", { className: "w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform", children: /* @__PURE__ */ e(ne, { size: 20 }) }),
-              /* @__PURE__ */ d("div", { children: [
+            onClick: () => T.info("Navegar para pesquisa de cuidadores"),
+            children: /* @__PURE__ */ s("div", { className: "flex items-center gap-3", children: [
+              /* @__PURE__ */ e("div", { className: "w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform", children: /* @__PURE__ */ e(pe, { size: 20 }) }),
+              /* @__PURE__ */ s("div", { children: [
                 /* @__PURE__ */ e("p", { className: "font-display font-black text-foreground text-sm uppercase", children: "Procurar Cuidadores" }),
                 /* @__PURE__ */ e("p", { className: "text-[10px] text-muted-foreground font-medium", children: "Encontrar profissional ideal" })
               ] })
@@ -3245,10 +3649,10 @@ const mi = () => La(Aa), ui = [
           "div",
           {
             className: "bg-card rounded-3xl p-5 sm:p-7 border border-border shadow-card hover:shadow-elevated hover:border-primary/30 transition-all cursor-pointer group",
-            onClick: () => P.info("Navegar para propostas"),
-            children: /* @__PURE__ */ d("div", { className: "flex items-center gap-3", children: [
-              /* @__PURE__ */ e("div", { className: "w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform", children: /* @__PURE__ */ e(B, { size: 20 }) }),
-              /* @__PURE__ */ d("div", { children: [
+            onClick: () => T.info("Navegar para propostas"),
+            children: /* @__PURE__ */ s("div", { className: "flex items-center gap-3", children: [
+              /* @__PURE__ */ e("div", { className: "w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform", children: /* @__PURE__ */ e(G, { size: 20 }) }),
+              /* @__PURE__ */ s("div", { children: [
                 /* @__PURE__ */ e("p", { className: "font-display font-black text-foreground text-sm uppercase", children: "Propostas" }),
                 /* @__PURE__ */ e("p", { className: "text-[10px] text-muted-foreground font-medium", children: "Solicitações recebidas" })
               ] })
@@ -3259,10 +3663,10 @@ const mi = () => La(Aa), ui = [
           "div",
           {
             className: "bg-card rounded-3xl p-5 sm:p-7 border border-border shadow-card hover:shadow-elevated hover:border-primary/30 transition-all cursor-pointer group",
-            onClick: () => P.info("Navegar para contratos"),
-            children: /* @__PURE__ */ d("div", { className: "flex items-center gap-3", children: [
-              /* @__PURE__ */ e("div", { className: "w-10 h-10 rounded-2xl bg-success/10 flex items-center justify-center text-success group-hover:scale-110 transition-transform", children: /* @__PURE__ */ e(B, { size: 20 }) }),
-              /* @__PURE__ */ d("div", { children: [
+            onClick: () => T.info("Navegar para contratos"),
+            children: /* @__PURE__ */ s("div", { className: "flex items-center gap-3", children: [
+              /* @__PURE__ */ e("div", { className: "w-10 h-10 rounded-2xl bg-success/10 flex items-center justify-center text-success group-hover:scale-110 transition-transform", children: /* @__PURE__ */ e(G, { size: 20 }) }),
+              /* @__PURE__ */ s("div", { children: [
                 /* @__PURE__ */ e("p", { className: "font-display font-black text-foreground text-sm uppercase", children: "Contratos" }),
                 /* @__PURE__ */ e("p", { className: "text-[10px] text-muted-foreground font-medium", children: "Ver todos os contratos" })
               ] })
@@ -3273,10 +3677,10 @@ const mi = () => La(Aa), ui = [
           "div",
           {
             className: "bg-card rounded-3xl p-5 sm:p-7 border border-border shadow-card hover:shadow-elevated hover:border-primary/30 transition-all cursor-pointer group",
-            onClick: () => P.info("Navegar para carteira"),
-            children: /* @__PURE__ */ d("div", { className: "flex items-center gap-3", children: [
-              /* @__PURE__ */ e("div", { className: "w-10 h-10 rounded-2xl bg-warning/10 flex items-center justify-center text-warning group-hover:scale-110 transition-transform", children: /* @__PURE__ */ e(me, { size: 20 }) }),
-              /* @__PURE__ */ d("div", { children: [
+            onClick: () => T.info("Navegar para carteira"),
+            children: /* @__PURE__ */ s("div", { className: "flex items-center gap-3", children: [
+              /* @__PURE__ */ e("div", { className: "w-10 h-10 rounded-2xl bg-warning/10 flex items-center justify-center text-warning group-hover:scale-110 transition-transform", children: /* @__PURE__ */ e(he, { size: 20 }) }),
+              /* @__PURE__ */ s("div", { children: [
                 /* @__PURE__ */ e("p", { className: "font-display font-black text-foreground text-sm uppercase", children: "Carteira" }),
                 /* @__PURE__ */ e("p", { className: "text-[10px] text-muted-foreground font-medium", children: "Saldo e movimentos" })
               ] })
@@ -3284,311 +3688,314 @@ const mi = () => La(Aa), ui = [
           }
         )
       ] }),
-      s.length > 0 && /* @__PURE__ */ e(E.div, { variants: X, className: "mt-5", children: /* @__PURE__ */ e(De, { title: "Próximos Passos", children: /* @__PURE__ */ e("div", { className: "space-y-3", children: s.map((n, c) => /* @__PURE__ */ d(
+      o.length > 0 && /* @__PURE__ */ e(I.div, { variants: re, className: "mt-5", children: /* @__PURE__ */ e(Fe, { title: "Próximos Passos", children: /* @__PURE__ */ e("div", { className: "space-y-3", children: o.map((d, m) => /* @__PURE__ */ s(
         "div",
         {
           className: "flex items-center justify-between p-4 bg-secondary rounded-2xl border border-border/50 hover:border-warning/30 transition-all cursor-pointer group",
-          onClick: () => P.info(n.label),
+          onClick: () => T.info(d.label),
           children: [
-            /* @__PURE__ */ d("div", { className: "flex items-center gap-3", children: [
-              /* @__PURE__ */ e("div", { className: "w-9 h-9 bg-warning/10 rounded-xl flex items-center justify-center text-warning", children: /* @__PURE__ */ e(n.icon, { size: 16 }) }),
-              /* @__PURE__ */ e("span", { className: "text-sm font-display font-bold text-foreground", children: n.label })
+            /* @__PURE__ */ s("div", { className: "flex items-center gap-3", children: [
+              /* @__PURE__ */ e("div", { className: "w-9 h-9 bg-warning/10 rounded-xl flex items-center justify-center text-warning", children: /* @__PURE__ */ e(d.icon, { size: 16 }) }),
+              /* @__PURE__ */ e("span", { className: "text-sm font-display font-bold text-foreground", children: d.label })
             ] }),
-            /* @__PURE__ */ e(W, { size: 16, className: "text-muted-foreground group-hover:text-warning transition-colors" })
+            /* @__PURE__ */ e(Z, { size: 16, className: "text-muted-foreground group-hover:text-warning transition-colors" })
           ]
         },
-        c
+        m
       )) }) }) }),
-      /* @__PURE__ */ e(E.div, { variants: X, className: "mt-5", children: /* @__PURE__ */ e(De, { title: "Benefícios da Plataforma", children: /* @__PURE__ */ e("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4", children: r.map((n, c) => /* @__PURE__ */ d("div", { className: "bg-secondary rounded-2xl p-4 sm:p-5 text-center hover:bg-primary/5 transition-all group", children: [
-        /* @__PURE__ */ e("div", { className: "w-10 h-10 rounded-2xl bg-card flex items-center justify-center text-primary mx-auto mb-3 group-hover:scale-110 transition-transform border border-border", children: /* @__PURE__ */ e(n.icon, { size: 18 }) }),
-        /* @__PURE__ */ e("p", { className: "text-xs font-display font-black text-foreground uppercase", children: n.title }),
-        /* @__PURE__ */ e("p", { className: "text-[10px] text-muted-foreground font-medium mt-1", children: n.sub })
-      ] }, c)) }) }) }),
-      /* @__PURE__ */ e(E.div, { variants: X, className: "mt-5", children: /* @__PURE__ */ d(De, { title: "Atividade Recente", children: [
-        /* @__PURE__ */ d("div", { className: "flex justify-between items-center mb-4", children: [
+      /* @__PURE__ */ e(I.div, { variants: re, className: "mt-5", children: /* @__PURE__ */ e(Fe, { title: "Benefícios da Plataforma", children: /* @__PURE__ */ e("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4", children: r.map((d, m) => /* @__PURE__ */ s("div", { className: "bg-secondary rounded-2xl p-4 sm:p-5 text-center hover:bg-primary/5 transition-all group", children: [
+        /* @__PURE__ */ e("div", { className: "w-10 h-10 rounded-2xl bg-card flex items-center justify-center text-primary mx-auto mb-3 group-hover:scale-110 transition-transform border border-border", children: /* @__PURE__ */ e(d.icon, { size: 18 }) }),
+        /* @__PURE__ */ e("p", { className: "text-xs font-display font-black text-foreground uppercase", children: d.title }),
+        /* @__PURE__ */ e("p", { className: "text-[10px] text-muted-foreground font-medium mt-1", children: d.sub })
+      ] }, m)) }) }) }),
+      /* @__PURE__ */ e(I.div, { variants: re, className: "mt-5", children: /* @__PURE__ */ s(Fe, { title: "Atividade Recente", children: [
+        /* @__PURE__ */ s("div", { className: "flex justify-between items-center mb-4", children: [
           /* @__PURE__ */ e("p", { className: "text-[10px] font-display font-black text-muted-foreground uppercase tracking-widest", children: "Últimos movimentos" }),
-          /* @__PURE__ */ e(_, { variant: "link", size: "sm", onClick: () => P.info("Ver todo o histórico"), children: "Ver Todos" })
+          /* @__PURE__ */ e(S, { variant: "link", size: "sm", onClick: () => T.info("Ver todo o histórico"), children: "Ver Todos" })
         ] }),
-        /* @__PURE__ */ e("div", { className: "space-y-3", children: hi.map((n, c) => /* @__PURE__ */ d("div", { className: "flex items-center justify-between p-3 sm:p-4 bg-secondary rounded-2xl border border-border/50", children: [
-          /* @__PURE__ */ d("div", { className: "flex items-center gap-3", children: [
-            /* @__PURE__ */ e("div", { className: `w-9 h-9 rounded-xl flex items-center justify-center ${n.type === "credit" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`, children: n.type === "credit" ? /* @__PURE__ */ e(yt, { size: 16 }) : /* @__PURE__ */ e(Nt, { size: 16 }) }),
-            /* @__PURE__ */ d("div", { children: [
-              /* @__PURE__ */ e("p", { className: "text-sm font-display font-bold text-foreground", children: n.description }),
-              /* @__PURE__ */ e("p", { className: "text-[10px] text-muted-foreground font-medium", children: new Date(n.date).toLocaleDateString("pt-PT") })
+        /* @__PURE__ */ e("div", { className: "space-y-3", children: Ei.map((d, m) => /* @__PURE__ */ s("div", { className: "flex items-center justify-between p-3 sm:p-4 bg-secondary rounded-2xl border border-border/50", children: [
+          /* @__PURE__ */ s("div", { className: "flex items-center gap-3", children: [
+            /* @__PURE__ */ e("div", { className: `w-9 h-9 rounded-xl flex items-center justify-center ${d.type === "credit" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`, children: d.type === "credit" ? /* @__PURE__ */ e(Pt, { size: 16 }) : /* @__PURE__ */ e(zt, { size: 16 }) }),
+            /* @__PURE__ */ s("div", { children: [
+              /* @__PURE__ */ e("p", { className: "text-sm font-display font-bold text-foreground", children: d.description }),
+              /* @__PURE__ */ e("p", { className: "text-[10px] text-muted-foreground font-medium", children: new Date(d.date).toLocaleDateString("pt-PT") })
             ] })
           ] }),
-          /* @__PURE__ */ d("span", { className: `text-sm font-display font-black ${n.type === "credit" ? "text-success" : "text-destructive"}`, children: [
-            n.type === "credit" ? "+" : "-",
-            n.amount,
+          /* @__PURE__ */ s("span", { className: `text-sm font-display font-black ${d.type === "credit" ? "text-success" : "text-destructive"}`, children: [
+            d.type === "credit" ? "+" : "-",
+            d.amount,
             "€"
           ] })
-        ] }, c)) })
+        ] }, m)) })
       ] }) })
     ] })
   ] });
-}, Fn = () => /* @__PURE__ */ e(_a, { role: "caregiver" }), Bn = () => /* @__PURE__ */ e(_a, { role: "family" }), wi = Fa(
-  ({ className: a, activeClassName: t, pendingClassName: r, to: s, ...n }, c) => /* @__PURE__ */ e(
-    At,
+}, od = () => /* @__PURE__ */ e(Ua, { role: "caregiver" }), sd = () => /* @__PURE__ */ e(Ua, { role: "family" }), Vi = Ja(
+  ({ className: t, activeClassName: a, pendingClassName: r, to: o, ...d }, m) => /* @__PURE__ */ e(
+    $t,
     {
-      ref: c,
-      to: s,
-      className: ({ isActive: l, isPending: f }) => o(a, l && t, f && r),
-      ...n
+      ref: m,
+      to: o,
+      className: ({ isActive: c, isPending: l }) => i(t, c && a, l && r),
+      ...d
     }
   )
 );
-wi.displayName = "NavLink";
+Vi.displayName = "NavLink";
 export {
-  Yi as Accordion,
-  Tr as AccordionContent,
-  Rr as AccordionItem,
-  Sr as AccordionTrigger,
-  Ot as Alert,
-  Kt as AlertDescription,
-  bn as AlertDialog,
-  Gs as AlertDialogAction,
-  Vs as AlertDialogCancel,
-  js as AlertDialogContent,
-  Bs as AlertDialogDescription,
-  Ls as AlertDialogFooter,
-  Es as AlertDialogHeader,
-  Fs as AlertDialogTitle,
-  hn as AlertDialogTrigger,
-  $t as AlertTitle,
-  gn as AspectRatio,
-  di as Avatar,
-  ci as AvatarFallback,
-  li as AvatarImage,
-  Bi as Badge,
-  Dr as Breadcrumb,
-  Ar as BreadcrumbItem,
-  _r as BreadcrumbLink,
-  Mr as BreadcrumbList,
-  jr as BreadcrumbPage,
-  Er as BreadcrumbSeparator,
-  _ as Button,
-  cs as Calendar,
-  _t as Card,
-  Ft as CardContent,
-  Lt as CardDescription,
-  Bt as CardFooter,
-  jt as CardHeader,
-  Et as CardTitle,
-  ms as Carousel,
-  us as CarouselContent,
-  ps as CarouselItem,
-  gs as CarouselNext,
-  fs as CarouselPrevious,
-  Is as ChartContainer,
-  fn as ChartLegend,
-  As as ChartLegendContent,
-  Ds as ChartStyle,
-  pn as ChartTooltip,
-  Ms as ChartTooltipContent,
-  dr as Checkbox,
-  rn as Collapsible,
-  sn as CollapsibleContent,
-  on as CollapsibleTrigger,
-  Pa as Command,
-  un as CommandDialog,
-  ks as CommandEmpty,
-  Rs as CommandGroup,
-  ws as CommandInput,
-  Ts as CommandItem,
-  Cs as CommandList,
-  Ss as CommandSeparator,
-  Ps as CommandShortcut,
-  xn as ContextMenu,
-  Ys as ContextMenuCheckboxItem,
-  $s as ContextMenuContent,
-  yn as ContextMenuGroup,
-  Ks as ContextMenuItem,
-  qs as ContextMenuLabel,
-  Us as ContextMenuRadioItem,
-  Ws as ContextMenuSeparator,
-  Js as ContextMenuShortcut,
-  Nn as ContextMenuSub,
-  Os as ContextMenuSubContent,
-  Hs as ContextMenuSubTrigger,
-  vn as ContextMenuTrigger,
-  Fn as DashboardCaregiverView,
-  Bn as DashboardFamilyView,
-  _a as DashboardView,
-  bs as Dialog,
-  mn as DialogClose,
-  Ta as DialogContent,
-  Ns as DialogDescription,
-  vs as DialogFooter,
-  xs as DialogHeader,
-  Sa as DialogOverlay,
-  hs as DialogPortal,
-  ys as DialogTitle,
-  cn as DialogTrigger,
-  De as DocCard,
-  qo as Drawer,
-  tn as DrawerClose,
-  Jo as DrawerContent,
-  es as DrawerDescription,
-  Xo as DrawerFooter,
-  Qo as DrawerHeader,
-  Ca as DrawerOverlay,
-  Wo as DrawerPortal,
-  Zo as DrawerTitle,
-  an as DrawerTrigger,
-  wn as DropdownMenu,
-  ai as DropdownMenuCheckboxItem,
-  Zs as DropdownMenuContent,
-  kn as DropdownMenuGroup,
-  ei as DropdownMenuItem,
-  ri as DropdownMenuLabel,
-  Rn as DropdownMenuPortal,
-  Tn as DropdownMenuRadioGroup,
-  ti as DropdownMenuRadioItem,
-  oi as DropdownMenuSeparator,
-  si as DropdownMenuShortcut,
-  Sn as DropdownMenuSub,
-  Xs as DropdownMenuSubContent,
-  Qs as DropdownMenuSubTrigger,
-  Cn as DropdownMenuTrigger,
-  jn as EvyraHeader,
-  En as EvyraSidebar,
-  Vi as Form,
-  or as FormControl,
-  sr as FormDescription,
-  Hi as FormField,
-  tr as FormItem,
-  rr as FormLabel,
-  ir as FormMessage,
-  In as HoverCard,
-  ni as HoverCardContent,
-  Dn as HoverCardTrigger,
-  oa as Input,
-  Nr as InputOTP,
-  wr as InputOTPGroup,
-  kr as InputOTPSeparator,
-  Cr as InputOTPSlot,
-  sa as Label,
-  Mn as LoginView,
-  Wr as Menubar,
-  ao as MenubarCheckboxItem,
-  Zr as MenubarContent,
-  Qi as MenubarGroup,
-  eo as MenubarItem,
-  ro as MenubarLabel,
-  Ji as MenubarMenu,
-  to as MenubarRadioItem,
-  oo as MenubarSeparator,
-  so as MenubarShortcut,
-  Xi as MenubarSub,
-  Xr as MenubarSubContent,
-  Qr as MenubarSubTrigger,
-  Jr as MenubarTrigger,
-  wi as NavLink,
-  Or as NavigationMenu,
-  Ur as NavigationMenuContent,
-  qi as NavigationMenuItem,
-  Wi as NavigationMenuLink,
-  $r as NavigationMenuList,
-  Yr as NavigationMenuTrigger,
-  Lr as Pagination,
-  Fr as PaginationContent,
-  Hr as PaginationEllipsis,
-  Br as PaginationItem,
-  Ve as PaginationLink,
-  Vr as PaginationNext,
-  Gr as PaginationPrevious,
-  Pn as Popover,
-  ii as PopoverContent,
-  zn as PopoverTrigger,
-  Ln as ProfileModal,
-  ar as Progress,
-  lr as RadioGroup,
-  cr as RadioGroupItem,
-  An as RegisterView,
-  ln as ResizableHandle,
-  dn as ResizablePanel,
-  nn as ResizablePanelGroup,
-  as as ScrollArea,
-  ka as ScrollBar,
-  gi as SectionHeader,
-  Oi as Select,
-  ur as SelectContent,
-  $i as SelectGroup,
-  fr as SelectItem,
-  pr as SelectLabel,
-  fa as SelectScrollDownButton,
-  pa as SelectScrollUpButton,
-  gr as SelectSeparator,
-  mr as SelectTrigger,
-  Ki as SelectValue,
-  xa as Separator,
-  no as Sheet,
-  en as SheetClose,
-  ya as SheetContent,
-  fo as SheetDescription,
-  uo as SheetFooter,
-  mo as SheetHeader,
-  va as SheetOverlay,
-  lo as SheetPortal,
-  po as SheetTitle,
-  Zi as SheetTrigger,
-  Ro as Sidebar,
-  Ao as SidebarContent,
-  Do as SidebarFooter,
-  _o as SidebarGroup,
-  Eo as SidebarGroupAction,
-  Lo as SidebarGroupContent,
-  jo as SidebarGroupLabel,
-  Io as SidebarHeader,
-  Po as SidebarInset,
-  Fo as SidebarMenu,
-  Oo as SidebarMenuBadge,
-  Vo as SidebarMenuButton,
-  Bo as SidebarMenuItem,
-  $o as SidebarMenuSkeleton,
-  Ko as SidebarMenuSub,
-  Uo as SidebarMenuSubButton,
-  Yo as SidebarMenuSubItem,
-  ko as SidebarProvider,
-  To as SidebarRail,
-  So as SidebarTrigger,
-  Ue as Skeleton,
-  br as Slider,
-  pe as StatBlock,
-  hr as Switch,
-  ts as Table,
-  os as TableBody,
-  ls as TableCaption,
-  ds as TableCell,
-  ss as TableFooter,
-  ns as TableHead,
-  rs as TableHeader,
-  is as TableRow,
-  Ui as Tabs,
-  Ir as TabsContent,
-  Pr as TabsList,
-  zr as TabsTrigger,
-  nr as Textarea,
-  _n as ThemeProvider,
-  na as Toast,
-  qt as ToastAction,
-  Gi as Toaster,
-  xr as Toggle,
-  vr as ToggleGroup,
-  yr as ToggleGroupItem,
-  bo as Tooltip,
-  Na as TooltipContent,
-  go as TooltipProvider,
-  ho as TooltipTrigger,
-  Vt as badgeVariants,
-  Z as buttonVariants,
-  o as cn,
-  Kr as navigationMenuTriggerStyle,
-  Zt as toast,
-  ga as toggleVariants,
-  io as useIsMobile,
-  ke as useSidebar,
-  mi as useTheme,
-  er as useToast
+  cn as Accordion,
+  _r as AccordionContent,
+  Mr as AccordionItem,
+  Er as AccordionTrigger,
+  Qt as Alert,
+  Zt as AlertDescription,
+  Mn as AlertDialog,
+  qs as AlertDialogAction,
+  Ws as AlertDialogCancel,
+  Hs as AlertDialogContent,
+  Us as AlertDialogDescription,
+  Ys as AlertDialogFooter,
+  Os as AlertDialogHeader,
+  Ks as AlertDialogTitle,
+  En as AlertDialogTrigger,
+  Xt as AlertTitle,
+  An as AspectRatio,
+  bi as Avatar,
+  xi as AvatarFallback,
+  hi as AvatarImage,
+  tn as Badge,
+  Vr as Breadcrumb,
+  $r as BreadcrumbItem,
+  Gr as BreadcrumbLink,
+  Br as BreadcrumbList,
+  Hr as BreadcrumbPage,
+  Or as BreadcrumbSeparator,
+  S as Button,
+  xs as Calendar,
+  Gt as Card,
+  Kt as CardContent,
+  Yt as CardDescription,
+  Ut as CardFooter,
+  Ht as CardHeader,
+  Ot as CardTitle,
+  vs as Carousel,
+  ys as CarouselContent,
+  Ns as CarouselItem,
+  Cs as CarouselNext,
+  ws as CarouselPrevious,
+  Ls as ChartContainer,
+  Dn as ChartLegend,
+  $s as ChartLegendContent,
+  Vs as ChartStyle,
+  zn as ChartTooltip,
+  Bs as ChartTooltipContent,
+  br as Checkbox,
+  Nn as Collapsible,
+  Cn as CollapsibleContent,
+  wn as CollapsibleTrigger,
+  Va as Command,
+  Pn as CommandDialog,
+  As as CommandEmpty,
+  Ms as CommandGroup,
+  zs as CommandInput,
+  _s as CommandItem,
+  Ds as CommandList,
+  Es as CommandSeparator,
+  js as CommandShortcut,
+  _n as ContextMenu,
+  ei as ContextMenuCheckboxItem,
+  Xs as ContextMenuContent,
+  Fn as ContextMenuGroup,
+  Zs as ContextMenuItem,
+  ti as ContextMenuLabel,
+  ai as ContextMenuRadioItem,
+  ri as ContextMenuSeparator,
+  oi as ContextMenuShortcut,
+  Ln as ContextMenuSub,
+  Qs as ContextMenuSubContent,
+  Js as ContextMenuSubTrigger,
+  jn as ContextMenuTrigger,
+  od as DashboardCaregiverView,
+  sd as DashboardFamilyView,
+  Ua as DashboardView,
+  ks as Dialog,
+  Tn as DialogClose,
+  La as DialogContent,
+  Ps as DialogDescription,
+  Is as DialogFooter,
+  Rs as DialogHeader,
+  Fa as DialogOverlay,
+  Ss as DialogPortal,
+  Ts as DialogTitle,
+  In as DialogTrigger,
+  Fe as DocCard,
+  ts as Drawer,
+  yn as DrawerClose,
+  os as DrawerContent,
+  ds as DrawerDescription,
+  is as DrawerFooter,
+  ss as DrawerHeader,
+  Ea as DrawerOverlay,
+  rs as DrawerPortal,
+  ns as DrawerTitle,
+  vn as DrawerTrigger,
+  Vn as DropdownMenu,
+  li as DropdownMenuCheckboxItem,
+  ni as DropdownMenuContent,
+  $n as DropdownMenuGroup,
+  di as DropdownMenuItem,
+  mi as DropdownMenuLabel,
+  Gn as DropdownMenuPortal,
+  On as DropdownMenuRadioGroup,
+  ci as DropdownMenuRadioItem,
+  ui as DropdownMenuSeparator,
+  pi as DropdownMenuShortcut,
+  Hn as DropdownMenuSub,
+  ii as DropdownMenuSubContent,
+  si as DropdownMenuSubTrigger,
+  Bn as DropdownMenuTrigger,
+  ad as EvyraHeader,
+  td as EvyraSidebar,
+  Qn as FamilySetupView,
+  on as Form,
+  ur as FormControl,
+  pr as FormDescription,
+  sn as FormField,
+  cr as FormItem,
+  mr as FormLabel,
+  fr as FormMessage,
+  Un as HoverCard,
+  gi as HoverCardContent,
+  qn as HoverCardTrigger,
+  ga as Input,
+  Pr as InputOTP,
+  zr as InputOTPGroup,
+  Ar as InputOTPSeparator,
+  Dr as InputOTPSlot,
+  Zn as KYCView,
+  ba as Label,
+  Wn as LoginView,
+  ro as Menubar,
+  co as MenubarCheckboxItem,
+  no as MenubarContent,
+  gn as MenubarGroup,
+  lo as MenubarItem,
+  uo as MenubarLabel,
+  fn as MenubarMenu,
+  mo as MenubarRadioItem,
+  po as MenubarSeparator,
+  fo as MenubarShortcut,
+  bn as MenubarSub,
+  io as MenubarSubContent,
+  so as MenubarSubTrigger,
+  oo as MenubarTrigger,
+  Vi as NavLink,
+  Qr as NavigationMenu,
+  ao as NavigationMenuContent,
+  un as NavigationMenuItem,
+  pn as NavigationMenuLink,
+  Xr as NavigationMenuList,
+  eo as NavigationMenuTrigger,
+  Yr as Pagination,
+  Kr as PaginationContent,
+  Jr as PaginationEllipsis,
+  Ur as PaginationItem,
+  Qe as PaginationLink,
+  Wr as PaginationNext,
+  qr as PaginationPrevious,
+  Yn as Popover,
+  fi as PopoverContent,
+  Kn as PopoverTrigger,
+  rd as ProfileModal,
+  Xn as ProfileSetupView,
+  lr as Progress,
+  hr as RadioGroup,
+  xr as RadioGroupItem,
+  Jn as RegisterView,
+  Rn as ResizableHandle,
+  Sn as ResizablePanel,
+  kn as ResizablePanelGroup,
+  ls as ScrollArea,
+  _a as ScrollBar,
+  Ai as SectionHeader,
+  nn as Select,
+  yr as SelectContent,
+  dn as SelectGroup,
+  wr as SelectItem,
+  Nr as SelectLabel,
+  Sa as SelectScrollDownButton,
+  ka as SelectScrollUpButton,
+  Cr as SelectSeparator,
+  vr as SelectTrigger,
+  ln as SelectValue,
+  Pa as Separator,
+  bo as Sheet,
+  xn as SheetClose,
+  Da as SheetContent,
+  wo as SheetDescription,
+  yo as SheetFooter,
+  vo as SheetHeader,
+  za as SheetOverlay,
+  ho as SheetPortal,
+  No as SheetTitle,
+  hn as SheetTrigger,
+  Mo as Sidebar,
+  $o as SidebarContent,
+  Vo as SidebarFooter,
+  Go as SidebarGroup,
+  Oo as SidebarGroupAction,
+  Yo as SidebarGroupContent,
+  Ho as SidebarGroupLabel,
+  Lo as SidebarHeader,
+  jo as SidebarInset,
+  Ko as SidebarMenu,
+  Qo as SidebarMenuBadge,
+  Wo as SidebarMenuButton,
+  Uo as SidebarMenuItem,
+  Xo as SidebarMenuSkeleton,
+  Zo as SidebarMenuSub,
+  as as SidebarMenuSubButton,
+  es as SidebarMenuSubItem,
+  Ao as SidebarProvider,
+  _o as SidebarRail,
+  Eo as SidebarTrigger,
+  oa as Skeleton,
+  kr as Slider,
+  ve as StatBlock,
+  Sr as Switch,
+  cs as Table,
+  us as TableBody,
+  hs as TableCaption,
+  bs as TableCell,
+  ps as TableFooter,
+  gs as TableHead,
+  ms as TableHeader,
+  fs as TableRow,
+  mn as Tabs,
+  Lr as TabsContent,
+  jr as TabsList,
+  Fr as TabsTrigger,
+  gr as Textarea,
+  ed as ThemeProvider,
+  xa as Toast,
+  tr as ToastAction,
+  rn as Toaster,
+  Rr as Toggle,
+  Ir as ToggleGroup,
+  Tr as ToggleGroupItem,
+  ko as Tooltip,
+  Aa as TooltipContent,
+  Co as TooltipProvider,
+  So as TooltipTrigger,
+  Wt as badgeVariants,
+  ie as buttonVariants,
+  i as cn,
+  Zr as navigationMenuTriggerStyle,
+  nr as toast,
+  Ra as toggleVariants,
+  go as useIsMobile,
+  ze as useSidebar,
+  Ti as useTheme,
+  dr as useToast
 };
 //# sourceMappingURL=bloom-elements.esm.js.map
