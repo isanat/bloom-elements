@@ -71,7 +71,8 @@ const SectionLabel = ({ label, isOpen }: { label: string; isOpen: boolean }) => 
 
 const navItems = {
   main: [
-    { id: 'dashboard',         icon: BarChart3,      label: 'Dashboard',          desc: 'Visão geral' },
+    { id: 'dashboard-caregiver', icon: BarChart3,      label: 'Dashboard Cuidador', desc: 'Visão do cuidador' },
+    { id: 'dashboard-family',    icon: LayoutDashboard,label: 'Dashboard Família',  desc: 'Visão da família' },
     { id: 'marketplace',       icon: Search,         label: 'Explorar Talentos',  desc: 'Pesquisar cuidadores' },
     { id: 'demandas',          icon: Briefcase,      label: 'Demandas',           desc: 'Publicar necessidades', count: '3' },
     { id: 'search-cuidadores', icon: Users,          label: 'Procurar Cuidadores',desc: 'Encontrar profissional' },
