@@ -246,4 +246,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ role = 'caregiver'
   );
 };
 
+export const DashboardCaregiverView: React.FC = () => <DashboardView role="caregiver" />;
+export const DashboardFamilyView: React.FC = () => <DashboardView role="family" />;
+
 export default DashboardView;
