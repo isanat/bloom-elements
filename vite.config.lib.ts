@@ -34,7 +34,7 @@ export default defineConfig({
         'src/main.tsx',
         'src/App.tsx',
         'src/pages/**',
-        'src/components/evyra/views/**',
+        'src/components/evyra/views/!(AuthViews)*',
         'src/test/**',
         '**/*.test.ts',
         '**/*.test.tsx',
