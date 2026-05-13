@@ -1,6 +1,6 @@
 {
   "name": "@isanat/bloom-elements",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Bloom Design System — A complete UI Kit built with React, TypeScript, and TailwindCSS. Next.js App Router ready.",
   "type": "module",
   "main": "./dist/bloom-elements.cjs.js",
