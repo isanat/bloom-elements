@@ -75,6 +75,14 @@ export { EvyraSidebar } from "./components/evyra/EvyraSidebar";
 export { ProfileModal } from "./components/evyra/ProfileModal";
 export { SectionHeader, DocCard, StatBlock } from "./components/evyra/EvyraShared";
 
+// Evyra — Dashboards (per role)
+export {
+  DashboardView,
+  DashboardCaregiverView,
+  DashboardFamilyView,
+  type DashboardViewProps,
+} from "./components/evyra/views/DashboardView";
+
 // Navigation
 export { NavLink } from "./components/NavLink";
 
