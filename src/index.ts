@@ -69,6 +69,7 @@ export { HoverCard, HoverCardTrigger, HoverCardContent } from "./components/ui/h
 export { Avatar, AvatarImage, AvatarFallback } from "./components/ui/avatar";
 
 // Evyra Components
+export { LoginView, RegisterView } from "./components/evyra/views/AuthViews";
 export { EvyraHeader } from "./components/evyra/EvyraHeader";
 export { EvyraSidebar } from "./components/evyra/EvyraSidebar";
 export { ProfileModal } from "./components/evyra/ProfileModal";
