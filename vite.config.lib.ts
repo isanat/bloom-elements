@@ -29,18 +29,33 @@ export default defineConfig({
   plugins: [
     react(),
     dts({
+      // Use the app tsconfig — it has the full compilerOptions (jsx, paths,
+      // moduleResolution, lib, target). The root tsconfig.json is just a
+      // references shell and produces empty/incorrect .d.ts files.
+      tsconfigPath: './tsconfig.app.json',
+      entryRoot: 'src',
       include: ['src'],
       exclude: [
         'src/main.tsx',
         'src/App.tsx',
         'src/pages/**',
-        'src/components/evyra/views/!(AuthViews)*',
         'src/test/**',
         '**/*.test.ts',
         '**/*.test.tsx',
       ],
       outDir: 'dist',
-      tsconfigPath: './tsconfig.json',
+      // Bundle the @/ path alias into relative paths inside emitted .d.ts
+      // so consumers don't need a matching tsconfig path mapping.
+      rollupTypes: true,
+      insertTypesEntry: true,
+      // Force declaration emission even when tsconfig has noEmit: true.
+      compilerOptions: {
+        declaration: true,
+        declarationMap: true,
+        emitDeclarationOnly: true,
+        noEmit: false,
+        skipLibCheck: true,
+      },
     }),
     useClientBanner(),
   ],

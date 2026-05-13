@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   FileText, Clock, Star, Users, Search, ChevronRight,
   ShieldCheck, Wallet, ArrowUp, ArrowDown, CheckCircle,
@@ -56,34 +56,24 @@ const pendingStepsFamily = [
   { label: 'Completar perfil do familiar', href: '#', icon: Users },
 ];
 
-export const DashboardView = () => {
-  const [role, setRole] = useState<'caregiver' | 'family'>('caregiver');
+export interface DashboardViewProps {
+  /** Which role's dashboard to render. Defaults to 'caregiver'. */
+  role?: 'caregiver' | 'family';
+}
+
+export const DashboardView: React.FC<DashboardViewProps> = ({ role = 'caregiver' }) => {
   const stats = role === 'caregiver' ? mockStats.caregiver : mockStats.family;
   const benefits = role === 'caregiver' ? caregiverBenefits : familyBenefits;
   const pendingSteps = role === 'caregiver' ? pendingStepsCuidador : pendingStepsFamily;
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in">
-      {/* Role Toggle - for demo only */}
-      <div className="flex items-center gap-3">
-        <SectionHeader title="Dashboard" desc="Visão geral da sua atividade na plataforma." />
-      </div>
-
-      <div className="flex gap-2">
-        {(['caregiver', 'family'] as const).map(r => (
-          <button
-            key={r}
-            onClick={() => setRole(r)}
-            className={`px-4 py-2 rounded-2xl text-[10px] font-display font-bold uppercase tracking-widest transition-all ${
-              role === r
-                ? 'bg-primary text-primary-foreground shadow-md'
-                : 'bg-card border border-border text-muted-foreground hover:border-primary/40'
-            }`}
-          >
-            {r === 'caregiver' ? '👨‍⚕️ Cuidador' : '👨‍👩‍👧 Família'}
-          </button>
-        ))}
-      </div>
+      <SectionHeader
+        title={role === 'caregiver' ? 'Dashboard Cuidador' : 'Dashboard Família'}
+        desc={role === 'caregiver'
+          ? 'Visão geral da sua atividade como cuidador.'
+          : 'Visão geral do cuidado familiar e contratos ativos.'}
+      />
 
       {/* Welcome */}
       <motion.div variants={containerVariants} initial="hidden" animate="show">
@@ -255,5 +245,8 @@ export const DashboardView = () => {
     </div>
   );
 };
+
+export const DashboardCaregiverView: React.FC = () => <DashboardView role="caregiver" />;
+export const DashboardFamilyView: React.FC = () => <DashboardView role="family" />;
 
 export default DashboardView;
