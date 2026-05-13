@@ -5,10 +5,10 @@
   "type": "module",
   "main": "./dist/bloom-elements.cjs.js",
   "module": "./dist/bloom-elements.esm.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/bloom-elements.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/bloom-elements.d.ts",
       "import": "./dist/bloom-elements.esm.js",
       "require": "./dist/bloom-elements.cjs.js"
     },
