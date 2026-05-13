@@ -31,7 +31,7 @@ import { UIMobileAuditView } from '@/components/evyra/views/UIMobileAuditView';
 
 // ── NEW views (páginas faltantes) ─────────────────────────────
 import { LoginView, RegisterView }                  from '@/components/evyra/views/AuthViews';
-import { FamilySetupView, KYCView }                 from '@/components/evyra/views/OnboardingViews';
+import { FamilySetupView, KYCView, ProfileSetupView } from '@/components/evyra/views/OnboardingViews';
 import { WalletView, NotificacoesView, CuidadorDetailView } from '@/components/evyra/views/AppViews';
 import { NovaDemandaView, NovoContratoView, ProposalFlowView, AdminDashboardView, HelpCenterView } from '@/components/evyra/views/FlowViews';
 import {
@@ -104,6 +104,7 @@ const Index = () => {
       case 'login':          return <LoginView onNavigate={navigate} />;
       case 'register':       return <RegisterView onNavigate={navigate} />;
       case 'family-setup':   return <FamilySetupView onNavigate={navigate} />;
+      case 'profile-setup':  return <ProfileSetupView onNavigate={navigate} />;
       case 'kyc':            return <KYCView onNavigate={navigate} />;
 
       // App views

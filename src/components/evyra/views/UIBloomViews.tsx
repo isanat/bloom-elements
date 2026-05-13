@@ -17,23 +17,23 @@ import { toast } from 'sonner';
 
 /* ───────────────── 1. COLORS ───────────────── */
 const swatches = [
-  { name: 'Primary',     varName: '--primary',     hex: '#2F6F6D' },
-  { name: 'Secondary',   varName: '--secondary',   hex: '#6FA8A3' },
-  { name: 'Accent',      varName: '--accent',      hex: '#A8DADC' },
-  { name: 'Warm',        varName: '--warning',     hex: '#F1C27D' },
-  { name: 'Background',  varName: '--background',  hex: '#FAFAF7' },
-  { name: 'Foreground',  varName: '--foreground',  hex: '#1A1A1A' },
-  { name: 'Muted',       varName: '--muted',       hex: '#F1F1EE' },
+  { name: 'Primary',     varName: '--primary',     hex: '#2563EB' },
+  { name: 'Secondary',   varName: '--secondary',   hex: '#F1F5F9' },
+  { name: 'Accent',      varName: '--accent',      hex: '#F1F5F9' },
+  { name: 'Warning',     varName: '--warning',     hex: '#F59E0B' },
+  { name: 'Background',  varName: '--background',  hex: '#F8FAFC' },
+  { name: 'Foreground',  varName: '--foreground',  hex: '#111827' },
+  { name: 'Muted',       varName: '--muted',       hex: '#F1F5F9' },
   { name: 'Card',        varName: '--card',        hex: '#FFFFFF' },
-  { name: 'Border',      varName: '--border',      hex: '#E5E5E0' },
-  { name: 'Destructive', varName: '--destructive', hex: '#D64545' },
-  { name: 'Success',     varName: '--success',     hex: '#3FA66E' },
-  { name: 'Info',        varName: '--info',        hex: '#4A8AC9' },
+  { name: 'Border',      varName: '--border',      hex: '#E1E7EF' },
+  { name: 'Destructive', varName: '--destructive', hex: '#EF4444' },
+  { name: 'Success',     varName: '--success',     hex: '#10B981' },
+  { name: 'Info',        varName: '--info',        hex: '#0EA5E9' },
 ];
 
 export const UIColorsView = () => (
   <div className="space-y-12 animate-fade-in">
-    <SectionHeader title="Paleta de Cores" desc="Tokens semânticos HSL do design system Bloom/EVYRA — usar sempre via classes Tailwind." />
+    <SectionHeader title="Paleta de Cores" desc="Tokens semânticos HSL do design system Bloom/EVYRA. Primary: azul #2563EB — usar sempre via classes Tailwind." />
     <DocCard title="Tokens Principais">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {swatches.map(s => (
@@ -50,8 +50,11 @@ export const UIColorsView = () => (
     </DocCard>
     <DocCard title="Como Usar">
       <pre className="text-xs bg-muted p-4 rounded-2xl overflow-x-auto font-mono">{`<div className="bg-primary text-primary-foreground" />
-<div className="bg-accent text-accent-foreground" />
-// HSL no index.css:  --primary: 178 41% 31%;`}</pre>
+<div className="bg-success text-success-foreground" />
+<div className="bg-warning text-warning-foreground" />
+// HSL no index.css:  --primary: 221 83% 53%;  → #2563EB
+//                    --success: 160 84% 39%;  → #10B981
+//                    --warning:  38 92% 50%;  → #F59E0B`}</pre>
     </DocCard>
   </div>
 );
