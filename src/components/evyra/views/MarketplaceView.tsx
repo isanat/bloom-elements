@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Star, MapPin, ShieldCheck, Filter, Plus, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { SectionHeader } from '@/components/evyra/EvyraShared';
-import { ProfileModal } from '@/components/evyra/ProfileModal';
+import { SectionHeader } from '../EvyraShared';
+import { ProfileModal } from '../ProfileModal';
 
 const talents = [
   { name: 'Helena Santos', role: 'Enfermagem', price: '18,50', rating: '5.0', bio: 'Especialista em cuidados intensivos e apoio pós-operatório com mais de 8 anos de experiência.', skills: ['Drenagem', 'Curativos', 'Diabetes'], location: 'Porto, PT', experience: '8 anos' },
