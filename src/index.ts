@@ -84,6 +84,62 @@ export {
   type DashboardViewProps,
 } from "./components/evyra/views/DashboardView";
 
+// Evyra — App Views (Wallet, Notifications, Cuidador Detail)
+export { WalletView, NotificacoesView, CuidadorDetailView } from "./components/evyra/views/AppViews";
+
+// Evyra — Search & Marketplace
+export { SearchCuidadoresView } from "./components/evyra/views/SearchCuidadoresView";
+export { MarketplaceView } from "./components/evyra/views/MarketplaceView";
+
+// Evyra — Chat
+export { ChatView } from "./components/evyra/views/ChatView";
+
+// Evyra — Contracts
+export { ContratosView } from "./components/evyra/views/ContratosView";
+
+// Evyra — Demands
+export { DemandasView } from "./components/evyra/views/DemandasView";
+
+// Evyra — Interviews
+export { EntrevistasView } from "./components/evyra/views/EntrevistasView";
+
+// Evyra — Payments
+export { PaymentsView } from "./components/evyra/views/PaymentsView";
+
+// Evyra — Profile
+export { ProfileView } from "./components/evyra/views/ProfileView";
+
+// Evyra — Proposals
+export { ProposalsView } from "./components/evyra/views/ProposalsView";
+
+// Evyra — Verification
+export { VerificacaoView } from "./components/evyra/views/VerificacaoView";
+
+// Evyra — Family Views
+export {
+  FamilyDashboardView,
+  FamilyMemberView,
+  FamilySearchView,
+  FamilyDemandasView,
+  FamilyReviewView,
+  FamilyAgendaView,
+  FamilyCarePlanView,
+  FamilyEmergencyView,
+  FamilyPaymentsView,
+  FamilyContractsView,
+  FamilyFavoritesView,
+  FamilyChatView,
+} from "./components/evyra/views/FamilyViews";
+
+// Evyra — Flow Views
+export {
+  NovaDemandaView,
+  NovoContratoView,
+  ProposalFlowView,
+  AdminDashboardView,
+  HelpCenterView,
+} from "./components/evyra/views/FlowViews";
+
 // Navigation
 export { NavLink } from "./components/NavLink";
 

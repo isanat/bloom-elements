@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShieldCheck, TrendingUp, Activity, Calendar, ChevronRight, Download } from 'lucide-react';
-import { SectionHeader, StatBlock, DocCard } from '@/components/evyra/EvyraShared';
+import { SectionHeader, StatBlock, DocCard } from '../EvyraShared';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 

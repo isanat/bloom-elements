@@ -9,8 +9,9 @@
   "exports": {
     ".": {
       "types": "./dist/bloom-elements.d.ts",
-      "import": "./dist/bloom-elements.esm.js",
-      "require": "./dist/bloom-elements.cjs.js"
+      "source": "./src/index.ts",
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
     },
     "./styles.css": "./bloom-elements.css",
     "./styles": "./bloom-elements.css",
@@ -32,6 +33,7 @@
   ],
   "files": [
     "dist",
+    "src",
     "bloom-elements.css",
     "README.md",
     "NPM_PUBLISH.md"
