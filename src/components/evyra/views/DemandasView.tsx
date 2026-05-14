@@ -54,6 +54,9 @@ export const DemandasView = () => {
 
   const currentList = activeTab === 'ativas' ? ativas : activeTab === 'fechadas' ? fechadas : pausadas;
 
+  const totalPropostas = demandas.reduce((s, d) => s + d.propostas, 0);
+  const totalVistas = demandas.reduce((s, d) => s + d.vistas, 0);
+
   const tabs: { id: TabType; label: string; count: number }[] = [
     { id: 'ativas', label: 'Ativas', count: ativas.length },
     { id: 'fechadas', label: 'Fechadas', count: fechadas.length },
@@ -71,11 +74,11 @@ export const DemandasView = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-        <StatBlock label="Ativas" value="3" icon={CheckCircle} colorClass="text-success" />
-        <StatBlock label="Fechadas" value="0" icon={Calendar} />
+        <StatBlock label="Ativas" value={String(ativas.length)} icon={CheckCircle} colorClass="text-success" />
+        <StatBlock label="Fechadas" value={String(fechadas.length)} icon={Calendar} />
         <StatBlock label="Gasto" value="€0" icon={Euro} colorClass="text-warning" />
-        <StatBlock label="Propostas" value="0.3" icon={MessageSquare} colorClass="text-info" />
-        <StatBlock label="Vistas" value="1.3" icon={Eye} />
+        <StatBlock label="Propostas" value={String(totalPropostas)} icon={MessageSquare} colorClass="text-info" />
+        <StatBlock label="Vistas" value={String(totalVistas)} icon={Eye} />
       </div>
 
       {/* Tabs */}
