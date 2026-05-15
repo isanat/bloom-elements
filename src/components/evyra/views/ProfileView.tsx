@@ -8,7 +8,7 @@ import {
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SectionHeader, DocCard } from '@/components/evyra/EvyraShared';
+import { SectionHeader, DocCard } from '../EvyraShared';
 import { toast } from 'sonner';
 
 const SERVICE_TYPES = [

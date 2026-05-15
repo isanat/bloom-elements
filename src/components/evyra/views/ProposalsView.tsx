@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { SectionHeader } from '@/components/evyra/EvyraShared';
-import { ProposalDetailModal } from '@/components/evyra/ProfileModal';
+import { SectionHeader } from '../EvyraShared';
+import { ProposalDetailModal } from '../ProfileModal';
 import { toast } from 'sonner';
 
 const proposals = [
@@ -20,7 +20,6 @@ export const ProposalsView = () => {
       <div className="grid grid-cols-1 gap-4">
         {proposals.map((prop, i) => (
           <div key={i} className="bg-card p-4 sm:p-6 md:p-8 rounded-3xl border border-border shadow-card flex flex-col gap-4 group hover:border-primary/30 transition-all">
-            {/* Top row: avatar + info */}
             <div className="flex items-center gap-3 sm:gap-5">
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-secondary overflow-hidden ring-4 ring-secondary shrink-0">
                 <img src={`https://i.pravatar.cc/150?u=prop${i}`} alt="" className="w-full h-full object-cover" />
@@ -39,8 +38,6 @@ export const ProposalsView = () => {
                 <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{prop.role} • {prop.project}</p>
               </div>
             </div>
-            
-            {/* Bottom row: price + actions */}
             <div className="flex items-center justify-between pt-3 border-t border-border/50">
               <div>
                 <p className="text-[10px] font-display font-bold text-muted-foreground/50 uppercase tracking-widest">Valor</p>

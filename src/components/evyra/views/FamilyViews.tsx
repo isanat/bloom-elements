@@ -7,14 +7,14 @@ import {
   Bell, CheckCircle2, XCircle, Sparkles, MessageSquare, Trash2, Edit3,
   Download, Eye, AlertCircle
 } from 'lucide-react';
-import { SectionHeader, StatBlock, DocCard } from '@/components/evyra/EvyraShared';
+import { SectionHeader, StatBlock, DocCard } from '../EvyraShared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-// ─── Animation helpers ──────────────────────────────────────
+// ─── Animation helpers ─────────────────────────────────────────────────────────────
 const fadeUp = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.35 } };
 const stagger = (i: number) => ({ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3, delay: i * 0.05 } });
 
@@ -123,12 +123,10 @@ export const FamilyMemberView = () => {
   const [tab, setTab] = useState<'info' | 'saude' | 'rotina'>('info');
   const [editing, setEditing] = useState(false);
 
-  // committed state
   const [info, setInfo] = useState<InfoData>(initialInfo);
   const [saude, setSaude] = useState<Condicao[]>(initialSaude);
   const [rotina, setRotina] = useState<RotinaItem[]>(initialRotina);
 
-  // draft state (used while editing)
   const [draftInfo, setDraftInfo] = useState<InfoData>(info);
   const [draftSaude, setDraftSaude] = useState<Condicao[]>(saude);
   const [draftRotina, setDraftRotina] = useState<RotinaItem[]>(rotina);

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { SectionHeader, StatBlock, DocCard } from '@/components/evyra/EvyraShared';
+import { SectionHeader, StatBlock, DocCard } from '../EvyraShared';
 import { toast } from 'sonner';
 
 const containerVariants = {

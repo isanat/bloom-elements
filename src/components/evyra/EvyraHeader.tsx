@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Bell, Moon, Sun, Menu, MessageSquare, FileText, CheckCircle, Clock, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme } from '../../hooks/use-theme';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Notification {

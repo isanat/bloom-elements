@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowUp, ArrowDown, Bell, Check, Star, MessageSquare, FileText, Shield, Euro, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { SectionHeader } from '@/components/evyra/EvyraShared';
+import { SectionHeader } from '../EvyraShared';
 
 const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
 const itemVariants = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } } };
@@ -33,7 +33,6 @@ export const WalletView = () => {
     <div className="space-y-6 sm:space-y-8 animate-fade-in">
       <SectionHeader title="Minha Carteira" desc="Saldo de conta e histórico de transações" />
 
-      {/* Hero */}
       <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-6 sm:p-10 text-primary-foreground shadow-elevated relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/3 translate-x-1/3 pointer-events-none" />
         <div className="relative space-y-6">
@@ -56,7 +55,6 @@ export const WalletView = () => {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {[{ label:'Este Mês', value:'€510', sub:'+12%', color:'text-success' }, { label:'Contratos Ativos', value:'3', sub:'1 escrow', color:'text-primary' }, { label:'Taxa Plataforma', value:'10%', sub:'por pagamento', color:'text-warning' }].map(s => (
           <div key={s.label} className="bg-card rounded-2xl border border-border shadow-card p-4 text-center">
@@ -67,7 +65,6 @@ export const WalletView = () => {
         ))}
       </div>
 
-      {/* Transactions */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-[10px] font-display font-black uppercase tracking-widest text-foreground border-l-4 border-primary pl-3">Histórico</h3>
@@ -210,7 +207,6 @@ export const CuidadorDetailView = ({ onNavigate }: { onNavigate?: (v: string) =>
         ← Voltar
       </button>
 
-      {/* Header */}
       <div className="bg-card rounded-3xl border border-border shadow-card p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row items-start gap-6">
           <div className="relative shrink-0">
@@ -244,7 +240,6 @@ export const CuidadorDetailView = ({ onNavigate }: { onNavigate?: (v: string) =>
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex border-b border-border">
         {[['sobre','Sobre'],['especialidades','Especialidades'],['avaliações','Avaliações']].map(([k,l]) => (
           <button key={k} onClick={() => setTab(k)} className={`flex-1 py-3 text-sm font-display font-bold transition-all border-b-2 ${tab===k ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>{l}</button>
