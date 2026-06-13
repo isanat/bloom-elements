@@ -1,0 +1,502 @@
+   500→   500→        const registration = await navigator.serviceWorker.ready;
+   501→   501→        const subscription = await registration.pushManager.getSubscription();
+   502→   502→        if (subscription) {
+   503→   503→          const endpoint = subscription.endpoint;
+   504→   504→          await subscription.unsubscribe();
+   505→   505→          await apiFetch('/api/push/subscribe', { method: 'DELETE', body: JSON.stringify({ endpoint }) }).catch(() => {});
+   506→   506→        }
+   507→   507→        setPushEnabled(false);
+   508→   508→        showBloomToast({ variant: 'info', message: 'Notificações push desativadas' });
+   509→   509→      }
+   510→   510→    } catch (error) {
+   511→   511→      console.error('Push subscription error:', error);
+   512→   512→      showBloomToast({ variant: 'error', message: 'Erro ao configurar notificações' });
+   513→   513→    } finally { setPushLoading(false); }
+   514→   514→  }, [pushEnabled, vapidPublicKey]);
+   515→   515→
+   516→   516→  const handleEmailNotificationToggle = async (enabled: boolean) => {
+   517→   517→    setEmailNotifications(enabled);
+   518→   518→    try {
+   519→   519→      const res = await apiFetch('/api/user/profile', { method: 'PUT', body: JSON.stringify({ notificationsEmail: enabled }) });
+   520→   520→      if (!res.ok) throw new Error('Failed');
+   521→   521→      await loadProfile();
+   522→   522→      toast.success(enabled ? 'Notificações por email ativadas' : 'Notificações por email desativadas');
+   523→   523→    } catch {
+   524→   524→      toast.error('Erro ao actualizar notificações');
+   525→   525→      setEmailNotifications(!enabled); // revert on error
+   526→   526→    }
+   527→   527→  };
+   528→   528→
+   529→   529→  const handleLanguageChange = async (newLang: string) => {
+   530→   530→    const prevLang = language;
+   531→   531→    setLanguage(newLang);
+   532→   532→    try {
+   533→   533→      const res = await apiFetch('/api/user/profile', { method: 'PUT', body: JSON.stringify({ preferredLanguage: newLang }) });
+   534→   534→      if (!res.ok) throw new Error('Failed');
+   535→   535→      await loadProfile();
+   536→   536→      toast.success('Idioma atualizado');
+   537→   537→    } catch {
+   538→   538→      toast.error('Erro ao actualizar idioma');
+   539→   539→      setLanguage(prevLang); // revert on error
+   540→   540→    }
+   541→   541→  };
+   542→   542→
+   543→   543→  const handleDataExport = async () => {
+   544→   544→    setExportingData(true);
+   545→   545→    try {
+   546→   546→      const profileRes = await apiFetch('/api/user/profile');
+   547→   547→      if (profileRes.ok) {
+   548→   548→        const profileData = await profileRes.json();
+   549→   549→        const exportData = { exportDate: new Date().toISOString(), user: profileData.user || {}, profile: profileData.profile || {} };
+   550→   550→        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+   551→   551→        const url = URL.createObjectURL(blob);
+   552→   552→        const a = document.createElement('a');
+   553→   553→        a.href = url;
+   554→   554→        a.download = `evyra-dados-${new Date().toISOString().split('T')[0]}.json`;
+   555→   555→        a.click();
+   556→   556→        URL.revokeObjectURL(url);
+   557→   557→        toast.success('Dados exportados com sucesso');
+   558→   558→      } else { throw new Error('Erro ao obter dados'); }
+   559→   559→    } catch (err) {
+   560→   560→      toast.error(err instanceof Error ? err.message : 'Erro ao exportar dados');
+   561→   561→    } finally { setExportingData(false); }
+   562→   562→  };
+   563→   563→
+   564→   564→  const handleDeleteAccount = async () => {
+   565→   565→    if (deleteConfirmText !== 'ELIMINAR') { toast.error('Escreva ELIMINAR para confirmar'); return; }
+   566→   566→    setIsDeleting(true);
+   567→   567→    try {
+   568→   568→      const res = await apiFetch('/api/user/account', { method: 'DELETE' });
+   569→   569→      if (res.ok) {
+   570→   570→        setDeleteDialogOpen(false);
+   571→   571→        await signOut({ callbackUrl: '/' });
+   572→   572→      } else {
+   573→   573→        const data = await res.json().catch(() => null);
+   574→   574→        throw new Error(data?.error || 'Erro ao eliminar conta');
+   575→   575→      }
+   576→   576→    } catch (err) {
+   577→   577→      toast.error(err instanceof Error ? err.message : 'Erro ao eliminar conta');
+   578→   578→    } finally { setIsDeleting(false); }
+   579→   579→  };
+   580→   580→
+   581→   581→  /* ════════════════════ Derived ════════════════════ */
+   582→   582→
+   583→   583→  const languagesStr = Array.isArray(form.languages) ? form.languages.join(', ') : '';
+   584→   584→  const availDisplay = parseAvailability(profile.availabilityJson);
+   585→   585→  const preferredScheduleDisplay = parsePreferredSchedule(profile.preferredSchedule);
+   586→   586→  const preferredServicesList = parsePreferredServices(profile.preferredServices);
+   587→   587→
+   588→   588→  const currentSession = {
+   589→   589→    device: userAgentStr
+   590→   590→      ? `${parseUserAgent(userAgentStr)}${parseOS(userAgentStr) ? ` - ${parseOS(userAgentStr)}` : ''}`
+   591→   591→      : 'Navegador Atual',
+   592→   592→    lastActive: 'Agora',
+   593→   593→  };
+   594→   594→
+   595→   595→  /* ════════════════════ Loading ════════════════════ */
+   596→   596→
+   597→   597→  if (loading) return (
+   598→   598→    <PageLayout spacing="normal">
+   599→   599→      <div className="flex items-center justify-center h-64">
+   600→   600→        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+   601→   601→      </div>
+   602→   602→    </PageLayout>
+   603→   603→  );
+   604→   604→
+   605→   605→  /* ════════════════════ RENDER ════════════════════ */
+   606→   606→
+   607→   607→  return (
+   608→   608→    <PageLayout spacing="compact">
+   609→   609→      {/* ═══ HEADER CARD ═══ */}
+   610→   610→      <BloomCard className="p-4 sm:p-5">
+   611→   611→        <div className="flex flex-wrap items-center gap-4">
+   612→   612→          {/* Photo */}
+   613→   613→          <div className="relative shrink-0 group">
+   614→   614→            <div
+   615→   615→              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-secondary overflow-hidden border-2 border-card shadow-elevated flex items-center justify-center cursor-pointer"
+   616→   616→              onClick={() => photoInputRef.current?.click()}
+   617→   617→            >
+   618→   618→              {form.profileImage
+   619→   619→                ? <img
+   620→   620→                    src={form.profileImage}
+   621→   621→                    alt={form.name}
+   622→   622→                    className="w-full h-full object-cover"
+   623→   623→                    onError={(e) => {
+   624→   624→                      // If image fails to load, fall back to initial letter
+   625→   625→                      const target = e.currentTarget;
+   626→   626→                      target.style.display = 'none';
+   627→   627→                      const fallback = target.nextElementSibling as HTMLElement;
+   628→   628→                      if (fallback) fallback.style.display = 'flex';
+   629→   629→                    }}
+   630→   630→                  />
+   631→   631→                : null
+   632→   632→              }
+   633→   633→              <span
+   634→   634→                className={`text-2xl font-display font-black text-muted-foreground items-center justify-center ${form.profileImage ? 'hidden' : 'flex'}`}
+   635→   635→              >
+   636→   636→                {(form.name || session?.user?.name || 'U').charAt(0).toUpperCase()}
+   637→   637→              </span>
+   638→   638→              {/* Hover overlay */}
+   639→   639→              {!uploadingPhoto && (
+   640→   640→                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/30 rounded-2xl transition-colors flex items-center justify-center">
+   641→   641→                  <Camera size={18} className="text-primary-foreground opacity-0 group-hover:opacity-80 transition-opacity" />
+   642→   642→                </div>
+   643→   643→              )}
+   644→   644→            </div>
+   645→   645→            <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handlePhotoUpload} />
+   646→   646→            {uploadingPhoto && (
+   647→   647→              <div className="absolute inset-0 bg-foreground/40 rounded-2xl flex items-center justify-center">
+   648→   648→                <Loader2 size={18} className="animate-spin text-primary-foreground" />
+   649→   649→              </div>
+   650→   650→            )}
+   651→   651→          </div>
+   652→   652→
+   653→   653→          {/* Name & meta */}
+   654→   654→          <div className="flex-1 min-w-0">
+   655→   655→            <h2 className="text-lg sm:text-xl font-display font-black text-foreground tracking-tighter leading-none truncate" title={form.name || session?.user?.name || undefined}>
+   656→   656→              {form.name || session?.user?.name || 'Utilizador'}
+   657→   657→            </h2>
+   658→   658→            {role === 'caregiver' && (
+   659→   659→              <p className="text-xs text-muted-foreground font-medium mt-1 flex items-center gap-1.5">
+   660→   660→                <Briefcase size={12} className="text-primary" />{form.title || 'Profissional'}{form.city ? ` · ${form.city}` : ''}
+   661→   661→              </p>
+   662→   662→            )}
+   663→   663→            {role === 'family' && form.city && (
+   664→   664→              <p className="text-xs text-muted-foreground font-medium mt-1 flex items-center gap-1.5">
+   665→   665→                <MapPin size={12} className="text-primary" />{form.city}
+   666→   666→              </p>
+   667→   667→            )}
+   668→   668→            {/* Verification badges */}
+   669→   669→            {role === 'caregiver' && (
+   670→   670→              <div className="mt-1.5 flex items-center gap-1.5">
+   671→   671→                {form.caregiverVerificationStatus === 'VERIFIED' || form.verificationStatus === 'VERIFIED' ? (
+   672→   672→                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-success/10 text-success border border-success/20"><CheckCircle size={10} /> Verificado</span>
+   673→   673→                ) : (
+   674→   674→                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-warning/10 text-warning border border-warning/20"><Clock size={10} /> Pendente</span>
+   675→   675→                )}
+   676→   676→                {form.availableNow && (
+   677→   677→                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-success/10 text-success border border-success/20"><CheckCircle size={10} /> Disponível</span>
+   678→   678→                )}
+   679→   679→              </div>
+   680→   680→            )}
+   681→   681→          </div>
+   682→   682→
+   683→   683→          {/* Edit / Save button */}
+   684→   684→          <div className="shrink-0">
+   685→   685→            {isEditing ? (
+   686→   686→              <div className="flex gap-2">
+   687→   687→                <Button variant="outline" size="sm" onClick={handleCancelEdit}>Cancelar</Button>
+   688→   688→                <Button size="sm" onClick={handleSave}>
+   689→   689→                  <IconCheck className="h-4 w-4 mr-1" /> Guardar
+   690→   690→                </Button>
+   691→   691→              </div>
+   692→   692→            ) : (
+   693→   693→              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+   694→   694→                <Edit size={14} className="mr-1" /> Editar
+   695→   695→              </Button>
+   696→   696→            )}
+   697→   697→          </div>
+   698→   698→        </div>
+   699→   699→
+   700→   700→        {/* Caregiver stats */}
+   701→   701→        {role === 'caregiver' && (
+   702→   702→          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 pt-4 border-t border-border">
+   703→   703→            {[
+   704→   704→              { value: profile.totalContracts ?? '—', label: 'Contratos' },
+   705→   705→              { value: profile.totalReviews ?? '—', label: 'Avaliações' },
+   706→   706→              { value: profile.averageRating ? Number(profile.averageRating).toFixed(1) : '—', label: 'Nota' },
+   707→   707→              { value: profile.hourlyRateEur ? `€${Number(profile.hourlyRateEur).toFixed(2)}` : '—', label: '/hora' },
+   708→   708→            ].map((stat, i) => (
+   709→   709→              <div key={i} className="text-center p-2 rounded-xl hover:bg-primary/5 transition-all">
+   710→   710→                <p className="text-xs font-display font-semibold text-muted-foreground tracking-widest">{stat.label}</p>
+   711→   711→                <p className="text-base font-display font-black text-foreground tracking-tighter mt-0.5">{String(stat.value)}</p>
+   712→   712→              </div>
+   713→   713→            ))}
+   714→   714→          </div>
+   715→   715→        )}
+   716→   716→      </BloomCard>
+   717→   717→
+   718→   718→      {/* ═══ TABS ═══ */}
+   719→   719→      <Tabs value={activeTab} onValueChange={setActiveTab}>
+   720→   720→        <TabsList variant="pill" className="w-full justify-start overflow-x-auto">
+   721→   721→          <TabsTrigger value="perfil" variant="pill">Perfil</TabsTrigger>
+   722→   722→          {role === 'caregiver' && <TabsTrigger value="servicos" variant="pill">Serviços</TabsTrigger>}
+   723→   723→          {role === 'family' && <TabsTrigger value="familiar" variant="pill">Familiar</TabsTrigger>}
+   724→   724→          <TabsTrigger value="documentos" variant="pill">Documentos</TabsTrigger>
+   725→   725→          {role === 'caregiver' && <TabsTrigger value="pagamentos" variant="pill">Pagamentos</TabsTrigger>}
+   726→   726→          <TabsTrigger value="conta" variant="pill">Conta</TabsTrigger>
+   727→   727→        </TabsList>
+   728→   728→
+   729→   729→        {/* ═══ TAB: PERFIL ═══ */}
+   730→   730→        <TabsContent value="perfil" className="space-y-3 mt-3">
+   731→   731→          <BloomCard className="p-4 sm:p-5">
+   732→   732→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+   733→   733→              <div>
+   734→   734→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Nome</label>
+   735→   735→                <Input value={form.name || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   736→   736→              </div>
+   737→   737→              <div>
+   738→   738→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Cidade</label>
+   739→   739→                <Input value={form.city || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   740→   740→              </div>
+   741→   741→              <div>
+   742→   742→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Telemóvel</label>
+   743→   743→                <Input value={form.phone || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   744→   744→              </div>
+   745→   745→              <div>
+   746→   746→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">NIF</label>
+   747→   747→                <Input value={form.nif || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, nif: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   748→   748→              </div>
+   749→   749→
+   750→   750→              {/* Caregiver-specific fields */}
+   751→   751→              {role === 'caregiver' && (
+   752→   752→                <>
+   753→   753→                  <div>
+   754→   754→                    <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Título Profissional</label>
+   755→   755→                    <Input value={form.title || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   756→   756→                  </div>
+   757→   757→                  <div>
+   758→   758→                    <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Anos de Experiência</label>
+   759→   759→                    <Input type="number" value={String(form.experienceYears ?? '')} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, experienceYears: e.target.value ? Number(e.target.value) : null }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   760→   760→                  </div>
+   761→   761→                  <div className="sm:col-span-2">
+   762→   762→                    <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Bio</label>
+   763→   763→                    <textarea value={form.bio || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} rows={2}
+   764→   764→                      className="mt-1.5 w-full rounded-xl bg-secondary border border-border p-2.5 text-sm text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60" />
+   765→   765→                  </div>
+   766→   766→                  <div>
+   767→   767→                    <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Valor por Hora (€)</label>
+   768→   768→                    <Input type="number" step="0.50" value={form.hourlyRateEur != null ? String(form.hourlyRateEur) : ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, hourlyRateEur: e.target.value ? Number(e.target.value) : null }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   769→   769→                  </div>
+   770→   770→                  <div>
+   771→   771→                    <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Idiomas</label>
+   772→   772→                    <Input value={languagesStr} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, languages: e.target.value.split(',').map(l => l.trim()).filter(Boolean) }))} placeholder="Português, Inglês" className="mt-1.5 rounded-xl bg-secondary border-border" />
+   773→   773→                  </div>
+   774→   774→                </>
+   775→   775→              )}
+   776→   776→
+   777→   777→              {/* Family-specific read-only info */}
+   778→   778→              {role === 'family' && (
+   779→   779→                <>
+   780→   780→                  {preferredServicesList.length > 0 && (
+   781→   781→                    <div className="sm:col-span-2">
+   782→   782→                      <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Preferências de Serviço</label>
+   783→   783→                      <div className="mt-1.5 flex flex-wrap gap-1">
+   784→   784→                        {preferredServicesList.map((s: string) => {
+   785→   785→                          const st = SERVICE_TYPES.find(t => t.id === s);
+   786→   786→                          return (
+   787→   787→                            <span key={s} className="inline-flex px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-primary/10 text-primary border border-primary/20">
+   788→   788→                              {st?.label || s}
+   789→   789→                            </span>
+   790→   790→                          );
+   791→   791→                        })}
+   792→   792→                      </div>
+   793→   793→                    </div>
+   794→   794→                  )}
+   795→   795→                  {preferredScheduleDisplay && (
+   796→   796→                    <div className="sm:col-span-2">
+   797→   797→                      <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Horário Preferido</label>
+   798→   798→                      <div className="mt-1.5 flex flex-wrap gap-1">
+   799→   799→                        {(preferredScheduleDisplay.days || []).map((d: string, i: number) => (
+   800→   800→                          <span key={i} className="inline-flex px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-secondary text-foreground border border-border">{d}</span>
+   801→   801→                        ))}
+   802→   802→                        {(preferredScheduleDisplay.times || []).map((t: string, i: number) => (
+   803→   803→                          <span key={`t-${i}`} className="inline-flex px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-primary/10 text-primary border border-primary/20">{t}</span>
+   804→   804→                        ))}
+   805→   805→                      </div>
+   806→   806→                    </div>
+   807→   807→                  )}
+   808→   808→                </>
+   809→   809→              )}
+   810→   810→            </div>
+   811→   811→          </BloomCard>
+   812→   812→
+   813→   813→          {/* Emergency Contact - inside Perfil tab */}
+   814→   814→          <BloomCard className="p-4 sm:p-5">
+   815→   815→            <div className="flex items-center gap-2 mb-3">
+   816→   816→              <div className="w-8 h-8 rounded-xl bg-destructive/10 flex items-center justify-center">
+   817→   817→                <Shield className="h-4 w-4 text-destructive" />
+   818→   818→              </div>
+   819→   819→              <h3 className="text-sm font-display font-semibold text-foreground tracking-tight">Contacto de Emergência</h3>
+   820→   820→            </div>
+   821→   821→            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+   822→   822→              <div>
+   823→   823→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Nome</label>
+   824→   824→                <Input value={form.emergencyContactName || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, emergencyContactName: e.target.value }))} placeholder="Nome completo" className="mt-1.5 rounded-xl bg-secondary border-border" />
+   825→   825→              </div>
+   826→   826→              <div>
+   827→   827→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Telefone</label>
+   828→   828→                <Input value={form.emergencyContactPhone || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, emergencyContactPhone: e.target.value }))} placeholder="+351 9xx xxx xxx" className="mt-1.5 rounded-xl bg-secondary border-border" />
+   829→   829→              </div>
+   830→   830→              <div>
+   831→   831→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Relação</label>
+   832→   832→                <Input value={form.emergencyContactRelation || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, emergencyContactRelation: e.target.value }))} placeholder="Filho(a), Vizinho(a)..." className="mt-1.5 rounded-xl bg-secondary border-border" />
+   833→   833→              </div>
+   834→   834→            </div>
+   835→   835→          </BloomCard>
+   836→   836→        </TabsContent>
+   837→   837→
+   838→   838→        {/* ═══ TAB: SERVIÇOS (caregiver only) ═══ */}
+   839→   839→        {role === 'caregiver' && (
+   840→   840→          <TabsContent value="servicos" className="space-y-3 mt-3">
+   841→   841→            {/* Available Now toggle */}
+   842→   842→            <BloomCard className="p-4 sm:p-5">
+   843→   843→              <div className="flex items-center justify-between">
+   844→   844→                <div className="flex items-center gap-3">
+   845→   845→                  <CheckCircle size={16} className={form.availableNow ? 'text-success' : 'text-muted-foreground'} />
+   846→   846→                  <div>
+   847→   847→                    <p className="text-sm font-display font-bold text-foreground">Disponível Agora</p>
+   848→   848→                    <p className="text-xs text-muted-foreground">Mostrar que está disponível imediatamente</p>
+   849→   849→                  </div>
+   850→   850→                </div>
+   851→   851→                <Switch checked={!!form.availableNow} onCheckedChange={handleAvailableNowToggle} aria-label="Disponível agora" />
+   852→   852→              </div>
+   853→   853→            </BloomCard>
+   854→   854→
+   855→   855→            {/* Services */}
+   856→   856→            <BloomCard className="p-4 sm:p-5">
+   857→   857→              <h3 className="text-sm font-display font-semibold text-foreground tracking-tight mb-3">Serviços que Oferece</h3>
+   858→   858→              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+   859→   859→                {SERVICE_TYPES.map(service => {
+   860→   860→                  const selected = Array.isArray(form.services) && form.services.includes(service.id);
+   861→   861→                  return (
+   862→   862→                    <button key={service.id} disabled={!isEditing} onClick={() => toggleService(service.id)}
+   863→   863→                      className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all text-left ${
+   864→   864→                        selected ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-secondary border-border text-muted-foreground hover:border-primary/20'
+   865→   865→                      } ${!isEditing ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
+   866→   866→                      <div className={`w-4 h-4 rounded-md border-2 flex items-center justify-center shrink-0 ${selected ? 'bg-primary border-primary' : 'border-border'}`}>
+   867→   867→                        {selected && <IconCheck className="h-2.5 w-2.5 text-primary-foreground" />}
+   868→   868→                      </div>
+   869→   869→                      <span className="text-xs font-display font-bold">{service.label}</span>
+   870→   870→                    </button>
+   871→   871→                  );
+   872→   872→                })}
+   873→   873→              </div>
+   874→   874→            </BloomCard>
+   875→   875→
+   876→   876→            {/* Availability */}
+   877→   877→            <BloomCard className="p-4 sm:p-5">
+   878→   878→              <h3 className="text-sm font-display font-semibold text-foreground tracking-tight mb-3">Disponibilidade</h3>
+   879→   879→              {availDisplay && availDisplay.length > 0 ? (
+   880→   880→                <div className="space-y-2">
+   881→   881→                  {availDisplay.map(({ day, times }) => (
+   882→   882→                    <div key={day} className="flex items-start gap-2 p-2.5 bg-secondary/50 rounded-xl border border-border/50">
+   883→   883→                      <Calendar size={12} className="text-primary mt-0.5 shrink-0" />
+   884→   884→                      <div>
+   885→   885→                        <p className="text-xs font-display font-bold text-foreground">{DAY_LABELS[day] || day}</p>
+   886→   886→                        <div className="flex flex-wrap gap-1 mt-1">
+   887→   887→                          {times.map((t: string) => (
+   888→   888→                            <span key={t} className="inline-flex px-1.5 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-primary/10 text-primary border border-primary/20">
+   889→   889→                              {AVAILABILITY_LABELS[t] || t}
+   890→   890→                            </span>
+   891→   891→                          ))}
+   892→   892→                        </div>
+   893→   893→                      </div>
+   894→   894→                    </div>
+   895→   895→                  ))}
+   896→   896→                </div>
+   897→   897→              ) : (
+   898→   898→                <div className="p-3 bg-secondary/50 rounded-xl border border-border/50 text-center">
+   899→   899→                  <Calendar size={20} className="mx-auto text-muted-foreground mb-1" />
+   900→   900→                  <p className="text-xs text-muted-foreground">Nenhuma disponibilidade configurada.</p>
+   901→   901→                </div>
+   902→   902→              )}
+   903→   903→            </BloomCard>
+   904→   904→          </TabsContent>
+   905→   905→        )}
+   906→   906→
+   907→   907→        {/* ═══ TAB: FAMILIAR (family only) ═══ */}
+   908→   908→        {role === 'family' && (
+   909→   909→          <TabsContent value="familiar" className="space-y-3 mt-3">
+   910→   910→            <BloomCard className="p-4 sm:p-5">
+   911→   911→              <div className="flex items-center gap-2 mb-3">
+   912→   912→                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+   913→   913→                  <Heart className="h-4 w-4 text-primary" />
+   914→   914→                </div>
+   915→   915→                <h3 className="text-sm font-display font-semibold text-foreground tracking-tight">Dados da Pessoa a Cuidar</h3>
+   916→   916→              </div>
+   917→   917→
+   918→   918→              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   919→   919→                <div>
+   920→   920→                  <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Nome da Pessoa a Cuidar</label>
+   921→   921→                  <Input value={form.elderName || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, elderName: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   922→   922→                </div>
+   923→   923→                <div>
+   924→   924→                  <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Idade</label>
+   925→   925→                  <Input type="number" value={String(form.elderAge ?? '')} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, elderAge: e.target.value ? Number(e.target.value) : null }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   926→   926→                </div>
+   927→   927→                <div>
+   928→   928→                  <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Nível de Mobilidade</label>
+   929→   929→                  <Input value={MOBILITY_LABELS[form.mobilityLevel || ''] || form.mobilityLevel || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, mobilityLevel: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   930→   930→                </div>
+   931→   931→                <div>
+   932→   932→                  <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Condições Médicas</label>
+   933→   933→                  {!isEmptyValue(form.medicalConditions) ? (
+   934→   934→                    <div className="mt-1.5 flex flex-wrap gap-1">
+   935→   935→                      {String(form.medicalConditions).split(',').map((c, i) => {
+   936→   936→                        const trimmed = c.trim();
+   937→   937→                        if (!trimmed || trimmed === '{}') return null;
+   938→   938→                        const st = SERVICE_TYPES.find(t => t.id === trimmed);
+   939→   939→                        return (
+   940→   940→                          <span key={i} className="inline-flex px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-primary/10 text-primary border border-primary/20">
+   941→   941→                            {st?.label || trimmed}
+   942→   942→                          </span>
+   943→   943→                        );
+   944→   944→                      })}
+   945→   945→                    </div>
+   946→   946→                  ) : (
+   947→   947→                    <p className="mt-1.5 text-sm text-muted-foreground">Nenhuma condição registada</p>
+   948→   948→                  )}
+   949→   949→                  {isEditing && (
+   950→   950→                    <Input value={isEmptyValue(form.medicalConditions) ? '' : String(form.medicalConditions)} onChange={e => setForm(f => ({ ...f, medicalConditions: e.target.value }))} className="mt-2 rounded-xl bg-secondary border-border" placeholder="Diabetes, Hipertensão..." />
+   951→   951→                  )}
+   952→   952→                </div>
+   953→   953→                <div className="sm:col-span-2">
+   954→   954→                  <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Necessidades Especiais</label>
+   955→   955→                  <textarea value={isEmptyValue(form.elderNeeds) ? '' : String(form.elderNeeds)} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, elderNeeds: e.target.value }))} rows={2}
+   956→   956→                    className="mt-1.5 w-full rounded-xl bg-secondary border border-border p-2.5 text-sm text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60" />
+   957→   957→                </div>
+   958→   958→              </div>
+   959→   959→            </BloomCard>
+   960→   960→          </TabsContent>
+   961→   961→        )}
+   962→   962→
+   963→   963→        {/* ═══ TAB: DOCUMENTOS ═══ */}
+   964→   964→        <TabsContent value="documentos" className="space-y-3 mt-3">
+   965→   965→          <BloomCard className="p-4 sm:p-5">
+   966→   966→            <h3 className="text-sm font-display font-semibold text-foreground tracking-tight mb-3">Documentos de Identificação</h3>
+   967→   967→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   968→   968→              <div>
+   969→   969→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Tipo de Documento</label>
+   970→   970→                <Input value={form.documentType || 'Cartão de Cidadão'} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, documentType: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   971→   971→              </div>
+   972→   972→              <div>
+   973→   973→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Nº do Documento</label>
+   974→   974→                <Input value={form.documentNumber || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, documentNumber: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" placeholder="00000000" />
+   975→   975→              </div>
+   976→   976→            </div>
+   977→   977→          </BloomCard>
+   978→   978→
+   979→   979→          {/* Background check — caregiver only */}
+   980→   980→          {role === 'caregiver' && (
+   981→   981→            <BloomCard className="p-4 sm:p-5">
+   982→   982→              <div className="flex items-center justify-between mb-3">
+   983→   983→                <h3 className="text-sm font-display font-semibold text-foreground tracking-tight">Registo Criminal</h3>
+   984→   984→                {profile.backgroundCheckStatus === 'VERIFIED'
+   985→   985→                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-success/10 text-success border border-success/20"><CheckCircle size={10} /> Verificado</span>
+   986→   986→                  : profile.backgroundCheckStatus === 'SUBMITTED'
+   987→   987→                    ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-blue-500/10 text-blue-500 border border-blue-500/30"><Clock size={10} /> Enviado</span>
+   988→   988→                    : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-warning/10 text-warning border border-warning/20"><Clock size={10} /> Pendente</span>}
+   989→   989→              </div>
+   990→   990→              <p className="text-xs text-muted-foreground mb-3">Upload do comprovativo de registo criminal para verificação.</p>
+   991→   991→              <input ref={docInputRef} type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={handleDocUpload} />
+   992→   992→              <Button variant="outline" size="sm" onClick={() => docInputRef.current?.click()} disabled={uploadingDoc}>
+   993→   993→                {uploadingDoc ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+   994→   994→                <span className="ml-1.5">{uploadingDoc ? 'A enviar...' : 'Enviar Comprovativo'}</span>
+   995→   995→              </Button>
+   996→   996→            </BloomCard>
+   997→   997→          )}
+   998→   998→
+   999→   999→          {/* Certifications */}
+
+[showing lines 500-999 of 1500; use offset=1000 with limit to continue reading]

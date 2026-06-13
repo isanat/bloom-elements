@@ -1,0 +1,1500 @@
+     1→'use client';
+     2→
+     3→import React, { useState, useEffect, useRef, useCallback } from 'react';
+     4→import { useSession, signOut } from 'next-auth/react';
+     5→import { isCaregiver, isAdmin } from '@/lib/roles';
+     6→import { BloomCard } from '@/components/bloom-custom/BloomCard';
+     7→import { BloomInfoRow } from '@/components/bloom-custom/BloomInfoRow';
+     8→import { BloomDialog } from '@/components/bloom-custom/BloomDialog';
+     9→import { BloomAlert } from '@/components/bloom-custom/BloomAlert';
+    10→import { showBloomToast } from '@/components/bloom-custom/BloomToast';
+    11→import { apiFetch } from '@/lib/api-client';
+    12→import { PageLayout } from '@/components/layout/PageLayout';
+    13→import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+    14→import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+    15→import { ThemeToggle } from '@/components/ui/theme-toggle';
+    16→import { Button } from '@/components/ui/button';
+    17→import { Input } from '@/components/ui/input';
+    18→import { Switch } from '@/components/ui/switch';
+    19→import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+    20→import { toast } from 'sonner';
+    21→import {
+    22→  IconUser, IconBell, IconGlobe, IconShield, IconSmartphone,
+    23→  IconTrash, IconLoader2, IconLock, IconDownload, IconEye,
+    24→  IconEyeOff, IconCheck, IconLogout, IconMail,
+    25→} from '@/components/icons';
+    26→import {
+    27→  Camera, Edit, Upload, CheckCircle, Clock, Briefcase,
+    28→  Loader2, Calendar, MapPin, CreditCard, Building2, Wallet,
+    29→  ExternalLink, AlertTriangle, FileText, Heart, Shield,
+    30→} from 'lucide-react';
+    31→
+    32→/* ───────────────────────────── Constants ───────────────────────────── */
+    33→
+    34→const SERVICE_TYPES = [
+    35→  { id: 'PERSONAL_CARE', label: 'Cuidados Pessoais' },
+    36→  { id: 'MEDICATION', label: 'Medicação' },
+    37→  { id: 'MOBILITY', label: 'Mobilidade' },
+    38→  { id: 'COMPANIONSHIP', label: 'Companhia' },
+    39→  { id: 'MEAL_PREPARATION', label: 'Refeições' },
+    40→  { id: 'LIGHT_HOUSEWORK', label: 'Tarefas Domésticas' },
+    41→  { id: 'TRANSPORTATION', label: 'Transporte' },
+    42→  { id: 'COGNITIVE_SUPPORT', label: 'Estimulação Cognitiva' },
+    43→  { id: 'NIGHT_CARE', label: 'Cuidados Noturnos' },
+    44→  { id: 'PALLIATIVE_CARE', label: 'Cuidados Paliativos' },
+    45→  { id: 'PHYSIOTHERAPY', label: 'Fisioterapia' },
+    46→  { id: 'NURSING_CARE', label: 'Enfermagem' },
+    47→];
+    48→
+    49→const MOBILITY_LABELS: Record<string, string> = {
+    50→  'Independente': 'Independente',
+    51→  'Mobilidade Parcial': 'Mobilidade Parcial',
+    52→  'Cadeira de Rodas': 'Cadeira de Rodas',
+    53→  'Acamado': 'Acamado',
+    54→};
+    55→
+    56→const AVAILABILITY_LABELS: Record<string, string> = {
+    57→  'weekday_morning': 'Manhã (Semana)',
+    58→  'weekday_afternoon': 'Tarde (Semana)',
+    59→  'weekday_evening': 'Noite (Semana)',
+    60→  'weekend_morning': 'Manhã (Fim de semana)',
+    61→  'weekend_afternoon': 'Tarde (Fim de semana)',
+    62→  'weekend_evening': 'Noite (Fim de semana)',
+    63→  'overnight': 'Madrugada',
+    64→  'live_in': 'Full-time / Interno',
+    65→};
+    66→
+    67→const DAY_LABELS: Record<string, string> = {
+    68→  'MONDAY': 'Segunda-feira', 'TUESDAY': 'Terça-feira',
+    69→  'WEDNESDAY': 'Quarta-feira', 'THURSDAY': 'Quinta-feira',
+    70→  'FRIDAY': 'Sexta-feira', 'SATURDAY': 'Sábado', 'SUNDAY': 'Domingo',
+    71→};
+    72→
+    73→/* ───────────────────────────── Types ───────────────────────────── */
+    74→
+    75→interface ProfileData {
+    76→  name?: string; email?: string; phone?: string; nif?: string;
+    77→  documentType?: string; documentNumber?: string;
+    78→  backgroundCheckStatus?: string; backgroundCheckUrl?: string; profileImage?: string;
+    79→  city?: string; country?: string; address?: string;
+    80→  title?: string; bio?: string; experienceYears?: number | null;
+    81→  education?: string; certifications?: string;
+    82→  languages?: string[]; services?: string[];
+    83→  hourlyRateEur?: number | null;
+    84→  averageRating?: number | null; totalReviews?: number | null;
+    85→  totalContracts?: number | null; totalHoursWorked?: number | null;
+    86→  availabilityJson?: string; availableNow?: boolean;
+    87→  elderName?: string; elderAge?: number | null; elderNeeds?: string;
+    88→  medicalConditions?: string; mobilityLevel?: string;
+    89→  preferredServices?: string; preferredSchedule?: string;
+    90→  emergencyContactName?: string; emergencyContactPhone?: string; emergencyContactRelation?: string;
+    91→  iban?: string;
+    92→  preferredPaymentMethod?: string;
+    93→  stripeConnectAccountId?: string;
+    94→  stripeConnectOnboardingComplete?: boolean;
+    95→  verificationStatus?: string;
+    96→  caregiverVerificationStatus?: string;
+    97→  // Notifications & preferences (stored in User table)
+    98→  notificationsEmail?: boolean;
+    99→  notificationsPush?: boolean;
+   100→  preferredLanguage?: string;
+   101→}
+   102→
+   103→/* ───────────────────────────── Helpers ───────────────────────────── */
+   104→
+   105→function isEmptyValue(value: any): boolean {
+   106→  if (!value) return true;
+   107→  if (value === '{}') return true;
+   108→  if (typeof value === 'object' && Object.keys(value).length === 0) return true;
+   109→  return false;
+   110→}
+   111→
+   112→function sanitizeDateValue(value: string | null | undefined): string {
+   113→  if (!value) return '';
+   114→  const trimmed = value.trim();
+   115→  if (trimmed === '0' || trimmed === '0/0/0' || trimmed === 'NaN') return '';
+   116→  return trimmed;
+   117→}
+   118→
+   119→function parseAvailability(json?: string) {
+   120→  if (!json) return null;
+   121→  try {
+   122→    const avail = JSON.parse(json);
+   123→    if (typeof avail === 'object' && avail !== null) {
+   124→      return Object.entries(avail).map(([day, times]) => ({
+   125→        day,
+   126→        times: Array.isArray(times) ? times : [],
+   127→      }));
+   128→    }
+   129→    return null;
+   130→  } catch { return null; }
+   131→}
+   132→
+   133→function parsePreferredSchedule(json?: string) {
+   134→  if (!json) return null;
+   135→  try { return JSON.parse(json); } catch { return null; }
+   136→}
+   137→
+   138→function parsePreferredServices(json?: string): string[] {
+   139→  if (!json) return [];
+   140→  try {
+   141→    const s = JSON.parse(json);
+   142→    return Array.isArray(s) ? s : [];
+   143→  } catch { return []; }
+   144→}
+   145→
+   146→function parseUserAgent(ua: string): string {
+   147→  if (ua.includes('Edg')) return 'Edge';
+   148→  if (ua.includes('Chrome') && !ua.includes('Edg')) return 'Chrome';
+   149→  if (ua.includes('Firefox')) return 'Firefox';
+   150→  if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+   151→  if (ua.includes('Opera') || ua.includes('OPR')) return 'Opera';
+   152→  return 'Navegador';
+   153→}
+   154→
+   155→function parseOS(ua: string): string {
+   156→  if (ua.includes('Windows')) return 'Windows';
+   157→  if (ua.includes('Mac OS X')) return 'macOS';
+   158→  if (ua.includes('Linux')) return 'Linux';
+   159→  if (ua.includes('Android')) return 'Android';
+   160→  if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
+   161→  return '';
+   162→}
+   163→
+   164→/* ═══════════════════════════ MAIN PAGE ═══════════════════════════ */
+   165→
+   166→export default function ProfilePage() {
+   167→  const { data: session } = useSession();
+   168→  // ADMIN users see the CAREGIVER view (they test the full platform)
+   169→  const role = (isCaregiver(session?.user) || isAdmin(session?.user)) ? 'caregiver' : 'family';
+   170→
+   171→  /* ── Profile state ── */
+   172→  const [profile, setProfile] = useState<ProfileData>({});
+   173→  const [form, setForm] = useState<ProfileData>({});
+   174→  const [isEditing, setIsEditing] = useState(false);
+   175→  const [loading, setLoading] = useState(true);
+   176→  const [activeTab, setActiveTab] = useState('perfil');
+   177→
+   178→  /* ── Upload state ── */
+   179→  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+   180→  const [uploadingDoc, setUploadingDoc] = useState(false);
+   181→  const photoInputRef = useRef<HTMLInputElement>(null);
+   182→  const docInputRef = useRef<HTMLInputElement>(null);
+   183→
+   184→  /* ── Payment state ── */
+   185→  const [editIban, setEditIban] = useState('');
+   186→  const [savingIban, setSavingIban] = useState(false);
+   187→  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('IBAN');
+   188→  const [savingPaymentMethod, setSavingPaymentMethod] = useState(false);
+   189→  const [connectingStripe, setConnectingStripe] = useState(false);
+   190→
+   191→  /* ── Account / security state ── */
+   192→  const [currentPassword, setCurrentPassword] = useState('');
+   193→  const [newPassword, setNewPassword] = useState('');
+   194→  const [confirmPassword, setConfirmPassword] = useState('');
+   195→  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+   196→  const [showNewPassword, setShowNewPassword] = useState(false);
+   197→  const [changingPassword, setChangingPassword] = useState(false);
+   198→  const [userAgentStr, setUserAgentStr] = useState('');
+   199→
+   200→  /* ── Delete account state ── */
+   201→  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+   202→  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+   203→  const [isDeleting, setIsDeleting] = useState(false);
+   204→
+   205→  /* ── Notification state ── */
+   206→  const [emailNotifications, setEmailNotifications] = useState(true);
+   207→  const [emailNewProposals, setEmailNewProposals] = useState(true);
+   208→  const [emailContractUpdates, setEmailContractUpdates] = useState(true);
+   209→  const [emailPaymentReminders, setEmailPaymentReminders] = useState(true);
+   210→  const [pushEnabled, setPushEnabled] = useState(false);
+   211→  const [pushLoading, setPushLoading] = useState(false);
+   212→  const [pushAvailable, setPushAvailable] = useState<boolean | null>(null);
+   213→  const [vapidPublicKey, setVapidPublicKey] = useState<string | null>(null);
+   214→
+   215→  /* ── Preferences state ── */
+   216→  const [language, setLanguage] = useState('pt');
+   217→
+   218→  /* ── Privacy state ── */
+   219→  const [exportingData, setExportingData] = useState(false);
+   220→
+   221→  /* ════════════════════ Data Loading ════════════════════ */
+   222→
+   223→  const loadProfile = useCallback(async () => {
+   224→    try {
+   225→      const r = await apiFetch('/api/user/profile');
+   226→      if (!r.ok) {
+   227→        toast.error('Erro ao carregar perfil');
+   228→        return;
+   229→      }
+   230→      const data = await r.json();
+   231→      const p: ProfileData = { ...data.profile };
+   232→      // The GET endpoint now returns services/languages already parsed from JSON
+   233→      // But keep defensive parsing in case of edge cases
+   234→      if (typeof p.services === 'string') { try { p.services = JSON.parse(p.services as unknown as string); } catch { p.services = []; } }
+   235→      if (!Array.isArray(p.services)) p.services = [];
+   236→      if (typeof p.languages === 'string') { try { p.languages = JSON.parse(p.languages as unknown as string); } catch { p.languages = []; } }
+   237→      if (!Array.isArray(p.languages)) p.languages = [];
+   238→      // Parse medicalConditions from JSON string to display-friendly format
+   239→      if (typeof p.medicalConditions === 'string' && p.medicalConditions.trim()) {
+   240→        try {
+   241→          const parsed = JSON.parse(p.medicalConditions);
+   242→          if (Array.isArray(parsed)) {
+   243→            p.medicalConditions = parsed.join(', ');
+   244→          }
+   245→        } catch {
+   246→          // Not valid JSON — keep as-is (could be comma-separated)
+   247→        }
+   248→      }
+   249→      if (p.hourlyRateEur != null) p.hourlyRateEur = Number(p.hourlyRateEur);
+   250→      setProfile(p);
+   251→      setForm({ ...p });
+   252→      setEditIban(p.iban || '');
+   253→      setSelectedPaymentMethod(p.preferredPaymentMethod || 'IBAN');
+   254→      // Load notification & language settings from profile
+   255→      setEmailNotifications(p.notificationsEmail !== false);
+   256→      setLanguage(p.preferredLanguage || 'pt');
+   257→    } catch {
+   258→      toast.error('Erro ao carregar perfil');
+   259→    } finally {
+   260→      setLoading(false);
+   261→    }
+   262→  }, []);
+   263→
+   264→  useEffect(() => { loadProfile(); }, [loadProfile]);
+   265→
+   266→  useEffect(() => {
+   267→    if (typeof navigator !== 'undefined') setUserAgentStr(navigator.userAgent);
+   268→  }, []);
+   269→
+   270→  useEffect(() => {
+   271→    apiFetch('/api/push/subscribe')
+   272→      .then(res => res.json())
+   273→      .then(data => {
+   274→        setPushAvailable(data.pushEnabled === true);
+   275→        setVapidPublicKey(data.publicKey || null);
+   276→      })
+   277→      .catch(() => setPushAvailable(false));
+   278→
+   279→    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
+   280→      navigator.serviceWorker.ready
+   281→        .then(reg => reg.pushManager.getSubscription())
+   282→        .then(sub => { if (sub) setPushEnabled(true); })
+   283→        .catch(() => {});
+   284→    }
+   285→  }, []);
+   286→
+   287→  /* ════════════════════ Handlers ════════════════════ */
+   288→
+   289→  const handleSave = async () => {
+   290→    const payload: Record<string, unknown> = {
+   291→      name: form.name, phone: form.phone, nif: form.nif,
+   292→      documentType: form.documentType, documentNumber: form.documentNumber,
+   293→    };
+   294→    if (role === 'caregiver') {
+   295→      Object.assign(payload, {
+   296→        title: form.title, bio: form.bio, city: form.city, certifications: form.certifications,
+   297→        services: Array.isArray(form.services) ? form.services : [],
+   298→        languages: Array.isArray(form.languages) ? form.languages : [],
+   299→        ...(form.experienceYears != null && { experienceYears: Number(form.experienceYears) }),
+   300→        ...(form.hourlyRateEur != null && { hourlyRateEur: Number(form.hourlyRateEur) }),
+   301→        emergencyContactName: form.emergencyContactName || null,
+   302→        emergencyContactPhone: form.emergencyContactPhone || null,
+   303→        emergencyContactRelation: form.emergencyContactRelation || null,
+   304→      });
+   305→    } else {
+   306→      Object.assign(payload, {
+   307→        city: form.city, elderName: form.elderName, elderNeeds: form.elderNeeds,
+   308→        medicalConditions: form.medicalConditions, mobilityLevel: form.mobilityLevel,
+   309→        emergencyContactName: form.emergencyContactName || null,
+   310→        emergencyContactPhone: form.emergencyContactPhone || null,
+   311→        emergencyContactRelation: form.emergencyContactRelation || null,
+   312→        ...(form.elderAge != null && { elderAge: Number(form.elderAge) }),
+   313→      });
+   314→    }
+   315→    try {
+   316→      const res = await apiFetch('/api/user/profile', { method: 'PUT', body: JSON.stringify(payload) });
+   317→      if (res.ok) {
+   318→        // Re-fetch from server to ensure client state matches DB
+   319→        await loadProfile();
+   320→        setIsEditing(false);
+   321→        toast.success('Guardado com sucesso!');
+   322→      } else {
+   323→        const err = await res.json().catch(() => null);
+   324→        toast.error(err?.error || 'Erro ao guardar');
+   325→        console.error('[Profile Save] Error:', err);
+   326→      }
+   327→    } catch (error) {
+   328→      toast.error('Erro de ligação ao guardar');
+   329→      console.error('[Profile Save] Network error:', error);
+   330→    }
+   331→  };
+   332→
+   333→  const handleCancelEdit = () => {
+   334→    setForm({ ...profile });
+   335→    setIsEditing(false);
+   336→  };
+   337→
+   338→  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+   339→    const file = e.target.files?.[0];
+   340→    if (!file) return;
+   341→    setUploadingPhoto(true);
+   342→    try {
+   343→      const fd = new FormData();
+   344→      fd.append('file', file);
+   345→      fd.append('type', 'profile');
+   346→      const uploadRes = await apiFetch('/api/upload', { method: 'POST', body: fd });
+   347→      if (!uploadRes.ok) throw new Error('Upload failed');
+   348→      const { url } = await uploadRes.json();
+   349→      const profileRes = await apiFetch('/api/user/profile', { method: 'PUT', body: JSON.stringify({ profileImage: url }) });
+   350→      if (!profileRes.ok) throw new Error('Profile update failed');
+   351→      setProfile(prev => prev ? { ...prev, profileImage: url } : prev);
+   352→      setForm(prev => ({ ...prev, profileImage: url }));
+   353→      // Dispatch custom event so header picks up the new photo
+   354→      // (profileImage is NOT stored in JWT to keep cookies small)
+   355→      window.dispatchEvent(new CustomEvent('profile-image-updated', { detail: { profileImage: url } }));
+   356→      showBloomToast({ variant: 'success', message: 'Foto atualizada!' });
+   357→    } catch {
+   358→      showBloomToast({ variant: 'error', message: 'Erro ao carregar foto' });
+   359→    } finally {
+   360→      setUploadingPhoto(false);
+   361→      if (photoInputRef.current) photoInputRef.current.value = '';
+   362→    }
+   363→  };
+   364→
+   365→  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+   366→    const file = e.target.files?.[0];
+   367→    if (!file) return;
+   368→    setUploadingDoc(true);
+   369→    try {
+   370→      const fd = new FormData();
+   371→      fd.append('file', file);
+   372→      fd.append('type', 'document');
+   373→      const uploadRes = await apiFetch('/api/upload', { method: 'POST', body: fd });
+   374→      if (!uploadRes.ok) throw new Error('Upload failed');
+   375→      const { url } = await uploadRes.json();
+   376→      const profileRes = await apiFetch('/api/user/profile', { method: 'PUT', body: JSON.stringify({ backgroundCheckUrl: url, backgroundCheckStatus: 'SUBMITTED' }) });
+   377→      if (!profileRes.ok) throw new Error('Profile update failed');
+   378→      setProfile(prev => prev ? { ...prev, backgroundCheckUrl: url, backgroundCheckStatus: 'SUBMITTED' } : prev);
+   379→      setForm(prev => ({ ...prev, backgroundCheckUrl: url, backgroundCheckStatus: 'SUBMITTED' }));
+   380→      showBloomToast({ variant: 'success', message: 'Documento carregado com sucesso!' });
+   381→    } catch {
+   382→      showBloomToast({ variant: 'error', message: 'Erro ao carregar documento' });
+   383→    } finally {
+   384→      setUploadingDoc(false);
+   385→      if (docInputRef.current) docInputRef.current.value = '';
+   386→    }
+   387→  };
+   388→
+   389→  const toggleService = (id: string) => {
+   390→    if (!isEditing) return;
+   391→    setForm(f => ({
+   392→      ...f,
+   393→      services: Array.isArray(f.services)
+   394→        ? f.services.includes(id) ? f.services.filter(s => s !== id) : [...f.services, id]
+   395→        : [id],
+   396→    }));
+   397→  };
+   398→
+   399→  const handleAvailableNowToggle = async () => {
+   400→    const newVal = !form.availableNow;
+   401→    try {
+   402→      const res = await apiFetch('/api/user/profile', { method: 'PUT', body: JSON.stringify({ availableNow: newVal }) });
+   403→      if (res.ok) {
+   404→        await loadProfile();
+   405→        toast.success(newVal ? 'Marcado como disponível!' : 'Disponibilidade removida');
+   406→      } else {
+   407→        const err = await res.json().catch(() => null);
+   408→        toast.error(err?.error || 'Erro ao actualizar disponibilidade');
+   409→      }
+   410→    } catch {
+   411→      toast.error('Erro de ligação');
+   412→    }
+   413→  };
+   414→
+   415→  const handleSaveIban = async () => {
+   416→    const clean = editIban.replace(/\s/g, '').toUpperCase();
+   417→    if (clean.length < 15) { toast.error('IBAN inválido'); return; }
+   418→    setSavingIban(true);
+   419→    try {
+   420→      const payload: Record<string, unknown> = { iban: clean };
+   421→      if (selectedPaymentMethod === 'IBAN') payload.preferredPaymentMethod = 'IBAN';
+   422→      const res = await apiFetch('/api/user/profile', { method: 'PUT', body: JSON.stringify(payload) });
+   423→      if (res.ok) {
+   424→        await loadProfile();
+   425→        toast.success('IBAN guardado!');
+   426→      } else {
+   427→        const err = await res.json().catch(() => null);
+   428→        toast.error(err?.error || 'Erro ao guardar IBAN');
+   429→      }
+   430→    } catch {
+   431→      toast.error('Erro de ligação ao guardar IBAN');
+   432→    }
+   433→    setSavingIban(false);
+   434→  };
+   435→
+   436→  const handleSavePaymentMethod = async () => {
+   437→    setSavingPaymentMethod(true);
+   438→    try {
+   439→      const res = await apiFetch('/api/user/profile', { method: 'PUT', body: JSON.stringify({ preferredPaymentMethod: selectedPaymentMethod }) });
+   440→      if (res.ok) {
+   441→        await loadProfile();
+   442→        toast.success('Método de recebimento atualizado!');
+   443→      } else {
+   444→        toast.error('Erro ao guardar método de recebimento');
+   445→      }
+   446→    } catch {
+   447→      toast.error('Erro ao guardar método de recebimento');
+   448→    }
+   449→    setSavingPaymentMethod(false);
+   450→  };
+   451→
+   452→  const handleStripeConnect = async () => {
+   453→    setConnectingStripe(true);
+   454→    try {
+   455→      const res = await apiFetch('/api/payments/stripe/connect', { method: 'POST' });
+   456→      if (res.ok) {
+   457→        const data = await res.json();
+   458→        if (data.url) { window.open(data.url, '_blank'); toast.success('Janela de onboarding Stripe aberta!'); }
+   459→      } else { toast.error('Erro ao iniciar Stripe Connect'); }
+   460→    } catch { toast.error('Erro ao conectar com Stripe'); }
+   461→    setConnectingStripe(false);
+   462→  };
+   463→
+   464→  const handlePasswordChange = async () => {
+   465→    if (!currentPassword || !newPassword || !confirmPassword) { toast.error('Preencha todos os campos de palavra-passe'); return; }
+   466→    if (newPassword.length < 8) { toast.error('A nova palavra-passe deve ter pelo menos 8 caracteres'); return; }
+   467→    if (newPassword !== confirmPassword) { toast.error('As palavras-passe não coincidem'); return; }
+   468→    setChangingPassword(true);
+   469→    try {
+   470→      const res = await apiFetch('/api/auth/reset-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ currentPassword, newPassword }) });
+   471→      if (res.ok) {
+   472→        toast.success('Palavra-passe alterada com sucesso');
+   473→        setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
+   474→      } else {
+   475→        const data = await res.json().catch(() => null);
+   476→        throw new Error(data?.error || 'Erro ao alterar palavra-passe');
+   477→      }
+   478→    } catch (err) {
+   479→      toast.error(err instanceof Error ? err.message : 'Erro ao alterar palavra-passe');
+   480→    } finally { setChangingPassword(false); }
+   481→  };
+   482→
+   483→  const handleTogglePush = useCallback(async () => {
+   484→    setPushLoading(true);
+   485→    try {
+   486→      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+   487→        showBloomToast({ variant: 'error', message: 'Notificações push não suportadas neste navegador' });
+   488→        return;
+   489→      }
+   490→      if (!pushEnabled) {
+   491→        const permission = await Notification.requestPermission();
+   492→        if (permission !== 'granted') { showBloomToast({ variant: 'info', message: 'Permissão de notificação negada' }); return; }
+   493→        const registration = await navigator.serviceWorker.ready;
+   494→        const subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidPublicKey || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY });
+   495→        const res = await apiFetch('/api/push/subscribe', { method: 'POST', body: JSON.stringify(subscription.toJSON()) });
+   496→        if (!res.ok) { const err = await res.json().catch(() => null); throw new Error(err?.error || 'Erro ao registar subscrição'); }
+   497→        setPushEnabled(true);
+   498→        showBloomToast({ variant: 'success', message: 'Notificações push ativadas!' });
+   499→      } else {
+   500→        const registration = await navigator.serviceWorker.ready;
+   501→        const subscription = await registration.pushManager.getSubscription();
+   502→        if (subscription) {
+   503→          const endpoint = subscription.endpoint;
+   504→          await subscription.unsubscribe();
+   505→          await apiFetch('/api/push/subscribe', { method: 'DELETE', body: JSON.stringify({ endpoint }) }).catch(() => {});
+   506→        }
+   507→        setPushEnabled(false);
+   508→        showBloomToast({ variant: 'info', message: 'Notificações push desativadas' });
+   509→      }
+   510→    } catch (error) {
+   511→      console.error('Push subscription error:', error);
+   512→      showBloomToast({ variant: 'error', message: 'Erro ao configurar notificações' });
+   513→    } finally { setPushLoading(false); }
+   514→  }, [pushEnabled, vapidPublicKey]);
+   515→
+   516→  const handleEmailNotificationToggle = async (enabled: boolean) => {
+   517→    setEmailNotifications(enabled);
+   518→    try {
+   519→      const res = await apiFetch('/api/user/profile', { method: 'PUT', body: JSON.stringify({ notificationsEmail: enabled }) });
+   520→      if (!res.ok) throw new Error('Failed');
+   521→      await loadProfile();
+   522→      toast.success(enabled ? 'Notificações por email ativadas' : 'Notificações por email desativadas');
+   523→    } catch {
+   524→      toast.error('Erro ao actualizar notificações');
+   525→      setEmailNotifications(!enabled); // revert on error
+   526→    }
+   527→  };
+   528→
+   529→  const handleLanguageChange = async (newLang: string) => {
+   530→    const prevLang = language;
+   531→    setLanguage(newLang);
+   532→    try {
+   533→      const res = await apiFetch('/api/user/profile', { method: 'PUT', body: JSON.stringify({ preferredLanguage: newLang }) });
+   534→      if (!res.ok) throw new Error('Failed');
+   535→      await loadProfile();
+   536→      toast.success('Idioma atualizado');
+   537→    } catch {
+   538→      toast.error('Erro ao actualizar idioma');
+   539→      setLanguage(prevLang); // revert on error
+   540→    }
+   541→  };
+   542→
+   543→  const handleDataExport = async () => {
+   544→    setExportingData(true);
+   545→    try {
+   546→      const profileRes = await apiFetch('/api/user/profile');
+   547→      if (profileRes.ok) {
+   548→        const profileData = await profileRes.json();
+   549→        const exportData = { exportDate: new Date().toISOString(), user: profileData.user || {}, profile: profileData.profile || {} };
+   550→        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+   551→        const url = URL.createObjectURL(blob);
+   552→        const a = document.createElement('a');
+   553→        a.href = url;
+   554→        a.download = `evyra-dados-${new Date().toISOString().split('T')[0]}.json`;
+   555→        a.click();
+   556→        URL.revokeObjectURL(url);
+   557→        toast.success('Dados exportados com sucesso');
+   558→      } else { throw new Error('Erro ao obter dados'); }
+   559→    } catch (err) {
+   560→      toast.error(err instanceof Error ? err.message : 'Erro ao exportar dados');
+   561→    } finally { setExportingData(false); }
+   562→  };
+   563→
+   564→  const handleDeleteAccount = async () => {
+   565→    if (deleteConfirmText !== 'ELIMINAR') { toast.error('Escreva ELIMINAR para confirmar'); return; }
+   566→    setIsDeleting(true);
+   567→    try {
+   568→      const res = await apiFetch('/api/user/account', { method: 'DELETE' });
+   569→      if (res.ok) {
+   570→        setDeleteDialogOpen(false);
+   571→        await signOut({ callbackUrl: '/' });
+   572→      } else {
+   573→        const data = await res.json().catch(() => null);
+   574→        throw new Error(data?.error || 'Erro ao eliminar conta');
+   575→      }
+   576→    } catch (err) {
+   577→      toast.error(err instanceof Error ? err.message : 'Erro ao eliminar conta');
+   578→    } finally { setIsDeleting(false); }
+   579→  };
+   580→
+   581→  /* ════════════════════ Derived ════════════════════ */
+   582→
+   583→  const languagesStr = Array.isArray(form.languages) ? form.languages.join(', ') : '';
+   584→  const availDisplay = parseAvailability(profile.availabilityJson);
+   585→  const preferredScheduleDisplay = parsePreferredSchedule(profile.preferredSchedule);
+   586→  const preferredServicesList = parsePreferredServices(profile.preferredServices);
+   587→
+   588→  const currentSession = {
+   589→    device: userAgentStr
+   590→      ? `${parseUserAgent(userAgentStr)}${parseOS(userAgentStr) ? ` - ${parseOS(userAgentStr)}` : ''}`
+   591→      : 'Navegador Atual',
+   592→    lastActive: 'Agora',
+   593→  };
+   594→
+   595→  /* ════════════════════ Loading ════════════════════ */
+   596→
+   597→  if (loading) return (
+   598→    <PageLayout spacing="normal">
+   599→      <div className="flex items-center justify-center h-64">
+   600→        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+   601→      </div>
+   602→    </PageLayout>
+   603→  );
+   604→
+   605→  /* ════════════════════ RENDER ════════════════════ */
+   606→
+   607→  return (
+   608→    <PageLayout spacing="compact">
+   609→      {/* ═══ HEADER CARD ═══ */}
+   610→      <BloomCard className="p-4 sm:p-5">
+   611→        <div className="flex flex-wrap items-center gap-4">
+   612→          {/* Photo */}
+   613→          <div className="relative shrink-0 group">
+   614→            <div
+   615→              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-secondary overflow-hidden border-2 border-card shadow-elevated flex items-center justify-center cursor-pointer"
+   616→              onClick={() => photoInputRef.current?.click()}
+   617→            >
+   618→              {form.profileImage
+   619→                ? <img
+   620→                    src={form.profileImage}
+   621→                    alt={form.name}
+   622→                    className="w-full h-full object-cover"
+   623→                    onError={(e) => {
+   624→                      // If image fails to load, fall back to initial letter
+   625→                      const target = e.currentTarget;
+   626→                      target.style.display = 'none';
+   627→                      const fallback = target.nextElementSibling as HTMLElement;
+   628→                      if (fallback) fallback.style.display = 'flex';
+   629→                    }}
+   630→                  />
+   631→                : null
+   632→              }
+   633→              <span
+   634→                className={`text-2xl font-display font-black text-muted-foreground items-center justify-center ${form.profileImage ? 'hidden' : 'flex'}`}
+   635→              >
+   636→                {(form.name || session?.user?.name || 'U').charAt(0).toUpperCase()}
+   637→              </span>
+   638→              {/* Hover overlay */}
+   639→              {!uploadingPhoto && (
+   640→                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/30 rounded-2xl transition-colors flex items-center justify-center">
+   641→                  <Camera size={18} className="text-primary-foreground opacity-0 group-hover:opacity-80 transition-opacity" />
+   642→                </div>
+   643→              )}
+   644→            </div>
+   645→            <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handlePhotoUpload} />
+   646→            {uploadingPhoto && (
+   647→              <div className="absolute inset-0 bg-foreground/40 rounded-2xl flex items-center justify-center">
+   648→                <Loader2 size={18} className="animate-spin text-primary-foreground" />
+   649→              </div>
+   650→            )}
+   651→          </div>
+   652→
+   653→          {/* Name & meta */}
+   654→          <div className="flex-1 min-w-0">
+   655→            <h2 className="text-lg sm:text-xl font-display font-black text-foreground tracking-tighter leading-none truncate" title={form.name || session?.user?.name || undefined}>
+   656→              {form.name || session?.user?.name || 'Utilizador'}
+   657→            </h2>
+   658→            {role === 'caregiver' && (
+   659→              <p className="text-xs text-muted-foreground font-medium mt-1 flex items-center gap-1.5">
+   660→                <Briefcase size={12} className="text-primary" />{form.title || 'Profissional'}{form.city ? ` · ${form.city}` : ''}
+   661→              </p>
+   662→            )}
+   663→            {role === 'family' && form.city && (
+   664→              <p className="text-xs text-muted-foreground font-medium mt-1 flex items-center gap-1.5">
+   665→                <MapPin size={12} className="text-primary" />{form.city}
+   666→              </p>
+   667→            )}
+   668→            {/* Verification badges */}
+   669→            {role === 'caregiver' && (
+   670→              <div className="mt-1.5 flex items-center gap-1.5">
+   671→                {form.caregiverVerificationStatus === 'VERIFIED' || form.verificationStatus === 'VERIFIED' ? (
+   672→                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-success/10 text-success border border-success/20"><CheckCircle size={10} /> Verificado</span>
+   673→                ) : (
+   674→                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-warning/10 text-warning border border-warning/20"><Clock size={10} /> Pendente</span>
+   675→                )}
+   676→                {form.availableNow && (
+   677→                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-success/10 text-success border border-success/20"><CheckCircle size={10} /> Disponível</span>
+   678→                )}
+   679→              </div>
+   680→            )}
+   681→          </div>
+   682→
+   683→          {/* Edit / Save button */}
+   684→          <div className="shrink-0">
+   685→            {isEditing ? (
+   686→              <div className="flex gap-2">
+   687→                <Button variant="outline" size="sm" onClick={handleCancelEdit}>Cancelar</Button>
+   688→                <Button size="sm" onClick={handleSave}>
+   689→                  <IconCheck className="h-4 w-4 mr-1" /> Guardar
+   690→                </Button>
+   691→              </div>
+   692→            ) : (
+   693→              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+   694→                <Edit size={14} className="mr-1" /> Editar
+   695→              </Button>
+   696→            )}
+   697→          </div>
+   698→        </div>
+   699→
+   700→        {/* Caregiver stats */}
+   701→        {role === 'caregiver' && (
+   702→          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 pt-4 border-t border-border">
+   703→            {[
+   704→              { value: profile.totalContracts ?? '—', label: 'Contratos' },
+   705→              { value: profile.totalReviews ?? '—', label: 'Avaliações' },
+   706→              { value: profile.averageRating ? Number(profile.averageRating).toFixed(1) : '—', label: 'Nota' },
+   707→              { value: profile.hourlyRateEur ? `€${Number(profile.hourlyRateEur).toFixed(2)}` : '—', label: '/hora' },
+   708→            ].map((stat, i) => (
+   709→              <div key={i} className="text-center p-2 rounded-xl hover:bg-primary/5 transition-all">
+   710→                <p className="text-xs font-display font-semibold text-muted-foreground tracking-widest">{stat.label}</p>
+   711→                <p className="text-base font-display font-black text-foreground tracking-tighter mt-0.5">{String(stat.value)}</p>
+   712→              </div>
+   713→            ))}
+   714→          </div>
+   715→        )}
+   716→      </BloomCard>
+   717→
+   718→      {/* ═══ TABS ═══ */}
+   719→      <Tabs value={activeTab} onValueChange={setActiveTab}>
+   720→        <TabsList variant="pill" className="w-full justify-start overflow-x-auto">
+   721→          <TabsTrigger value="perfil" variant="pill">Perfil</TabsTrigger>
+   722→          {role === 'caregiver' && <TabsTrigger value="servicos" variant="pill">Serviços</TabsTrigger>}
+   723→          {role === 'family' && <TabsTrigger value="familiar" variant="pill">Familiar</TabsTrigger>}
+   724→          <TabsTrigger value="documentos" variant="pill">Documentos</TabsTrigger>
+   725→          {role === 'caregiver' && <TabsTrigger value="pagamentos" variant="pill">Pagamentos</TabsTrigger>}
+   726→          <TabsTrigger value="conta" variant="pill">Conta</TabsTrigger>
+   727→        </TabsList>
+   728→
+   729→        {/* ═══ TAB: PERFIL ═══ */}
+   730→        <TabsContent value="perfil" className="space-y-3 mt-3">
+   731→          <BloomCard className="p-4 sm:p-5">
+   732→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+   733→              <div>
+   734→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Nome</label>
+   735→                <Input value={form.name || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   736→              </div>
+   737→              <div>
+   738→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Cidade</label>
+   739→                <Input value={form.city || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   740→              </div>
+   741→              <div>
+   742→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Telemóvel</label>
+   743→                <Input value={form.phone || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   744→              </div>
+   745→              <div>
+   746→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">NIF</label>
+   747→                <Input value={form.nif || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, nif: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   748→              </div>
+   749→
+   750→              {/* Caregiver-specific fields */}
+   751→              {role === 'caregiver' && (
+   752→                <>
+   753→                  <div>
+   754→                    <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Título Profissional</label>
+   755→                    <Input value={form.title || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   756→                  </div>
+   757→                  <div>
+   758→                    <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Anos de Experiência</label>
+   759→                    <Input type="number" value={String(form.experienceYears ?? '')} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, experienceYears: e.target.value ? Number(e.target.value) : null }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   760→                  </div>
+   761→                  <div className="sm:col-span-2">
+   762→                    <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Bio</label>
+   763→                    <textarea value={form.bio || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} rows={2}
+   764→                      className="mt-1.5 w-full rounded-xl bg-secondary border border-border p-2.5 text-sm text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60" />
+   765→                  </div>
+   766→                  <div>
+   767→                    <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Valor por Hora (€)</label>
+   768→                    <Input type="number" step="0.50" value={form.hourlyRateEur != null ? String(form.hourlyRateEur) : ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, hourlyRateEur: e.target.value ? Number(e.target.value) : null }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   769→                  </div>
+   770→                  <div>
+   771→                    <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Idiomas</label>
+   772→                    <Input value={languagesStr} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, languages: e.target.value.split(',').map(l => l.trim()).filter(Boolean) }))} placeholder="Português, Inglês" className="mt-1.5 rounded-xl bg-secondary border-border" />
+   773→                  </div>
+   774→                </>
+   775→              )}
+   776→
+   777→              {/* Family-specific read-only info */}
+   778→              {role === 'family' && (
+   779→                <>
+   780→                  {preferredServicesList.length > 0 && (
+   781→                    <div className="sm:col-span-2">
+   782→                      <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Preferências de Serviço</label>
+   783→                      <div className="mt-1.5 flex flex-wrap gap-1">
+   784→                        {preferredServicesList.map((s: string) => {
+   785→                          const st = SERVICE_TYPES.find(t => t.id === s);
+   786→                          return (
+   787→                            <span key={s} className="inline-flex px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-primary/10 text-primary border border-primary/20">
+   788→                              {st?.label || s}
+   789→                            </span>
+   790→                          );
+   791→                        })}
+   792→                      </div>
+   793→                    </div>
+   794→                  )}
+   795→                  {preferredScheduleDisplay && (
+   796→                    <div className="sm:col-span-2">
+   797→                      <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Horário Preferido</label>
+   798→                      <div className="mt-1.5 flex flex-wrap gap-1">
+   799→                        {(preferredScheduleDisplay.days || []).map((d: string, i: number) => (
+   800→                          <span key={i} className="inline-flex px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-secondary text-foreground border border-border">{d}</span>
+   801→                        ))}
+   802→                        {(preferredScheduleDisplay.times || []).map((t: string, i: number) => (
+   803→                          <span key={`t-${i}`} className="inline-flex px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-primary/10 text-primary border border-primary/20">{t}</span>
+   804→                        ))}
+   805→                      </div>
+   806→                    </div>
+   807→                  )}
+   808→                </>
+   809→              )}
+   810→            </div>
+   811→          </BloomCard>
+   812→
+   813→          {/* Emergency Contact - inside Perfil tab */}
+   814→          <BloomCard className="p-4 sm:p-5">
+   815→            <div className="flex items-center gap-2 mb-3">
+   816→              <div className="w-8 h-8 rounded-xl bg-destructive/10 flex items-center justify-center">
+   817→                <Shield className="h-4 w-4 text-destructive" />
+   818→              </div>
+   819→              <h3 className="text-sm font-display font-semibold text-foreground tracking-tight">Contacto de Emergência</h3>
+   820→            </div>
+   821→            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+   822→              <div>
+   823→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Nome</label>
+   824→                <Input value={form.emergencyContactName || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, emergencyContactName: e.target.value }))} placeholder="Nome completo" className="mt-1.5 rounded-xl bg-secondary border-border" />
+   825→              </div>
+   826→              <div>
+   827→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Telefone</label>
+   828→                <Input value={form.emergencyContactPhone || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, emergencyContactPhone: e.target.value }))} placeholder="+351 9xx xxx xxx" className="mt-1.5 rounded-xl bg-secondary border-border" />
+   829→              </div>
+   830→              <div>
+   831→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Relação</label>
+   832→                <Input value={form.emergencyContactRelation || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, emergencyContactRelation: e.target.value }))} placeholder="Filho(a), Vizinho(a)..." className="mt-1.5 rounded-xl bg-secondary border-border" />
+   833→              </div>
+   834→            </div>
+   835→          </BloomCard>
+   836→        </TabsContent>
+   837→
+   838→        {/* ═══ TAB: SERVIÇOS (caregiver only) ═══ */}
+   839→        {role === 'caregiver' && (
+   840→          <TabsContent value="servicos" className="space-y-3 mt-3">
+   841→            {/* Available Now toggle */}
+   842→            <BloomCard className="p-4 sm:p-5">
+   843→              <div className="flex items-center justify-between">
+   844→                <div className="flex items-center gap-3">
+   845→                  <CheckCircle size={16} className={form.availableNow ? 'text-success' : 'text-muted-foreground'} />
+   846→                  <div>
+   847→                    <p className="text-sm font-display font-bold text-foreground">Disponível Agora</p>
+   848→                    <p className="text-xs text-muted-foreground">Mostrar que está disponível imediatamente</p>
+   849→                  </div>
+   850→                </div>
+   851→                <Switch checked={!!form.availableNow} onCheckedChange={handleAvailableNowToggle} aria-label="Disponível agora" />
+   852→              </div>
+   853→            </BloomCard>
+   854→
+   855→            {/* Services */}
+   856→            <BloomCard className="p-4 sm:p-5">
+   857→              <h3 className="text-sm font-display font-semibold text-foreground tracking-tight mb-3">Serviços que Oferece</h3>
+   858→              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+   859→                {SERVICE_TYPES.map(service => {
+   860→                  const selected = Array.isArray(form.services) && form.services.includes(service.id);
+   861→                  return (
+   862→                    <button key={service.id} disabled={!isEditing} onClick={() => toggleService(service.id)}
+   863→                      className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all text-left ${
+   864→                        selected ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-secondary border-border text-muted-foreground hover:border-primary/20'
+   865→                      } ${!isEditing ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
+   866→                      <div className={`w-4 h-4 rounded-md border-2 flex items-center justify-center shrink-0 ${selected ? 'bg-primary border-primary' : 'border-border'}`}>
+   867→                        {selected && <IconCheck className="h-2.5 w-2.5 text-primary-foreground" />}
+   868→                      </div>
+   869→                      <span className="text-xs font-display font-bold">{service.label}</span>
+   870→                    </button>
+   871→                  );
+   872→                })}
+   873→              </div>
+   874→            </BloomCard>
+   875→
+   876→            {/* Availability */}
+   877→            <BloomCard className="p-4 sm:p-5">
+   878→              <h3 className="text-sm font-display font-semibold text-foreground tracking-tight mb-3">Disponibilidade</h3>
+   879→              {availDisplay && availDisplay.length > 0 ? (
+   880→                <div className="space-y-2">
+   881→                  {availDisplay.map(({ day, times }) => (
+   882→                    <div key={day} className="flex items-start gap-2 p-2.5 bg-secondary/50 rounded-xl border border-border/50">
+   883→                      <Calendar size={12} className="text-primary mt-0.5 shrink-0" />
+   884→                      <div>
+   885→                        <p className="text-xs font-display font-bold text-foreground">{DAY_LABELS[day] || day}</p>
+   886→                        <div className="flex flex-wrap gap-1 mt-1">
+   887→                          {times.map((t: string) => (
+   888→                            <span key={t} className="inline-flex px-1.5 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-primary/10 text-primary border border-primary/20">
+   889→                              {AVAILABILITY_LABELS[t] || t}
+   890→                            </span>
+   891→                          ))}
+   892→                        </div>
+   893→                      </div>
+   894→                    </div>
+   895→                  ))}
+   896→                </div>
+   897→              ) : (
+   898→                <div className="p-3 bg-secondary/50 rounded-xl border border-border/50 text-center">
+   899→                  <Calendar size={20} className="mx-auto text-muted-foreground mb-1" />
+   900→                  <p className="text-xs text-muted-foreground">Nenhuma disponibilidade configurada.</p>
+   901→                </div>
+   902→              )}
+   903→            </BloomCard>
+   904→          </TabsContent>
+   905→        )}
+   906→
+   907→        {/* ═══ TAB: FAMILIAR (family only) ═══ */}
+   908→        {role === 'family' && (
+   909→          <TabsContent value="familiar" className="space-y-3 mt-3">
+   910→            <BloomCard className="p-4 sm:p-5">
+   911→              <div className="flex items-center gap-2 mb-3">
+   912→                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+   913→                  <Heart className="h-4 w-4 text-primary" />
+   914→                </div>
+   915→                <h3 className="text-sm font-display font-semibold text-foreground tracking-tight">Dados da Pessoa a Cuidar</h3>
+   916→              </div>
+   917→
+   918→              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   919→                <div>
+   920→                  <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Nome da Pessoa a Cuidar</label>
+   921→                  <Input value={form.elderName || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, elderName: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   922→                </div>
+   923→                <div>
+   924→                  <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Idade</label>
+   925→                  <Input type="number" value={String(form.elderAge ?? '')} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, elderAge: e.target.value ? Number(e.target.value) : null }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   926→                </div>
+   927→                <div>
+   928→                  <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Nível de Mobilidade</label>
+   929→                  <Input value={MOBILITY_LABELS[form.mobilityLevel || ''] || form.mobilityLevel || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, mobilityLevel: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   930→                </div>
+   931→                <div>
+   932→                  <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Condições Médicas</label>
+   933→                  {!isEmptyValue(form.medicalConditions) ? (
+   934→                    <div className="mt-1.5 flex flex-wrap gap-1">
+   935→                      {String(form.medicalConditions).split(',').map((c, i) => {
+   936→                        const trimmed = c.trim();
+   937→                        if (!trimmed || trimmed === '{}') return null;
+   938→                        const st = SERVICE_TYPES.find(t => t.id === trimmed);
+   939→                        return (
+   940→                          <span key={i} className="inline-flex px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-primary/10 text-primary border border-primary/20">
+   941→                            {st?.label || trimmed}
+   942→                          </span>
+   943→                        );
+   944→                      })}
+   945→                    </div>
+   946→                  ) : (
+   947→                    <p className="mt-1.5 text-sm text-muted-foreground">Nenhuma condição registada</p>
+   948→                  )}
+   949→                  {isEditing && (
+   950→                    <Input value={isEmptyValue(form.medicalConditions) ? '' : String(form.medicalConditions)} onChange={e => setForm(f => ({ ...f, medicalConditions: e.target.value }))} className="mt-2 rounded-xl bg-secondary border-border" placeholder="Diabetes, Hipertensão..." />
+   951→                  )}
+   952→                </div>
+   953→                <div className="sm:col-span-2">
+   954→                  <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Necessidades Especiais</label>
+   955→                  <textarea value={isEmptyValue(form.elderNeeds) ? '' : String(form.elderNeeds)} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, elderNeeds: e.target.value }))} rows={2}
+   956→                    className="mt-1.5 w-full rounded-xl bg-secondary border border-border p-2.5 text-sm text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60" />
+   957→                </div>
+   958→              </div>
+   959→            </BloomCard>
+   960→          </TabsContent>
+   961→        )}
+   962→
+   963→        {/* ═══ TAB: DOCUMENTOS ═══ */}
+   964→        <TabsContent value="documentos" className="space-y-3 mt-3">
+   965→          <BloomCard className="p-4 sm:p-5">
+   966→            <h3 className="text-sm font-display font-semibold text-foreground tracking-tight mb-3">Documentos de Identificação</h3>
+   967→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   968→              <div>
+   969→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Tipo de Documento</label>
+   970→                <Input value={form.documentType || 'Cartão de Cidadão'} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, documentType: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" />
+   971→              </div>
+   972→              <div>
+   973→                <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">Nº do Documento</label>
+   974→                <Input value={form.documentNumber || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, documentNumber: e.target.value }))} className="mt-1.5 rounded-xl bg-secondary border-border" placeholder="00000000" />
+   975→              </div>
+   976→            </div>
+   977→          </BloomCard>
+   978→
+   979→          {/* Background check — caregiver only */}
+   980→          {role === 'caregiver' && (
+   981→            <BloomCard className="p-4 sm:p-5">
+   982→              <div className="flex items-center justify-between mb-3">
+   983→                <h3 className="text-sm font-display font-semibold text-foreground tracking-tight">Registo Criminal</h3>
+   984→                {profile.backgroundCheckStatus === 'VERIFIED'
+   985→                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-success/10 text-success border border-success/20"><CheckCircle size={10} /> Verificado</span>
+   986→                  : profile.backgroundCheckStatus === 'SUBMITTED'
+   987→                    ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-blue-500/10 text-blue-500 border border-blue-500/30"><Clock size={10} /> Enviado</span>
+   988→                    : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-display font-bold tracking-wide bg-warning/10 text-warning border border-warning/20"><Clock size={10} /> Pendente</span>}
+   989→              </div>
+   990→              <p className="text-xs text-muted-foreground mb-3">Upload do comprovativo de registo criminal para verificação.</p>
+   991→              <input ref={docInputRef} type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={handleDocUpload} />
+   992→              <Button variant="outline" size="sm" onClick={() => docInputRef.current?.click()} disabled={uploadingDoc}>
+   993→                {uploadingDoc ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+   994→                <span className="ml-1.5">{uploadingDoc ? 'A enviar...' : 'Enviar Comprovativo'}</span>
+   995→              </Button>
+   996→            </BloomCard>
+   997→          )}
+   998→
+   999→          {/* Certifications */}
+  1000→          <BloomCard className="p-4 sm:p-5">
+  1001→            <h3 className="text-sm font-display font-semibold text-foreground tracking-tight mb-3">Certificações</h3>
+  1002→            <textarea value={form.certifications || ''} disabled={!isEditing} onChange={e => setForm(f => ({ ...f, certifications: e.target.value }))} rows={2}
+  1003→              className="w-full rounded-xl bg-secondary border border-border p-2.5 text-sm text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60" placeholder="Certificações profissionais..." />
+  1004→          </BloomCard>
+  1005→        </TabsContent>
+  1006→
+  1007→        {/* ═══ TAB: PAGAMENTOS (caregiver only) ═══ */}
+  1008→        {role === 'caregiver' && (
+  1009→          <TabsContent value="pagamentos" className="space-y-3 mt-3">
+  1010→            <BloomCard className="p-4 sm:p-5">
+  1011→              <h3 className="text-sm font-display font-semibold text-foreground tracking-tight mb-2">Método de Recebimento</h3>
+  1012→              <p className="text-xs text-muted-foreground mb-3">Escolha como deseja receber os seus pagamentos.</p>
+  1013→
+  1014→              <div className="space-y-2">
+  1015→                {/* IBAN */}
+  1016→                <button
+  1017→                  onClick={() => setSelectedPaymentMethod('IBAN')}
+  1018→                  className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+  1019→                    selectedPaymentMethod === 'IBAN' ? 'bg-primary/10 border-primary/30 ring-1 ring-primary/20' : 'bg-secondary border-border hover:border-primary/20'
+  1020→                  }`}
+  1021→                >
+  1022→                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+  1023→                    selectedPaymentMethod === 'IBAN' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground border border-border'
+  1024→                  }`}>
+  1025→                    <Building2 size={16} />
+  1026→                  </div>
+  1027→                  <div className="flex-1 min-w-0">
+  1028→                    <p className="text-xs font-display font-bold text-foreground">Transferência Bancária (IBAN)</p>
+  1029→                    <p className="text-xs text-muted-foreground mt-0.5 truncate">Processado toda sexta-feira · Mínimo €50</p>
+  1030→                  </div>
+  1031→                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedPaymentMethod === 'IBAN' ? 'border-primary' : 'border-border'}`}>
+  1032→                    {selectedPaymentMethod === 'IBAN' && <div className="w-2 h-2 rounded-full bg-primary" />}
+  1033→                  </div>
+  1034→                </button>
+  1035→
+  1036→                {/* Stripe Connect */}
+  1037→                <button
+  1038→                  onClick={() => setSelectedPaymentMethod('STRIPE_CONNECT')}
+  1039→                  className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+  1040→                    selectedPaymentMethod === 'STRIPE_CONNECT' ? 'bg-primary/10 border-primary/30 ring-1 ring-primary/20' : 'bg-secondary border-border hover:border-primary/20'
+  1041→                  }`}
+  1042→                >
+  1043→                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+  1044→                    selectedPaymentMethod === 'STRIPE_CONNECT' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground border border-border'
+  1045→                  }`}>
+  1046→                    <CreditCard size={16} />
+  1047→                  </div>
+  1048→                  <div className="flex-1 min-w-0">
+  1049→                    <p className="text-xs font-display font-bold text-foreground">Stripe Connect</p>
+  1050→                    <p className="text-xs text-muted-foreground mt-0.5 truncate">Pagamentos automáticos · 2-3 dias úteis</p>
+  1051→                  </div>
+  1052→                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedPaymentMethod === 'STRIPE_CONNECT' ? 'border-primary' : 'border-border'}`}>
+  1053→                    {selectedPaymentMethod === 'STRIPE_CONNECT' && <div className="w-2 h-2 rounded-full bg-primary" />}
+  1054→                  </div>
+  1055→                </button>
+  1056→
+  1057→                {/* Easypay */}
+  1058→                <button
+  1059→                  onClick={() => setSelectedPaymentMethod('EASYPAY')}
+  1060→                  className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+  1061→                    selectedPaymentMethod === 'EASYPAY' ? 'bg-primary/10 border-primary/30 ring-1 ring-primary/20' : 'bg-secondary border-border hover:border-primary/20'
+  1062→                  }`}
+  1063→                >
+  1064→                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+  1065→                    selectedPaymentMethod === 'EASYPAY' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground border border-border'
+  1066→                  }`}>
+  1067→                    <Wallet size={16} />
+  1068→                  </div>
+  1069→                  <div className="flex-1 min-w-0">
+  1070→                    <p className="text-xs font-display font-bold text-foreground">Easypay</p>
+  1071→                    <p className="text-xs text-muted-foreground mt-0.5 truncate">Carteira Easypay · Transferência SEPA</p>
+  1072→                  </div>
+  1073→                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedPaymentMethod === 'EASYPAY' ? 'border-primary' : 'border-border'}`}>
+  1074→                    {selectedPaymentMethod === 'EASYPAY' && <div className="w-2 h-2 rounded-full bg-primary" />}
+  1075→                  </div>
+  1076→                </button>
+  1077→              </div>
+  1078→
+  1079→              {/* IBAN content */}
+  1080→              {selectedPaymentMethod === 'IBAN' && (
+  1081→                <div className="mt-3 space-y-2">
+  1082→                  <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">IBAN</label>
+  1083→                  <div className="flex gap-2">
+  1084→                    <Input
+  1085→                      value={editIban}
+  1086→                      onChange={e => setEditIban(e.target.value.toUpperCase())}
+  1087→                      placeholder="PT50 0000 0000 0000 0000 0000 0"
+  1088→                      className="rounded-xl bg-secondary border-border font-mono text-sm flex-1"
+  1089→                      disabled={savingIban}
+  1090→                    />
+  1091→                    <Button size="sm" onClick={handleSaveIban} disabled={savingIban || !editIban.trim()} className="rounded-xl">
+  1092→                      {savingIban ? <Loader2 size={14} className="animate-spin" /> : <IconCheck className="h-4 w-4" />}
+  1093→                      <span className="ml-1">{savingIban ? '' : 'Guardar'}</span>
+  1094→                    </Button>
+  1095→                  </div>
+  1096→                  {profile.iban && (
+  1097→                    <p className="text-xs text-success flex items-center gap-1">
+  1098→                      <IconCheck className="h-3 w-3" /> IBAN configurado: ...{profile.iban.slice(-4)}
+  1099→                    </p>
+  1100→                  )}
+  1101→                  <div className="flex items-start gap-2 p-2.5 bg-secondary/50 rounded-xl border border-border/50">
+  1102→                    <Building2 size={12} className="text-muted-foreground shrink-0 mt-0.5" />
+  1103→                    <div className="text-xs text-muted-foreground">
+  1104→                      <p><strong>Processamento:</strong> Sexta-feira · <strong>Mínimo:</strong> €50 · <strong>Prazo:</strong> 1-2 dias úteis</p>
+  1105→                    </div>
+  1106→                  </div>
+  1107→                </div>
+  1108→              )}
+  1109→
+  1110→              {/* Stripe Connect content */}
+  1111→              {selectedPaymentMethod === 'STRIPE_CONNECT' && (
+  1112→                <div className="mt-3 space-y-2">
+  1113→                  {profile.stripeConnectOnboardingComplete ? (
+  1114→                    <div className="p-3 bg-success/10 rounded-xl border border-success/20">
+  1115→                      <div className="flex items-center gap-2">
+  1116→                        <CheckCircle size={14} className="text-success" />
+  1117→                        <p className="text-xs font-display font-bold text-success">Conta Stripe Connect ativa</p>
+  1118→                      </div>
+  1119→                      <p className="text-xs text-success/80 mt-1">Os seus pagamentos serão transferidos automaticamente para a sua conta bancária via Stripe.</p>
+  1120→                    </div>
+  1121→                  ) : (
+  1122→                    <>
+  1123→                      <div className="p-3 bg-secondary rounded-xl border border-border/50">
+  1124→                        <p className="text-xs font-display font-bold text-foreground">Configurar Stripe Connect</p>
+  1125→                        <p className="text-xs text-muted-foreground mt-1">Para receber pagamentos via Stripe, precisa de criar uma conta Stripe Connect.</p>
+  1126→                      </div>
+  1127→                      <Button className="w-full rounded-xl" disabled={connectingStripe} onClick={handleStripeConnect}>
+  1128→                        {connectingStripe ? <Loader2 size={14} className="animate-spin" /> : <ExternalLink size={14} />}
+  1129→                        <span className="ml-2">{connectingStripe ? 'A conectar...' : 'Configurar Stripe Connect'}</span>
+  1130→                      </Button>
+  1131→                    </>
+  1132→                  )}
+  1133→                  <div className="flex items-start gap-2 p-2.5 bg-secondary/50 rounded-xl border border-border/50">
+  1134→                    <CreditCard size={12} className="text-muted-foreground shrink-0 mt-0.5" />
+  1135→                    <div className="text-xs text-muted-foreground">
+  1136→                      <p><strong>Taxa Stripe:</strong> 2.5% + €0.25 · <strong>Prazo:</strong> 2-3 dias úteis</p>
+  1137→                    </div>
+  1138→                  </div>
+  1139→                </div>
+  1140→              )}
+  1141→
+  1142→              {/* Easypay content */}
+  1143→              {selectedPaymentMethod === 'EASYPAY' && (
+  1144→                <div className="mt-3 space-y-2">
+  1145→                  <div className="p-3 bg-secondary rounded-xl border border-border/50">
+  1146→                    <p className="text-xs font-display font-bold text-foreground">Carteira Easypay</p>
+  1147→                    <p className="text-xs text-muted-foreground mt-1">Os seus ganhos ficam disponíveis na sua carteira Easypay. Pode solicitar levantamento para o IBAN registado na sua conta Easypay.</p>
+  1148→                  </div>
+  1149→                  <div className="flex items-start gap-2 p-2.5 bg-warning/10 rounded-xl border border-warning/20">
+  1150→                    <AlertTriangle size={12} className="text-warning shrink-0 mt-0.5" />
+  1151→                    <p className="text-xs text-warning">O IBAN para recebimento é gerido na sua conta Easypay, não aqui.</p>
+  1152→                  </div>
+  1153→                </div>
+  1154→              )}
+  1155→
+  1156→              {/* Save payment method */}
+  1157→              {selectedPaymentMethod !== profile.preferredPaymentMethod && (
+  1158→                <Button className="w-full rounded-xl mt-3" disabled={savingPaymentMethod} onClick={handleSavePaymentMethod}>
+  1159→                  {savingPaymentMethod ? <Loader2 size={14} className="animate-spin" /> : <IconCheck className="h-4 w-4" />}
+  1160→                  <span className="ml-2">{savingPaymentMethod ? 'A guardar...' : 'Guardar Método de Recebimento'}</span>
+  1161→                </Button>
+  1162→              )}
+  1163→            </BloomCard>
+  1164→          </TabsContent>
+  1165→        )}
+  1166→
+  1167→        {/* ═══ TAB: CONTA ═══ */}
+  1168→        <TabsContent value="conta" className="space-y-3 mt-3">
+  1169→          <Accordion type="multiple" defaultValue={['seguranca', 'notificacoes']} className="space-y-2">
+  1170→            {/* Segurança */}
+  1171→            <AccordionItem value="seguranca">
+  1172→              <AccordionTrigger>
+  1173→                <div className="flex items-center gap-2">
+  1174→                  <IconLock className="h-4 w-4 text-primary" />
+  1175→                  <span>Segurança</span>
+  1176→                </div>
+  1177→              </AccordionTrigger>
+  1178→              <AccordionContent>
+  1179→                <div className="space-y-3">
+  1180→                  <BloomInfoRow
+  1181→                    label="Email"
+  1182→                    value={session?.user?.email || form.email || '—'}
+  1183→                    icon={<IconMail className="h-4 w-4" />}
+  1184→                  />
+  1185→                  <BloomInfoRow
+  1186→                    label={currentSession.device}
+  1187→                    value={
+  1188→                      <span className="flex items-center gap-2">
+  1189→                        {currentSession.lastActive}
+  1190→                        <span className="text-xs font-display font-bold text-success bg-success/10 px-2 py-0.5 rounded-lg uppercase">
+  1191→                          Sessão atual
+  1192→                        </span>
+  1193→                      </span>
+  1194→                    }
+  1195→                    icon={<IconSmartphone className="h-4 w-4" />}
+  1196→                  />
+  1197→
+  1198→                  <div className="pt-2 border-t border-border">
+  1199→                    <p className="text-xs font-display font-bold text-muted-foreground tracking-wide mb-2">
+  1200→                      Alterar palavra-passe
+  1201→                    </p>
+  1202→                    <div className="space-y-2">
+  1203→                      <div className="relative">
+  1204→                        <Input
+  1205→                          type={showCurrentPassword ? 'text' : 'password'}
+  1206→                          placeholder="Palavra-passe atual"
+  1207→                          value={currentPassword}
+  1208→                          onChange={e => setCurrentPassword(e.target.value)}
+  1209→                          className="rounded-xl pr-10"
+  1210→                        />
+  1211→                        <button
+  1212→                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+  1213→                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+  1214→                          type="button"
+  1215→                        >
+  1216→                          {showCurrentPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
+  1217→                        </button>
+  1218→                      </div>
+  1219→                      <div className="relative">
+  1220→                        <Input
+  1221→                          type={showNewPassword ? 'text' : 'password'}
+  1222→                          placeholder="Nova palavra-passe"
+  1223→                          value={newPassword}
+  1224→                          onChange={e => setNewPassword(e.target.value)}
+  1225→                          className="rounded-xl pr-10"
+  1226→                        />
+  1227→                        <button
+  1228→                          onClick={() => setShowNewPassword(!showNewPassword)}
+  1229→                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+  1230→                          type="button"
+  1231→                        >
+  1232→                          {showNewPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
+  1233→                        </button>
+  1234→                      </div>
+  1235→                      <Input
+  1236→                        type="password"
+  1237→                        placeholder="Confirmar nova palavra-passe"
+  1238→                        value={confirmPassword}
+  1239→                        onChange={e => setConfirmPassword(e.target.value)}
+  1240→                        className="rounded-xl"
+  1241→                      />
+  1242→                      <Button
+  1243→                        onClick={handlePasswordChange}
+  1244→                        disabled={changingPassword || !currentPassword || !newPassword || !confirmPassword}
+  1245→                        className="rounded-xl font-display font-bold"
+  1246→                        size="sm"
+  1247→                      >
+  1248→                        {changingPassword ? (
+  1249→                          <><IconLoader2 className="h-4 w-4 animate-spin mr-2" /> A alterar...</>
+  1250→                        ) : (
+  1251→                          <><IconLock className="h-4 w-4 mr-2" /> Alterar palavra-passe</>
+  1252→                        )}
+  1253→                      </Button>
+  1254→                    </div>
+  1255→                  </div>
+  1256→                </div>
+  1257→              </AccordionContent>
+  1258→            </AccordionItem>
+  1259→
+  1260→            {/* Notificações */}
+  1261→            <AccordionItem value="notificacoes">
+  1262→              <AccordionTrigger>
+  1263→                <div className="flex items-center gap-2">
+  1264→                  <IconBell className="h-4 w-4 text-primary" />
+  1265→                  <span>Notificações</span>
+  1266→                </div>
+  1267→              </AccordionTrigger>
+  1268→              <AccordionContent>
+  1269→                <div className="space-y-3">
+  1270→                  {/* Push */}
+  1271→                  {pushAvailable === false ? (
+  1272→                    <BloomInfoRow
+  1273→                      label="Notificações Push"
+  1274→                      value="Em breve"
+  1275→                      icon={<IconSmartphone className="h-4 w-4" />}
+  1276→                      action={<span className="text-xs font-display font-bold text-muted-foreground bg-secondary px-2 py-0.5 rounded-lg uppercase">Em breve</span>}
+  1277→                    />
+  1278→                  ) : (
+  1279→                    <BloomInfoRow
+  1280→                      label="Notificações Push"
+  1281→                      value="Alertas em tempo real no dispositivo"
+  1282→                      icon={<IconSmartphone className="h-4 w-4" />}
+  1283→                      action={
+  1284→                        pushLoading ? (
+  1285→                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+  1286→                        ) : (
+  1287→                          <Switch checked={pushEnabled} onCheckedChange={handleTogglePush} aria-label="Ativar notificações push" disabled={pushLoading} />
+  1288→                        )
+  1289→                      }
+  1290→                    />
+  1291→                  )}
+  1292→
+  1293→                  {/* Email */}
+  1294→                  <BloomInfoRow
+  1295→                    label="Notificações por Email"
+  1296→                    value="Resumos e atualizações por correio eletrónico"
+  1297→                    icon={<IconMail className="h-4 w-4" />}
+  1298→                    action={<Switch checked={emailNotifications} onCheckedChange={checked => handleEmailNotificationToggle(checked)} aria-label="Ativar notificações por email" />}
+  1299→                  />
+  1300→
+  1301→                  {/* Email sub-types */}
+  1302→                  {emailNotifications && (
+  1303→                    <div className="pl-6 space-y-2 border-l-2 border-primary/20 ml-2">
+  1304→                      <div className="flex items-center justify-between py-1">
+  1305→                        <label htmlFor="email-new-proposals" className="text-xs text-muted-foreground cursor-pointer">Novas propostas</label>
+  1306→                        <Switch id="email-new-proposals" checked={emailNewProposals} onCheckedChange={setEmailNewProposals} aria-label="Notificações de novas propostas" />
+  1307→                      </div>
+  1308→                      <div className="flex items-center justify-between py-1">
+  1309→                        <label htmlFor="email-contract-updates" className="text-xs text-muted-foreground cursor-pointer">Atualizações de contratos</label>
+  1310→                        <Switch id="email-contract-updates" checked={emailContractUpdates} onCheckedChange={setEmailContractUpdates} aria-label="Notificações de atualizações de contratos" />
+  1311→                      </div>
+  1312→                      <div className="flex items-center justify-between py-1">
+  1313→                        <label htmlFor="email-payment-reminders" className="text-xs text-muted-foreground cursor-pointer">Lembretes de pagamento</label>
+  1314→                        <Switch id="email-payment-reminders" checked={emailPaymentReminders} onCheckedChange={setEmailPaymentReminders} aria-label="Notificações de lembretes de pagamento" />
+  1315→                      </div>
+  1316→                    </div>
+  1317→                  )}
+  1318→                </div>
+  1319→              </AccordionContent>
+  1320→            </AccordionItem>
+  1321→
+  1322→            {/* Preferências */}
+  1323→            <AccordionItem value="preferencias">
+  1324→              <AccordionTrigger>
+  1325→                <div className="flex items-center gap-2">
+  1326→                  <IconGlobe className="h-4 w-4 text-primary" />
+  1327→                  <span>Preferências</span>
+  1328→                </div>
+  1329→              </AccordionTrigger>
+  1330→              <AccordionContent>
+  1331→                <div className="space-y-3">
+  1332→                  <BloomInfoRow
+  1333→                    label="Idioma da interface"
+  1334→                    value={
+  1335→                      <Select value={language} onValueChange={handleLanguageChange}>
+  1336→                        <SelectTrigger className="w-44 rounded-xl" aria-label="Selecionar idioma">
+  1337→                          <SelectValue placeholder="Selecionar idioma" />
+  1338→                        </SelectTrigger>
+  1339→                        <SelectContent className="bg-card border shadow-card z-50">
+  1340→                          <SelectItem value="pt">🇵🇹 Português (Portugal)</SelectItem>
+  1341→                          <SelectItem value="en">🇬🇧 English</SelectItem>
+  1342→                          <SelectItem value="es">🇪🇸 Español</SelectItem>
+  1343→                          <SelectItem value="it">🇮🇹 Italiano</SelectItem>
+  1344→                        </SelectContent>
+  1345→                      </Select>
+  1346→                    }
+  1347→                    icon={<IconGlobe className="h-4 w-4" />}
+  1348→                  />
+  1349→                  <BloomInfoRow
+  1350→                    label="Tema"
+  1351→                    value="Aparência da interface"
+  1352→                    icon={<IconEye className="h-4 w-4" />}
+  1353→                    action={<ThemeToggle />}
+  1354→                  />
+  1355→                </div>
+  1356→              </AccordionContent>
+  1357→            </AccordionItem>
+  1358→
+  1359→            {/* Privacidade */}
+  1360→            <AccordionItem value="privacidade">
+  1361→              <AccordionTrigger>
+  1362→                <div className="flex items-center gap-2">
+  1363→                  <IconShield className="h-4 w-4 text-primary" />
+  1364→                  <span>Privacidade</span>
+  1365→                </div>
+  1366→              </AccordionTrigger>
+  1367→              <AccordionContent>
+  1368→                <div className="space-y-3">
+  1369→                  <BloomInfoRow
+  1370→                    label="Exportar os seus dados"
+  1371→                    value="Descarregue uma cópia dos seus dados pessoais"
+  1372→                    icon={<IconDownload className="h-4 w-4" />}
+  1373→                    action={
+  1374→                      <Button variant="outline" size="sm" onClick={handleDataExport} disabled={exportingData} className="rounded-xl font-display font-bold text-xs">
+  1375→                        {exportingData ? <IconLoader2 className="h-3.5 w-3.5 animate-spin" /> : <IconDownload className="h-3.5 w-3.5 mr-1" />}
+  1376→                        {exportingData ? 'A exportar...' : 'Exportar'}
+  1377→                      </Button>
+  1378→                    }
+  1379→                  />
+  1380→
+  1381→                  <div className="space-y-1.5 text-xs text-muted-foreground">
+  1382→                    <div className="flex items-start gap-2">
+  1383→                      <IconCheck className="h-3.5 w-3.5 text-success shrink-0 mt-0.5" />
+  1384→                      <span><strong className="text-foreground">Acesso:</strong> Direito a aceder aos seus dados pessoais</span>
+  1385→                    </div>
+  1386→                    <div className="flex items-start gap-2">
+  1387→                      <IconCheck className="h-3.5 w-3.5 text-success shrink-0 mt-0.5" />
+  1388→                      <span><strong className="text-foreground">Retificação:</strong> Pode corrigir dados incorretos</span>
+  1389→                    </div>
+  1390→                    <div className="flex items-start gap-2">
+  1391→                      <IconCheck className="h-3.5 w-3.5 text-success shrink-0 mt-0.5" />
+  1392→                      <span><strong className="text-foreground">Eliminação:</strong> Pode solicitar a eliminação dos seus dados</span>
+  1393→                    </div>
+  1394→                    <div className="flex items-start gap-2">
+  1395→                      <IconCheck className="h-3.5 w-3.5 text-success shrink-0 mt-0.5" />
+  1396→                      <span><strong className="text-foreground">Portabilidade:</strong> Exporte os seus dados num formato estruturado</span>
+  1397→                    </div>
+  1398→                  </div>
+  1399→
+  1400→                  <div className="flex items-center gap-3 pt-1">
+  1401→                    <a href="/privacidade" className="text-primary hover:text-primary/80 text-xs font-display font-bold tracking-wide transition-colors">Privacidade</a>
+  1402→                    <a href="/termos" className="text-primary hover:text-primary/80 text-xs font-display font-bold tracking-wide transition-colors">Termos</a>
+  1403→                  </div>
+  1404→                </div>
+  1405→              </AccordionContent>
+  1406→            </AccordionItem>
+  1407→
+  1408→            {/* Zona de Perigo */}
+  1409→            <AccordionItem value="perigo">
+  1410→              <AccordionTrigger>
+  1411→                <div className="flex items-center gap-2">
+  1412→                  <AlertTriangle className="h-4 w-4 text-destructive" />
+  1413→                  <span className="text-destructive">Zona de Perigo</span>
+  1414→                </div>
+  1415→              </AccordionTrigger>
+  1416→              <AccordionContent>
+  1417→                <div className="space-y-3">
+  1418→                  <BloomInfoRow
+  1419→                    label="Terminar Sessão"
+  1420→                    value="Sair da sua conta neste dispositivo"
+  1421→                    icon={<IconLogout className="h-4 w-4" />}
+  1422→                    action={
+  1423→                      <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/5 rounded-xl font-display font-bold text-xs" onClick={() => signOut({ callbackUrl: '/' })}>
+  1424→                        <IconLogout className="h-3.5 w-3.5 mr-1" /> Terminar
+  1425→                      </Button>
+  1426→                    }
+  1427→                  />
+  1428→                  <div className="border-t border-border pt-3">
+  1429→                    <BloomInfoRow
+  1430→                      label="Eliminar conta"
+  1431→                      value="Esta ação é irreversível"
+  1432→                      icon={<IconTrash className="h-4 w-4" />}
+  1433→                      action={
+  1434→                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/5 rounded-xl font-display font-bold text-xs" onClick={() => setDeleteDialogOpen(true)}>
+  1435→                          <IconTrash className="h-3.5 w-3.5 mr-1" /> Eliminar
+  1436→                        </Button>
+  1437→                      }
+  1438→                    />
+  1439→                  </div>
+  1440→                </div>
+  1441→              </AccordionContent>
+  1442→            </AccordionItem>
+  1443→          </Accordion>
+  1444→        </TabsContent>
+  1445→      </Tabs>
+  1446→
+  1447→      {/* ═══ Delete Account Dialog ═══ */}
+  1448→      <BloomDialog
+  1449→        open={deleteDialogOpen}
+  1450→        onOpenChange={setDeleteDialogOpen}
+  1451→        title="Eliminar conta?"
+  1452→        description="Esta ação é irreversível. Todos os seus dados serão eliminados permanentemente."
+  1453→        icon={AlertTriangle}
+  1454→        iconVariant="error"
+  1455→      >
+  1456→        <div className="space-y-3">
+  1457→          <BloomAlert
+  1458→            variant="warning"
+  1459→            title="Atenção"
+  1460→            message="Ao eliminar a sua conta, perderá acesso a todos os contratos ativos, pagamentos pendentes e histórico de mensagens."
+  1461→          />
+  1462→          <div>
+  1463→            <p className="text-sm text-muted-foreground mb-2">
+  1464→              Escreva <strong className="text-destructive">ELIMINAR</strong> para confirmar:
+  1465→            </p>
+  1466→            <Input
+  1467→              value={deleteConfirmText}
+  1468→              onChange={e => setDeleteConfirmText(e.target.value)}
+  1469→              placeholder="ELIMINAR"
+  1470→              className="rounded-xl text-center font-display font-bold tracking-wide"
+  1471→            />
+  1472→          </div>
+  1473→          <div className="flex gap-3 pt-1">
+  1474→            <Button
+  1475→              variant="outline"
+  1476→              onClick={() => { setDeleteDialogOpen(false); setDeleteConfirmText(''); }}
+  1477→              disabled={isDeleting}
+  1478→              className="flex-1 rounded-xl font-display font-bold"
+  1479→            >
+  1480→              Cancelar
+  1481→            </Button>
+  1482→            <Button
+  1483→              variant="destructive"
+  1484→              onClick={handleDeleteAccount}
+  1485→              disabled={isDeleting || deleteConfirmText !== 'ELIMINAR'}
+  1486→              className="flex-1 rounded-xl font-display font-bold"
+  1487→            >
+  1488→              {isDeleting ? (
+  1489→                <><IconLoader2 className="h-4 w-4 animate-spin mr-2" /> A eliminar...</>
+  1490→              ) : (
+  1491→                <><IconTrash className="h-4 w-4 mr-2" /> Eliminar permanentemente</>
+  1492→              )}
+  1493→            </Button>
+  1494→          </div>
+  1495→        </div>
+  1496→      </BloomDialog>
+  1497→    </PageLayout>
+  1498→  );
+  1499→}
+  1500→
