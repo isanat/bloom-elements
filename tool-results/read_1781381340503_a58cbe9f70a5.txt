@@ -1,0 +1,1564 @@
+     1→"use client";
+     2→
+     3→import { useEffect, useState, useRef } from "react";
+     4→import { PageHeader } from "@/components/admin/common/page-header";
+     5→import { apiFetch } from "@/lib/api-client";
+     6→import {
+     7→  Card,
+     8→  CardContent,
+     9→  CardHeader,
+    10→  CardTitle,
+    11→  CardDescription,
+    12→} from "@/components/ui/card";
+    13→import { Button } from "@/components/ui/button";
+    14→import { Input } from "@/components/ui/input";
+    15→import { Badge } from "@/components/ui/badge";
+    16→import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+    17→import { Skeleton } from "@/components/ui/skeleton";
+    18→import { Switch } from "@/components/ui/switch";
+    19→import { Label } from "@/components/ui/label";
+    20→import {
+    21→  Select,
+    22→  SelectContent,
+    23→  SelectItem,
+    24→  SelectTrigger,
+    25→  SelectValue,
+    26→} from "@/components/ui/select";
+    27→import {
+    28→  IconCoin,
+    29→  IconCreditCard,
+    30→  IconPercentage,
+    31→  IconServer,
+    32→  IconShield,
+    33→  IconVideo,
+    34→  IconAlertTriangle,
+    35→  IconCheck,
+    36→  IconX,
+    37→  IconTrash,
+    38→  IconImage,
+    39→  IconUpload,
+    40→} from "@/components/icons";
+    41→import { useToast } from "@/hooks/use-toast";
+    42→
+    43→interface PlatformSettings {
+    44→  // Taxas
+    45→  activationCostEurCents: number;
+    46→  contractFeeEurCents: number;
+    47→  platformFeePercent: number;
+    48→  // Geral
+    49→  maintenanceMode: boolean;
+    50→  supportEmail: string;
+    51→  supportPhone: string;
+    52→  // KYC
+    53→  kycEnabled: boolean;
+    54→  kycProvider: string;
+    55→  kycApiKey: string;
+    56→  // Easypay
+    57→  easypayEnabled: boolean;
+    58→  easypayAccountId: string;
+    59→  easypayApiKey: string;
+    60→  easypayEnvironment: "sandbox" | "production";
+    61→  // Vídeo
+    62→  videoEnabled: boolean;
+    63→  videoProvider: string;
+    64→  videoApiKey: string;
+    65→  // Test Mode
+    66→  kycTestModeEnabled?: boolean;
+    67→  paymentTestModeEnabled?: boolean;
+    68→}
+    69→
+    70→interface IntegrationStatus {
+    71→  name: string;
+    72→  status: "healthy" | "degraded" | "down";
+    73→  lastWebhook: string | null;
+    74→  connected: boolean;
+    75→}
+    76→
+    77→interface SiteSettings {
+    78→  logoUrl: string;
+    79→  logoDarkUrl: string;
+    80→  iconUrl: string;
+    81→  faviconUrl: string;
+    82→  heroImageUrl: string;
+    83→}
+    84→
+    85→const SITE_SETTINGS_DEFAULTS: SiteSettings = {
+    86→  logoUrl: "",
+    87→  logoDarkUrl: "",
+    88→  iconUrl: "",
+    89→  faviconUrl: "/favicon.svg",
+    90→  heroImageUrl: "",
+    91→};
+    92→
+    93→export default function AdminSettingsPage() {
+    94→  const { toast } = useToast();
+    95→  const [loading, setLoading] = useState(true);
+    96→  const [saving, setSaving] = useState(false);
+    97→  const [savingTestMode, setSavingTestMode] = useState(false);
+    98→  const [resettingDb, setResettingDb] = useState(false);
+    99→  const [showResetConfirm, setShowResetConfirm] = useState(false);
+   100→  const [resetPreview, setResetPreview] = useState<any>(null);
+   101→  const [settings, setSettings] = useState<PlatformSettings>({
+   102→    activationCostEurCents: 3500,
+   103→    contractFeeEurCents: 500,
+   104→    platformFeePercent: 10,
+   105→    maintenanceMode: false,
+   106→    supportEmail: "",
+   107→    supportPhone: "",
+   108→    kycEnabled: true,
+   109→    kycProvider: "didit",
+   110→    kycApiKey: "",
+   111→    easypayEnabled: true,
+   112→    easypayAccountId: "",
+   113→    easypayApiKey: "",
+   114→    easypayEnvironment: "sandbox",
+   115→    videoEnabled: false,
+   116→    videoProvider: "daily",
+   117→    videoApiKey: "",
+   118→    kycTestModeEnabled: false,
+   119→    paymentTestModeEnabled: false,
+   120→  });
+   121→  const [integrations, setIntegrations] = useState<IntegrationStatus[]>([]);
+   122→  const [siteSettings, setSiteSettings] = useState<SiteSettings>(SITE_SETTINGS_DEFAULTS);
+   123→  const [loadingSiteSettings, setLoadingSiteSettings] = useState(false);
+   124→  const [uploadingType, setUploadingType] = useState<string | null>(null);
+   125→  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+   126→
+   127→  useEffect(() => {
+   128→    fetchData();
+   129→  }, []);
+   130→
+   131→  const fetchData = async () => {
+   132→    setLoading(true);
+   133→    try {
+   134→      const [settingsRes, integrationsRes, siteSettingsRes] = await Promise.all([
+   135→        apiFetch("/api/admin/settings"),
+   136→        apiFetch("/api/admin/settings/integrations"),
+   137→        apiFetch("/api/admin/site-settings").catch(() => null),
+   138→      ]);
+   139→
+   140→      if (settingsRes.ok) {
+   141→        const data = await settingsRes.json();
+   142→        setSettings(data.settings || settings);
+   143→      }
+   144→      if (integrationsRes.ok) {
+   145→        const data = await integrationsRes.json();
+   146→        setIntegrations(data.integrations || []);
+   147→      }
+   148→      if (siteSettingsRes?.ok) {
+   149→        const data = await siteSettingsRes.json();
+   150→        if (data.settings) {
+   151→          setSiteSettings({
+   152→            logoUrl: data.settings.logoUrl || SITE_SETTINGS_DEFAULTS.logoUrl,
+   153→            logoDarkUrl: data.settings.logoDarkUrl || SITE_SETTINGS_DEFAULTS.logoDarkUrl,
+   154→            iconUrl: data.settings.iconUrl || SITE_SETTINGS_DEFAULTS.iconUrl,
+   155→            faviconUrl: data.settings.faviconUrl || SITE_SETTINGS_DEFAULTS.faviconUrl,
+   156→            heroImageUrl: data.settings.heroImageUrl || SITE_SETTINGS_DEFAULTS.heroImageUrl,
+   157→          });
+   158→        }
+   159→      }
+   160→    } catch (error) {
+   161→      console.error("Error fetching settings:", error);
+   162→    } finally {
+   163→      setLoading(false);
+   164→    }
+   165→  };
+   166→
+   167→  const handleSave = async () => {
+   168→    setSaving(true);
+   169→    try {
+   170→      const response = await apiFetch("/api/admin/settings", {
+   171→        method: "PATCH",
+   172→        headers: { "Content-Type": "application/json" },
+   173→        body: JSON.stringify(settings),
+   174→      });
+   175→
+   176→      if (response.ok) {
+   177→        toast({ title: "Sucesso", description: "Definições guardadas" });
+   178→      } else {
+   179→        const data = await response.json();
+   180→        toast({
+   181→          title: "Erro",
+   182→          description: data.error || "Falha ao guardar",
+   183→          variant: "destructive",
+   184→        });
+   185→      }
+   186→    } catch (error) {
+   187→      toast({
+   188→        title: "Erro",
+   189→        description: "Falha ao guardar definições",
+   190→        variant: "destructive",
+   191→      });
+   192→    } finally {
+   193→      setSaving(false);
+   194→    }
+   195→  };
+   196→
+   197→  const handleTestModeToggle = async (
+   198→    mode: "kyc" | "payment",
+   199→    newValue: boolean,
+   200→  ) => {
+   201→    setSavingTestMode(true);
+   202→    try {
+   203→      // Convert values to proper booleans (SQLite might return 0/1)
+   204→      const currentSettings = {
+   205→        kycTestModeEnabled:
+   206→          mode === "kyc" ? Boolean(newValue) : Boolean(settings.kycTestModeEnabled),
+   207→        paymentTestModeEnabled:
+   208→          mode === "payment" ? Boolean(newValue) : Boolean(settings.paymentTestModeEnabled),
+   209→      };
+   210→
+   211→      const response = await apiFetch("/api/admin/settings/test-mode", {
+   212→        method: "PUT",
+   213→        headers: { "Content-Type": "application/json" },
+   214→        body: JSON.stringify(currentSettings),
+   215→      });
+   216→
+   217→      if (response.ok) {
+   218→        const data = await response.json();
+   219→        setSettings((prev) => ({
+   220→          ...prev,
+   221→          ...data.settings,
+   222→        }));
+   223→        toast({
+   224→          title: "Sucesso",
+   225→          description: data.message || "Modo de teste actualizado",
+   226→        });
+   227→      } else {
+   228→        const data = await response.json();
+   229→        toast({
+   230→          title: "Erro",
+   231→          description: data.error || "Falha ao actualizar modo de teste",
+   232→          variant: "destructive",
+   233→        });
+   234→      }
+   235→    } catch (error) {
+   236→      toast({
+   237→        title: "Erro",
+   238→        description: "Falha ao actualizar modo de teste",
+   239→        variant: "destructive",
+   240→      });
+   241→    } finally {
+   242→      setSavingTestMode(false);
+   243→    }
+   244→  };
+   245→
+   246→  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "logoDark" | "icon" | "favicon" | "hero") => {
+   247→    const file = e.target.files?.[0];
+   248→    if (!file) return;
+   249→
+   250→    setUploadingType(type);
+   251→    try {
+   252→      // Step 1: Upload the file
+   253→      const formData = new FormData();
+   254→      formData.append("file", file);
+   255→      formData.append("type", type);
+   256→
+   257→      const uploadRes = await apiFetch("/api/upload", {
+   258→        method: "POST",
+   259→        body: formData,
+   260→      });
+   261→
+   262→      if (!uploadRes.ok) {
+   263→        const data = await uploadRes.json();
+   264→        toast({
+   265→          title: "Erro",
+   266→          description: data.error || "Falha ao carregar imagem",
+   267→          variant: "destructive",
+   268→        });
+   269→        return;
+   270→      }
+   271→
+   272→      const uploadData = await uploadRes.json();
+   273→      // Map upload type to the correct URL field name
+   274→      const typeToField: Record<string, string> = {
+   275→        logo: "logoUrl",
+   276→        logoDark: "logoDarkUrl",
+   277→        icon: "iconUrl",
+   278→        favicon: "faviconUrl",
+   279→        hero: "heroImageUrl",
+   280→      };
+   281→      const urlField = typeToField[type] as keyof SiteSettings;
+   282→
+   283→      // Step 2: Save the URL to site settings
+   284→      const saveRes = await apiFetch("/api/admin/site-settings", {
+   285→        method: "PATCH",
+   286→        headers: { "Content-Type": "application/json" },
+   287→        body: JSON.stringify({ [urlField]: uploadData.url }),
+   288→      });
+   289→
+   290→      if (saveRes.ok) {
+   291→        const saveData = await saveRes.json();
+   292→        if (saveData.settings) {
+   293→          setSiteSettings({
+   294→            logoUrl: saveData.settings.logoUrl || SITE_SETTINGS_DEFAULTS.logoUrl,
+   295→            logoDarkUrl: saveData.settings.logoDarkUrl || SITE_SETTINGS_DEFAULTS.logoDarkUrl,
+   296→            iconUrl: saveData.settings.iconUrl || SITE_SETTINGS_DEFAULTS.iconUrl,
+   297→            faviconUrl: saveData.settings.faviconUrl || SITE_SETTINGS_DEFAULTS.faviconUrl,
+   298→            heroImageUrl: saveData.settings.heroImageUrl || SITE_SETTINGS_DEFAULTS.heroImageUrl,
+   299→          });
+   300→        }
+   301→        toast({ title: "Sucesso", description: "Imagem atualizada" });
+   302→      } else {
+   303→        toast({
+   304→          title: "Erro",
+   305→          description: "Imagem carregada mas falha ao guardar definição",
+   306→          variant: "destructive",
+   307→        });
+   308→      }
+   309→    } catch (error) {
+   310→      toast({
+   311→        title: "Erro",
+   312→        description: "Falha ao carregar imagem",
+   313→        variant: "destructive",
+   314→      });
+   315→    } finally {
+   316→      setUploadingType(null);
+   317→      // Reset file input so the same file can be selected again
+   318→      if (e.target) e.target.value = "";
+   319→    }
+   320→  };
+   321→
+   322→  const handleRemoveImage = async (type: "logo" | "logoDark" | "icon" | "favicon" | "hero") => {
+   323→    // Map upload type to the correct URL field name
+   324→    const typeToField: Record<string, string> = {
+   325→      logo: "logoUrl",
+   326→      logoDark: "logoDarkUrl",
+   327→      icon: "iconUrl",
+   328→      favicon: "faviconUrl",
+   329→      hero: "heroImageUrl",
+   330→    };
+   331→    const urlField = typeToField[type] as keyof SiteSettings;
+   332→    const defaultValue = SITE_SETTINGS_DEFAULTS[urlField];
+   333→
+   334→    try {
+   335→      const res = await apiFetch("/api/admin/site-settings", {
+   336→        method: "PATCH",
+   337→        headers: { "Content-Type": "application/json" },
+   338→        body: JSON.stringify({ [urlField]: defaultValue }),
+   339→      });
+   340→
+   341→      if (res.ok) {
+   342→        const data = await res.json();
+   343→        if (data.settings) {
+   344→          setSiteSettings({
+   345→            logoUrl: data.settings.logoUrl || SITE_SETTINGS_DEFAULTS.logoUrl,
+   346→            logoDarkUrl: data.settings.logoDarkUrl || SITE_SETTINGS_DEFAULTS.logoDarkUrl,
+   347→            iconUrl: data.settings.iconUrl || SITE_SETTINGS_DEFAULTS.iconUrl,
+   348→            faviconUrl: data.settings.faviconUrl || SITE_SETTINGS_DEFAULTS.faviconUrl,
+   349→            heroImageUrl: data.settings.heroImageUrl || SITE_SETTINGS_DEFAULTS.heroImageUrl,
+   350→          });
+   351→        }
+   352→        toast({ title: "Sucesso", description: "Imagem revertida para o padrão" });
+   353→      } else {
+   354→        toast({
+   355→          title: "Erro",
+   356→          description: "Falha ao remover imagem",
+   357→          variant: "destructive",
+   358→        });
+   359→      }
+   360→    } catch (error) {
+   361→      toast({
+   362→        title: "Erro",
+   363→        description: "Falha ao remover imagem",
+   364→        variant: "destructive",
+   365→      });
+   366→    }
+   367→  };
+   368→
+   369→  const testConnection = async (integration: string) => {
+   370→    try {
+   371→      const response = await apiFetch(`/api/admin/settings/test-integration`, {
+   372→        method: "POST",
+   373→        headers: { "Content-Type": "application/json" },
+   374→        body: JSON.stringify({ integration }),
+   375→      });
+   376→
+   377→      const data = await response.json();
+   378→      toast({
+   379→        title: data.success ? "Sucesso" : "Erro",
+   380→        description: data.message,
+   381→        variant: data.success ? "default" : "destructive",
+   382→      });
+   383→    } catch (error) {
+   384→      toast({
+   385→        title: "Erro",
+   386→        description: "Falha ao testar conexão",
+   387→        variant: "destructive",
+   388→      });
+   389→    }
+   390→  };
+   391→
+   392→  const getStatusColor = (status: string) => {
+   393→    switch (status) {
+   394→      case "healthy":
+   395→        return "bg-success";
+   396→      case "degraded":
+   397→        return "bg-warning";
+   398→      default:
+   399→        return "bg-destructive";
+   400→    }
+   401→  };
+   402→
+   403→  const handlePreviewReset = async () => {
+   404→    try {
+   405→      const res = await apiFetch("/api/admin/reset-database");
+   406→      if (res.ok) {
+   407→        const data = await res.json();
+   408→        setResetPreview(data);
+   409→        setShowResetConfirm(true);
+   410→      } else {
+   411→        const data = await res.json();
+   412→        toast({ title: "Erro", description: data.error || "Falha ao verificar dados", variant: "destructive" });
+   413→      }
+   414→    } catch {
+   415→      toast({ title: "Erro", description: "Falha ao conectar ao servidor", variant: "destructive" });
+   416→    }
+   417→  };
+   418→
+   419→  const handleResetDatabase = async () => {
+   420→    setResettingDb(true);
+   421→    try {
+   422→      const res = await apiFetch("/api/admin/reset-database", {
+   423→        method: "POST",
+   424→        headers: { "Content-Type": "application/json" },
+   425→        body: JSON.stringify({ confirmation: "RESET_ALL_DATA" }),
+   426→      });
+   427→      if (res.ok) {
+   428→        const data = await res.json();
+   429→        toast({
+   430→          title: "✓ Base de dados resetada",
+   431→          description: data.message,
+   432→        });
+   433→        setShowResetConfirm(false);
+   434→        setResetPreview(null);
+   435→      } else {
+   436→        const data = await res.json();
+   437→        toast({ title: "Erro", description: data.error || "Falha ao resetar", variant: "destructive" });
+   438→      }
+   439→    } catch {
+   440→      toast({ title: "Erro", description: "Falha ao conectar ao servidor", variant: "destructive" });
+   441→    } finally {
+   442→      setResettingDb(false);
+   443→    }
+   444→  };
+   445→
+   446→  return (
+   447→    <div className="space-y-6">
+   448→      <PageHeader
+   449→        title="Definições"
+   450→        description="Definições da plataforma"
+   451→        actions={
+   452→          <Button onClick={handleSave} disabled={saving}>
+   453→            {saving ? "A guardar..." : "Guardar Alterações"}
+   454→          </Button>
+   455→        }
+   456→      />
+   457→
+   458→      {/* ═══════════════════════════════════════════════════════════════
+   459→          ⚠️  NÃO REMOVER a aba "Imagens" — é obrigatória para o painel admin.
+   460→          Ela controla o upload de logo, favicon, ícone e hero do site.
+   461→          Sem esta aba, o administrador não consegue alterar as imagens.
+   462→          ═══════════════════════════════════════════════════════════════ */}
+   463→      <Tabs defaultValue="images">
+   464→        <TabsList className="flex w-full flex-wrap gap-1 overflow-x-auto">
+   465→          {/* ⚠️ ABA IMAGENS — NÃO REMOVER (ver comentário acima) */}
+   466→          <TabsTrigger value="images" className="flex items-center gap-1.5 shrink-0">
+   467→            <IconImage className="h-4 w-4" />
+   468→            Imagens
+   469→          </TabsTrigger>
+   470→          <TabsTrigger value="fees" className="shrink-0">Taxas</TabsTrigger>
+   471→          <TabsTrigger value="kyc" className="shrink-0">KYC</TabsTrigger>
+   472→          <TabsTrigger value="payments" className="shrink-0">Pagamentos</TabsTrigger>
+   473→          <TabsTrigger value="video" className="shrink-0">Vídeo</TabsTrigger>
+   474→          <TabsTrigger value="test-mode" className="shrink-0">Modo Teste</TabsTrigger>
+   475→        </TabsList>
+   476→
+   477→        {/* Tab: Taxas */}
+   478→        <TabsContent value="fees" className="space-y-6 mt-6">
+   479→          <Card>
+   480→            <CardHeader>
+   481→              <CardTitle className="text-base flex items-center gap-2">
+   482→                <IconCoin className="h-5 w-5" />
+   483→                Taxas da Plataforma
+   484→              </CardTitle>
+   485→              <CardDescription>
+   486→                Configure as taxas cobradas pela plataforma
+   487→              </CardDescription>
+   488→            </CardHeader>
+   489→            <CardContent className="space-y-4">
+   490→              {loading ? (
+   491→                <div className="space-y-4">
+   492→                  <Skeleton className="h-10 w-full" />
+   493→                  <Skeleton className="h-10 w-full" />
+   494→                  <Skeleton className="h-10 w-full" />
+   495→                </div>
+   496→              ) : (
+   497→                <>
+   498→                  <div className="space-y-2">
+   499→                    <Label>Taxa de Ativação (EUR)</Label>
+   500→                    <div className="flex items-center gap-2">
+   501→                      <IconCreditCard className="h-4 w-4 text-muted-foreground" />
+   502→                      <Input
+   503→                        type="number"
+   504→                        value={settings.activationCostEurCents / 100}
+   505→                        onChange={(e) =>
+   506→                          setSettings({
+   507→                            ...settings,
+   508→                            activationCostEurCents:
+   509→                              parseFloat(e.target.value) * 100,
+   510→                          })
+   511→                        }
+   512→                      />
+   513→                    </div>
+   514→                    <p className="text-xs text-muted-foreground">
+   515→                      Valor pago pela família ao ativar a conta
+   516→                    </p>
+   517→                  </div>
+   518→
+   519→                  <div className="space-y-2">
+   520→                    <Label>Taxa de Contrato (EUR)</Label>
+   521→                    <div className="flex items-center gap-2">
+   522→                      <IconCreditCard className="h-4 w-4 text-muted-foreground" />
+   523→                      <Input
+   524→                        type="number"
+   525→                        value={settings.contractFeeEurCents / 100}
+   526→                        onChange={(e) =>
+   527→                          setSettings({
+   528→                            ...settings,
+   529→                            contractFeeEurCents:
+   530→                              parseFloat(e.target.value) * 100,
+   531→                          })
+   532→                        }
+   533→                      />
+   534→                    </div>
+   535→                    <p className="text-xs text-muted-foreground">
+   536→                      Valor pago por cada contrato criado
+   537→                    </p>
+   538→                  </div>
+   539→
+   540→                  <div className="space-y-2">
+   541→                    <Label>Taxa da Plataforma (%)</Label>
+   542→                    <div className="flex items-center gap-2">
+   543→                      <IconPercentage className="h-4 w-4 text-muted-foreground" />
+   544→                      <Input
+   545→                        type="number"
+   546→                        value={settings.platformFeePercent}
+   547→                        onChange={(e) =>
+   548→                          setSettings({
+   549→                            ...settings,
+   550→                            platformFeePercent: parseFloat(e.target.value),
+   551→                          })
+   552→                        }
+   553→                      />
+   554→                    </div>
+   555→                    <p className="text-xs text-muted-foreground">
+   556→                      Taxa descontada do pagamento do profissional (profissional
+   557→                      recebe {100 - settings.platformFeePercent}%)
+   558→                    </p>
+   559→                  </div>
+   560→                </>
+   561→              )}
+   562→            </CardContent>
+   563→          </Card>
+   564→
+   565→          <Card>
+   566→            <CardHeader>
+   567→              <CardTitle className="text-base">
+   568→                Informações de Contacto
+   569→              </CardTitle>
+   570→            </CardHeader>
+   571→            <CardContent className="space-y-4">
+   572→              <div className="space-y-2">
+   573→                <Label>Email de Suporte</Label>
+   574→                <Input
+   575→                  value={settings.supportEmail}
+   576→                  onChange={(e) =>
+   577→                    setSettings({ ...settings, supportEmail: e.target.value })
+   578→                  }
+   579→                  placeholder="suporte@evyra.eu"
+   580→                />
+   581→              </div>
+   582→              <div className="space-y-2">
+   583→                <Label>Telefone de Suporte</Label>
+   584→                <Input
+   585→                  value={settings.supportPhone}
+   586→                  onChange={(e) =>
+   587→                    setSettings({ ...settings, supportPhone: e.target.value })
+   588→                  }
+   589→                  placeholder="+351 210 000 000"
+   590→                />
+   591→              </div>
+   592→              <div className="flex items-center justify-between">
+   593→                <div>
+   594→                  <Label>Modo de Manutenção</Label>
+   595→                  <p className="text-sm text-muted-foreground">
+   596→                    Apenas administradores podem aceder
+   597→                  </p>
+   598→                </div>
+   599→                <Switch
+   600→                  checked={settings.maintenanceMode}
+   601→                  onCheckedChange={(checked) =>
+   602→                    setSettings({ ...settings, maintenanceMode: checked })
+   603→                  }
+   604→                />
+   605→              </div>
+   606→            </CardContent>
+   607→          </Card>
+   608→
+   609→          <Card className="border-warning/30 bg-warning/10">
+   610→            <CardContent className="flex items-start gap-4 p-4">
+   611→              <IconAlertTriangle className="h-5 w-5 text-warning mt-0.5" />
+   612→              <div>
+   613→                <p className="font-medium text-warning">Atenção</p>
+   614→                <p className="text-sm text-warning/90">
+   615→                  Alterações nas taxas afetam apenas novos contratos. Contratos
+   616→                  existentes mantêm as taxas originais.
+   617→                </p>
+   618→              </div>
+   619→            </CardContent>
+   620→          </Card>
+   621→        </TabsContent>
+   622→
+   623→        {/* Tab: KYC */}
+   624→        <TabsContent value="kyc" className="space-y-6 mt-6">
+   625→          <Card>
+   626→            <CardHeader>
+   627→              <CardTitle className="text-base flex items-center gap-2">
+   628→                <IconShield className="h-5 w-5" />
+   629→                Verificação de Identidade (KYC)
+   630→              </CardTitle>
+   631→              <CardDescription>
+   632→                Configure a integração com o provedor de KYC
+   633→              </CardDescription>
+   634→            </CardHeader>
+   635→            <CardContent className="space-y-4">
+   636→              {loading ? (
+   637→                <div className="space-y-4">
+   638→                  <Skeleton className="h-10 w-full" />
+   639→                  <Skeleton className="h-10 w-full" />
+   640→                </div>
+   641→              ) : (
+   642→                <>
+   643→                  <div className="flex items-center justify-between">
+   644→                    <div>
+   645→                      <Label>Habilitar Verificação KYC</Label>
+   646→                      <p className="text-sm text-muted-foreground">
+   647→                        Permite que profissionais verifiquem a sua identidade
+   648→                      </p>
+   649→                    </div>
+   650→                    <Switch
+   651→                      checked={settings.kycEnabled}
+   652→                      onCheckedChange={(checked) =>
+   653→                        setSettings({ ...settings, kycEnabled: checked })
+   654→                      }
+   655→                    />
+   656→                  </div>
+   657→
+   658→                  <div className="space-y-2">
+   659→                    <Label>Provedor KYC</Label>
+   660→                    <Select
+   661→                      value={settings.kycProvider}
+   662→                      onValueChange={(v) =>
+   663→                        setSettings({ ...settings, kycProvider: v })
+   664→                      }
+   665→                    >
+   666→                      <SelectTrigger>
+   667→                        <SelectValue />
+   668→                      </SelectTrigger>
+   669→                      <SelectContent>
+   670→                        <SelectItem value="didit">Didit</SelectItem>
+   671→                        <SelectItem value="veriff">Veriff</SelectItem>
+   672→                        <SelectItem value="onfido">Onfido</SelectItem>
+   673→                      </SelectContent>
+   674→                    </Select>
+   675→                  </div>
+   676→
+   677→                  <div className="space-y-2">
+   678→                    <Label>API Key</Label>
+   679→                    <Input
+   680→                      type="password"
+   681→                      value={settings.kycApiKey}
+   682→                      onChange={(e) =>
+   683→                        setSettings({ ...settings, kycApiKey: e.target.value })
+   684→                      }
+   685→                      placeholder="sk_live_..."
+   686→                    />
+   687→                    <p className="text-xs text-muted-foreground">
+   688→                      Chave de API do provedor KYC
+   689→                    </p>
+   690→                  </div>
+   691→
+   692→                  <Button
+   693→                    variant="outline"
+   694→                    onClick={() => testConnection("kyc")}
+   695→                    disabled={!settings.kycApiKey}
+   696→                  >
+   697→                    Testar Conexão
+   698→                  </Button>
+   699→                </>
+   700→              )}
+   701→            </CardContent>
+   702→          </Card>
+   703→        </TabsContent>
+   704→
+   705→        {/* Tab: Pagamentos */}
+   706→        <TabsContent value="payments" className="space-y-6 mt-6">
+   707→          <Card>
+   708→            <CardHeader>
+   709→              <CardTitle className="text-base flex items-center gap-2">
+   710→                <IconCreditCard className="h-5 w-5" />
+   711→                Easypay - Pagamentos
+   712→              </CardTitle>
+   713→              <CardDescription>
+   714→                Configure a integração com Easypay (Multibanco, MB Way, Cartão)
+   715→              </CardDescription>
+   716→            </CardHeader>
+   717→            <CardContent className="space-y-4">
+   718→              {loading ? (
+   719→                <div className="space-y-4">
+   720→                  <Skeleton className="h-10 w-full" />
+   721→                  <Skeleton className="h-10 w-full" />
+   722→                  <Skeleton className="h-10 w-full" />
+   723→                </div>
+   724→              ) : (
+   725→                <>
+   726→                  <div className="flex items-center justify-between">
+   727→                    <div>
+   728→                      <Label>Habilitar Easypay</Label>
+   729→                      <p className="text-sm text-muted-foreground">
+   730→                        Ativa processamento de pagamentos via Easypay
+   731→                      </p>
+   732→                    </div>
+   733→                    <Switch
+   734→                      checked={settings.easypayEnabled}
+   735→                      onCheckedChange={(checked) =>
+   736→                        setSettings({ ...settings, easypayEnabled: checked })
+   737→                      }
+   738→                    />
+   739→                  </div>
+   740→
+   741→                  <div className="space-y-2">
+   742→                    <Label>Ambiente</Label>
+   743→                    <Select
+   744→                      value={settings.easypayEnvironment}
+   745→                      onValueChange={(v: "sandbox" | "production") =>
+   746→                        setSettings({ ...settings, easypayEnvironment: v })
+   747→                      }
+   748→                    >
+   749→                      <SelectTrigger>
+   750→                        <SelectValue />
+   751→                      </SelectTrigger>
+   752→                      <SelectContent>
+   753→                        <SelectItem value="sandbox">
+   754→                          Sandbox (Testes)
+   755→                        </SelectItem>
+   756→                        <SelectItem value="production">Produção</SelectItem>
+   757→                      </SelectContent>
+   758→                    </Select>
+   759→                  </div>
+   760→
+   761→                  <div className="space-y-2">
+   762→                    <Label>Account ID</Label>
+   763→                    <Input
+   764→                      value={settings.easypayAccountId}
+   765→                      onChange={(e) =>
+   766→                        setSettings({
+   767→                          ...settings,
+   768→                          easypayAccountId: e.target.value,
+   769→                        })
+   770→                      }
+   771→                      placeholder="12345"
+   772→                    />
+   773→                  </div>
+   774→
+   775→                  <div className="space-y-2">
+   776→                    <Label>API Key</Label>
+   777→                    <Input
+   778→                      type="password"
+   779→                      value={settings.easypayApiKey}
+   780→                      onChange={(e) =>
+   781→                        setSettings({
+   782→                          ...settings,
+   783→                          easypayApiKey: e.target.value,
+   784→                        })
+   785→                      }
+   786→                      placeholder="API Key da Easypay"
+   787→                    />
+   788→                    <p className="text-xs text-muted-foreground">
+   789→                      Encontrada no painel da Easypay
+   790→                    </p>
+   791→                  </div>
+   792→
+   793→                  <Button
+   794→                    variant="outline"
+   795→                    onClick={() => testConnection("easypay")}
+   796→                    disabled={
+   797→                      !settings.easypayAccountId || !settings.easypayApiKey
+   798→                    }
+   799→                  >
+   800→                    Testar Conexão
+   801→                  </Button>
+   802→                </>
+   803→              )}
+   804→            </CardContent>
+   805→          </Card>
+   806→        </TabsContent>
+   807→
+   808→        {/* Tab: Vídeo */}
+   809→        <TabsContent value="video" className="space-y-6 mt-6">
+   810→          <Card>
+   811→            <CardHeader>
+   812→              <CardTitle className="text-base flex items-center gap-2">
+   813→                <IconVideo className="h-5 w-5" />
+   814→                Videochamadas
+   815→              </CardTitle>
+   816→              <CardDescription>
+   817→                Configure a integração para reuniões por vídeo entre famílias e
+   818→                profissionais
+   819→              </CardDescription>
+   820→            </CardHeader>
+   821→            <CardContent className="space-y-4">
+   822→              {loading ? (
+   823→                <div className="space-y-4">
+   824→                  <Skeleton className="h-10 w-full" />
+   825→                  <Skeleton className="h-10 w-full" />
+   826→                </div>
+   827→              ) : (
+   828→                <>
+   829→                  <div className="flex items-center justify-between">
+   830→                    <div>
+   831→                      <Label>Habilitar Videochamadas</Label>
+   832→                      <p className="text-sm text-muted-foreground">
+   833→                        Permite reuniões por vídeo entre famílias e profissionais
+   834→                      </p>
+   835→                    </div>
+   836→                    <Switch
+   837→                      checked={settings.videoEnabled}
+   838→                      onCheckedChange={(checked) =>
+   839→                        setSettings({ ...settings, videoEnabled: checked })
+   840→                      }
+   841→                    />
+   842→                  </div>
+   843→
+   844→                  <div className="space-y-2">
+   845→                    <Label>Provedor de Vídeo</Label>
+   846→                    <Select
+   847→                      value={settings.videoProvider}
+   848→                      onValueChange={(v) =>
+   849→                        setSettings({ ...settings, videoProvider: v })
+   850→                      }
+   851→                    >
+   852→                      <SelectTrigger>
+   853→                        <SelectValue />
+   854→                      </SelectTrigger>
+   855→                      <SelectContent>
+   856→                        <SelectItem value="daily">Daily.co</SelectItem>
+   857→                        <SelectItem value="twilio">Twilio Video</SelectItem>
+   858→                        <SelectItem value="zoom">Zoom</SelectItem>
+   859→                      </SelectContent>
+   860→                    </Select>
+   861→                  </div>
+   862→
+   863→                  <div className="space-y-2">
+   864→                    <Label>API Key</Label>
+   865→                    <Input
+   866→                      type="password"
+   867→                      value={settings.videoApiKey}
+   868→                      onChange={(e) =>
+   869→                        setSettings({
+   870→                          ...settings,
+   871→                          videoApiKey: e.target.value,
+   872→                        })
+   873→                      }
+   874→                      placeholder="API Key do provedor"
+   875→                    />
+   876→                    <p className="text-xs text-muted-foreground">
+   877→                      Chave de API para criar salas de vídeo
+   878→                    </p>
+   879→                  </div>
+   880→
+   881→                  <Button
+   882→                    variant="outline"
+   883→                    onClick={() => testConnection("video")}
+   884→                    disabled={!settings.videoApiKey}
+   885→                  >
+   886→                    Testar Conexão
+   887→                  </Button>
+   888→                </>
+   889→              )}
+   890→            </CardContent>
+   891→          </Card>
+   892→        </TabsContent>
+   893→
+   894→        {/* ⚠️ CONTEÚDO DA ABA IMAGENS — NÃO REMOVER
+   895→            Este TabsContent corresponde à aba "Imagens" no TabsList acima.
+   896→            Sem ele, a aba fica vazia e o admin não consegue gerir as imagens do site. */}
+   897→        <TabsContent value="images" className="space-y-6 mt-6">
+   898→          <Card>
+   899→            <CardHeader>
+   900→              <CardTitle className="text-base flex items-center gap-2">
+   901→                <IconImage className="h-5 w-5" />
+   902→                Imagens do Site
+   903→              </CardTitle>
+   904→              <CardDescription>
+   905→                Carregue as imagens utilizadas no site: logo, favicon e imagem do hero
+   906→              </CardDescription>
+   907→            </CardHeader>
+   908→            <CardContent className="space-y-6">
+   909→              {loadingSiteSettings ? (
+   910→                <div className="space-y-4">
+   911→                  <Skeleton className="h-24 w-full" />
+   912→                  <Skeleton className="h-24 w-full" />
+   913→                  <Skeleton className="h-24 w-full" />
+   914→                </div>
+   915→              ) : (
+   916→                <>
+   917→                  {/* Logo do Site (Tema Escuro) */}
+   918→                  <div className="space-y-3">
+   919→                    <div className="flex items-center justify-between">
+   920→                      <div>
+   921→                        <Label className="text-sm font-medium">Logo — Tema Escuro</Label>
+   922→                        <p className="text-xs text-muted-foreground">
+   923→                          Logo clara para fundos escuros, exibida no header da landing page e sidebar (recomendado: PNG com fundo transparente, 200×200px)
+   924→                        </p>
+   925→                      </div>
+   926→                    </div>
+   927→                    <div className="flex items-start gap-4">
+   928→                      <div className="relative h-20 w-20 rounded-xl border border-border bg-[#0D110E] flex items-center justify-center overflow-hidden shrink-0">
+   929→                        <img
+   930→                          src={siteSettings.logoUrl}
+   931→                          alt="Logo tema escuro"
+   932→                          className="h-16 w-16 object-contain"
+   933→                        />
+   934→                      </div>
+   935→                      <div className="flex-1 space-y-2">
+   936→                        <p className="text-xs font-mono text-muted-foreground break-all">
+   937→                          {siteSettings.logoUrl}
+   938→                        </p>
+   939→                        <div className="flex items-center gap-2">
+   940→                          <Button
+   941→                            variant="outline"
+   942→                            size="sm"
+   943→                            onClick={() => fileInputRefs.current?.logo?.click()}
+   944→                            disabled={uploadingType === "logo"}
+   945→                          >
+   946→                            {uploadingType === "logo" ? (
+   947→                              <>
+   948→                                <span className="animate-spin mr-1.5">⏳</span>
+   949→                                A carregar...
+   950→                              </>
+   951→                            ) : (
+   952→                              <>
+   953→                                <IconUpload className="h-4 w-4 mr-1.5" />
+   954→                                Carregar Logo Clara
+   955→                              </>
+   956→                            )}
+   957→                          </Button>
+   958→                          {siteSettings.logoUrl !== SITE_SETTINGS_DEFAULTS.logoUrl && (
+   959→                            <Button
+   960→                              variant="ghost"
+   961→                              size="sm"
+   962→                              className="text-destructive hover:text-destructive"
+   963→                              onClick={() => handleRemoveImage("logo")}
+   964→                            >
+   965→                              <IconTrash className="h-4 w-4 mr-1" />
+   966→                              Remover
+   967→                            </Button>
+   968→                          )}
+   969→                        </div>
+   970→                        <input
+   971→                          ref={(el) => { fileInputRefs.current = { ...fileInputRefs.current, logo: el }; }}
+   972→                          type="file"
+   973→                          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+   974→                          className="hidden"
+   975→                          onChange={(e) => handleImageUpload(e, "logo")}
+   976→                        />
+   977→                      </div>
+   978→                    </div>
+   979→                  </div>
+   980→
+   981→                  <div className="border-t border-border" />
+   982→
+   983→                  {/* Logo do Site (Tema Claro) */}
+   984→                  <div className="space-y-3">
+   985→                    <div className="flex items-center justify-between">
+   986→                      <div>
+   987→                        <Label className="text-sm font-medium">Logo — Tema Claro</Label>
+   988→                        <p className="text-xs text-muted-foreground">
+   989→                          Logo escura para fundos claros, exibida quando o utilizador seleciona o tema claro (recomendado: PNG com fundo transparente, 200×200px)
+   990→                        </p>
+   991→                      </div>
+   992→                    </div>
+   993→                    <div className="flex items-start gap-4">
+   994→                      <div className="relative h-20 w-20 rounded-xl border border-border bg-white flex items-center justify-center overflow-hidden shrink-0">
+   995→                        <img
+   996→                          src={siteSettings.logoDarkUrl}
+   997→                          alt="Logo tema claro"
+   998→                          className="h-16 w-16 object-contain"
+   999→                        />
+  1000→                      </div>
+  1001→                      <div className="flex-1 space-y-2">
+  1002→                        <p className="text-xs font-mono text-muted-foreground break-all">
+  1003→                          {siteSettings.logoDarkUrl}
+  1004→                        </p>
+  1005→                        <div className="flex items-center gap-2">
+  1006→                          <Button
+  1007→                            variant="outline"
+  1008→                            size="sm"
+  1009→                            onClick={() => fileInputRefs.current?.logoDark?.click()}
+  1010→                            disabled={uploadingType === "logoDark"}
+  1011→                          >
+  1012→                            {uploadingType === "logoDark" ? (
+  1013→                              <>
+  1014→                                <span className="animate-spin mr-1.5">⏳</span>
+  1015→                                A carregar...
+  1016→                              </>
+  1017→                            ) : (
+  1018→                              <>
+  1019→                                <IconUpload className="h-4 w-4 mr-1.5" />
+  1020→                                Carregar Logo Escura
+  1021→                              </>
+  1022→                            )}
+  1023→                          </Button>
+  1024→                          {siteSettings.logoDarkUrl !== SITE_SETTINGS_DEFAULTS.logoDarkUrl && (
+  1025→                            <Button
+  1026→                              variant="ghost"
+  1027→                              size="sm"
+  1028→                              className="text-destructive hover:text-destructive"
+  1029→                              onClick={() => handleRemoveImage("logoDark")}
+  1030→                            >
+  1031→                              <IconTrash className="h-4 w-4 mr-1" />
+  1032→                              Remover
+  1033→                            </Button>
+  1034→                          )}
+  1035→                        </div>
+  1036→                        <input
+  1037→                          ref={(el) => { fileInputRefs.current = { ...fileInputRefs.current, logoDark: el }; }}
+  1038→                          type="file"
+  1039→                          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+  1040→                          className="hidden"
+  1041→                          onChange={(e) => handleImageUpload(e, "logoDark")}
+  1042→                        />
+  1043→                      </div>
+  1044→                    </div>
+  1045→                  </div>
+  1046→
+  1047→                  <div className="border-t border-border" />
+  1048→
+  1049→                  {/* Ícone do Site */}
+  1050→                  <div className="space-y-3">
+  1051→                    <div className="flex items-center justify-between">
+  1052→                      <div>
+  1053→                        <Label className="text-sm font-medium">Ícone do Site</Label>
+  1054→                        <p className="text-xs text-muted-foreground">
+  1055→                          Ícone da aplicação, usado em notificações e atalhos (recomendado: PNG quadrado, 512×512px)
+  1056→                        </p>
+  1057→                      </div>
+  1058→                    </div>
+  1059→                    <div className="flex items-start gap-4">
+  1060→                      <div className="relative h-20 w-20 rounded-xl border border-border bg-muted/50 flex items-center justify-center overflow-hidden shrink-0">
+  1061→                        <img
+  1062→                          src={siteSettings.iconUrl}
+  1063→                          alt="Ícone do site"
+  1064→                          className="h-16 w-16 object-contain"
+  1065→                        />
+  1066→                      </div>
+  1067→                      <div className="flex-1 space-y-2">
+  1068→                        <p className="text-xs font-mono text-muted-foreground break-all">
+  1069→                          {siteSettings.iconUrl}
+  1070→                        </p>
+  1071→                        <div className="flex items-center gap-2">
+  1072→                          <Button
+  1073→                            variant="outline"
+  1074→                            size="sm"
+  1075→                            onClick={() => fileInputRefs.current?.icon?.click()}
+  1076→                            disabled={uploadingType === "icon"}
+  1077→                          >
+  1078→                            {uploadingType === "icon" ? (
+  1079→                              <>
+  1080→                                <span className="animate-spin mr-1.5">⏳</span>
+  1081→                                A carregar...
+  1082→                              </>
+  1083→                            ) : (
+  1084→                              <>
+  1085→                                <IconUpload className="h-4 w-4 mr-1.5" />
+  1086→                                Carregar Ícone
+  1087→                              </>
+  1088→                            )}
+  1089→                          </Button>
+  1090→                          {siteSettings.iconUrl !== SITE_SETTINGS_DEFAULTS.iconUrl && (
+  1091→                            <Button
+  1092→                              variant="ghost"
+  1093→                              size="sm"
+  1094→                              className="text-destructive hover:text-destructive"
+  1095→                              onClick={() => handleRemoveImage("icon")}
+  1096→                            >
+  1097→                              <IconTrash className="h-4 w-4 mr-1" />
+  1098→                              Remover
+  1099→                            </Button>
+  1100→                          )}
+  1101→                        </div>
+  1102→                        <input
+  1103→                          ref={(el) => { fileInputRefs.current = { ...fileInputRefs.current, icon: el }; }}
+  1104→                          type="file"
+  1105→                          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+  1106→                          className="hidden"
+  1107→                          onChange={(e) => handleImageUpload(e, "icon")}
+  1108→                        />
+  1109→                      </div>
+  1110→                    </div>
+  1111→                  </div>
+  1112→
+  1113→                  <div className="border-t border-border" />
+  1114→
+  1115→                  {/* Favicon */}
+  1116→                  <div className="space-y-3">
+  1117→                    <div className="flex items-center justify-between">
+  1118→                      <div>
+  1119→                        <Label className="text-sm font-medium">Favicon</Label>
+  1120→                        <p className="text-xs text-muted-foreground">
+  1121→                          Ícone exibido no separador do navegador (recomendado: SVG ou PNG, 32×32px)
+  1122→                        </p>
+  1123→                      </div>
+  1124→                    </div>
+  1125→                    <div className="flex items-start gap-4">
+  1126→                      <div className="relative h-20 w-20 rounded-xl border border-border bg-muted/50 flex items-center justify-center overflow-hidden shrink-0">
+  1127→                        <img
+  1128→                          src={siteSettings.faviconUrl}
+  1129→                          alt="Favicon"
+  1130→                          className="h-10 w-10 object-contain"
+  1131→                        />
+  1132→                      </div>
+  1133→                      <div className="flex-1 space-y-2">
+  1134→                        <p className="text-xs font-mono text-muted-foreground break-all">
+  1135→                          {siteSettings.faviconUrl}
+  1136→                        </p>
+  1137→                        <div className="flex items-center gap-2">
+  1138→                          <Button
+  1139→                            variant="outline"
+  1140→                            size="sm"
+  1141→                            onClick={() => fileInputRefs.current?.favicon?.click()}
+  1142→                            disabled={uploadingType === "favicon"}
+  1143→                          >
+  1144→                            {uploadingType === "favicon" ? (
+  1145→                              <>
+  1146→                                <span className="animate-spin mr-1.5">⏳</span>
+  1147→                                A carregar...
+  1148→                              </>
+  1149→                            ) : (
+  1150→                              <>
+  1151→                                <IconUpload className="h-4 w-4 mr-1.5" />
+  1152→                                Carregar Favicon
+  1153→                              </>
+  1154→                            )}
+  1155→                          </Button>
+  1156→                          {siteSettings.faviconUrl !== SITE_SETTINGS_DEFAULTS.faviconUrl && (
+  1157→                            <Button
+  1158→                              variant="ghost"
+  1159→                              size="sm"
+  1160→                              className="text-destructive hover:text-destructive"
+  1161→                              onClick={() => handleRemoveImage("favicon")}
+  1162→                            >
+  1163→                              <IconTrash className="h-4 w-4 mr-1" />
+  1164→                              Remover
+  1165→                            </Button>
+  1166→                          )}
+  1167→                        </div>
+  1168→                        <input
+  1169→                          ref={(el) => { fileInputRefs.current = { ...fileInputRefs.current, favicon: el }; }}
+  1170→                          type="file"
+  1171→                          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+  1172→                          className="hidden"
+  1173→                          onChange={(e) => handleImageUpload(e, "favicon")}
+  1174→                        />
+  1175→                      </div>
+  1176→                    </div>
+  1177→                  </div>
+  1178→
+  1179→                  <div className="border-t border-border" />
+  1180→
+  1181→                  {/* Imagem do Hero */}
+  1182→                  <div className="space-y-3">
+  1183→                    <div className="flex items-center justify-between">
+  1184→                      <div>
+  1185→                        <Label className="text-sm font-medium">Imagem do Hero</Label>
+  1186→                        <p className="text-xs text-muted-foreground">
+  1187→                          Imagem de fundo da secção hero na página inicial (recomendado: JPG, 1536×1024px)
+  1188→                        </p>
+  1189→                      </div>
+  1190→                    </div>
+  1191→                    <div className="flex items-start gap-4">
+  1192→                      <div className="relative h-20 w-32 rounded-xl border border-border bg-muted/50 flex items-center justify-center overflow-hidden shrink-0">
+  1193→                        <img
+  1194→                          src={siteSettings.heroImageUrl}
+  1195→                          alt="Imagem do hero"
+  1196→                          className="h-full w-full object-cover"
+  1197→                        />
+  1198→                      </div>
+  1199→                      <div className="flex-1 space-y-2">
+  1200→                        <p className="text-xs font-mono text-muted-foreground break-all">
+  1201→                          {siteSettings.heroImageUrl}
+  1202→                        </p>
+  1203→                        <div className="flex items-center gap-2">
+  1204→                          <Button
+  1205→                            variant="outline"
+  1206→                            size="sm"
+  1207→                            onClick={() => fileInputRefs.current?.hero?.click()}
+  1208→                            disabled={uploadingType === "hero"}
+  1209→                          >
+  1210→                            {uploadingType === "hero" ? (
+  1211→                              <>
+  1212→                                <span className="animate-spin mr-1.5">⏳</span>
+  1213→                                A carregar...
+  1214→                              </>
+  1215→                            ) : (
+  1216→                              <>
+  1217→                                <IconUpload className="h-4 w-4 mr-1.5" />
+  1218→                                Carregar Imagem
+  1219→                              </>
+  1220→                            )}
+  1221→                          </Button>
+  1222→                          {siteSettings.heroImageUrl !== SITE_SETTINGS_DEFAULTS.heroImageUrl && (
+  1223→                            <Button
+  1224→                              variant="ghost"
+  1225→                              size="sm"
+  1226→                              className="text-destructive hover:text-destructive"
+  1227→                              onClick={() => handleRemoveImage("hero")}
+  1228→                            >
+  1229→                              <IconTrash className="h-4 w-4 mr-1" />
+  1230→                              Remover
+  1231→                            </Button>
+  1232→                          )}
+  1233→                        </div>
+  1234→                        <input
+  1235→                          ref={(el) => { fileInputRefs.current = { ...fileInputRefs.current, hero: el }; }}
+  1236→                          type="file"
+  1237→                          accept="image/png,image/jpeg,image/webp"
+  1238→                          className="hidden"
+  1239→                          onChange={(e) => handleImageUpload(e, "hero")}
+  1240→                        />
+  1241→                      </div>
+  1242→                    </div>
+  1243→                  </div>
+  1244→                </>
+  1245→              )}
+  1246→            </CardContent>
+  1247→          </Card>
+  1248→
+  1249→          <Card className="border-warning/30 bg-warning/10">
+  1250→            <CardContent className="flex items-start gap-4 p-4">
+  1251→              <IconAlertTriangle className="h-5 w-5 text-warning mt-0.5" />
+  1252→              <div>
+  1253→                <p className="font-medium text-warning">Recomendações</p>
+  1254→                <ul className="text-sm text-warning/90 list-disc list-inside space-y-1 mt-1">
+  1255→                  <li>Logo: Use imagens PNG com fundo transparente para melhor resultado em ambos os temas</li>
+  1256→                  <li>Ícone: PNG quadrado de alta resolução (512×512px) para notificações e atalhos</li>
+  1257→                  <li>Favicon: SVG ou ICO é o formato recomendado para melhor qualidade em qualquer tamanho</li>
+  1258→                  <li>Imagem do Hero: Use fotos de alta resolução (mínimo 1536×1024px) em formato JPG para melhor performance</li>
+  1259→                  <li>Tamanho máximo: 5MB por ficheiro</li>
+  1260→                </ul>
+  1261→              </div>
+  1262→            </CardContent>
+  1263→          </Card>
+  1264→        </TabsContent>
+  1265→
+  1266→        {/* Tab: Modo Teste */}
+  1267→        <TabsContent value="test-mode" className="space-y-6 mt-6">
+  1268→          <Card className="border-yellow-200/50 dark:border-yellow-700/50 bg-yellow-50/30 dark:bg-yellow-950/30">
+  1269→            <CardContent className="flex items-start gap-4 p-4">
+  1270→              <IconAlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+  1271→              <div>
+  1272→                <p className="font-medium text-yellow-800 dark:text-yellow-300">Aviso de Segurança</p>
+  1273→                <p className="text-sm text-yellow-700 dark:text-yellow-400">
+  1274→                  O modo de teste não deve ser ativado em produção. Todos os dados de teste
+  1275→                  não são criptografados e podem ser expostos. Use apenas para desenvolvimento.
+  1276→                </p>
+  1277→              </div>
+  1278→            </CardContent>
+  1279→          </Card>
+  1280→
+  1281→          <Card>
+  1282→            <CardHeader>
+  1283→              <CardTitle className="text-base flex items-center gap-2">
+  1284→                <IconShield className="h-5 w-5" />
+  1285→                Modo de Teste de Verificação de Identidade (KYC)
+  1286→              </CardTitle>
+  1287→              <CardDescription>
+  1288→                Ativa modo de teste para processos de verificação de identidade
+  1289→              </CardDescription>
+  1290→            </CardHeader>
+  1291→            <CardContent className="space-y-4">
+  1292→              {loading ? (
+  1293→                <div className="space-y-4">
+  1294→                  <Skeleton className="h-16 w-full" />
+  1295→                </div>
+  1296→              ) : (
+  1297→                <>
+  1298→                  <div className="flex items-center justify-between">
+  1299→                    <div>
+  1300→                      <Label>Habilitar Modo de Teste KYC</Label>
+  1301→                      <p className="text-sm text-muted-foreground">
+  1302→                        Bypass da verificação de identidade real com dados de teste
+  1303→                      </p>
+  1304→                    </div>
+  1305→                    <Switch
+  1306→                      checked={settings.kycTestModeEnabled || false}
+  1307→                      disabled={savingTestMode}
+  1308→                      onCheckedChange={(checked) =>
+  1309→                        handleTestModeToggle("kyc", checked)
+  1310→                      }
+  1311→                    />
+  1312→                  </div>
+  1313→                  <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+  1314→                    <p className="text-xs text-blue-800 dark:text-blue-300">
+  1315→                      <strong>O que faz:</strong> Quando ativado, os utilizadores podem concluir
+  1316→                      a verificação de identidade usando dados de teste sem passar pela
+  1317→                      verificação real do provedor KYC.
+  1318→                    </p>
+  1319→                  </div>
+  1320→                </>
+  1321→              )}
+  1322→            </CardContent>
+  1323→          </Card>
+  1324→
+  1325→          <Card>
+  1326→            <CardHeader>
+  1327→              <CardTitle className="text-base flex items-center gap-2">
+  1328→                <IconCreditCard className="h-5 w-5" />
+  1329→                Modo de Teste de Pagamentos
+  1330→              </CardTitle>
+  1331→              <CardDescription>
+  1332→                Ativa modo de teste para processamento de pagamento
+  1333→              </CardDescription>
+  1334→            </CardHeader>
+  1335→            <CardContent className="space-y-4">
+  1336→              {loading ? (
+  1337→                <div className="space-y-4">
+  1338→                  <Skeleton className="h-16 w-full" />
+  1339→                </div>
+  1340→              ) : (
+  1341→                <>
+  1342→                  <div className="flex items-center justify-between">
+  1343→                    <div>
+  1344→                      <Label>Habilitar Modo de Teste de Pagamentos</Label>
+  1345→                      <p className="text-sm text-muted-foreground">
+  1346→                        Usa ambiente sandbox para processamento de pagamentos
+  1347→                      </p>
+  1348→                    </div>
+  1349→                    <Switch
+  1350→                      checked={settings.paymentTestModeEnabled || false}
+  1351→                      disabled={savingTestMode}
+  1352→                      onCheckedChange={(checked) =>
+  1353→                        handleTestModeToggle("payment", checked)
+  1354→                      }
+  1355→                    />
+  1356→                  </div>
+  1357→                  <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+  1358→                    <p className="text-xs text-blue-800 dark:text-blue-300">
+  1359→                      <strong>O que faz:</strong> Quando ativado, todos os pagamentos são
+  1360→                      processados no ambiente sandbox da Easypay/Stripe. Nenhum dinheiro real
+  1361→                      é transferido.
+  1362→                    </p>
+  1363→                  </div>
+  1364→                </>
+  1365→              )}
+  1366→            </CardContent>
+  1367→          </Card>
+  1368→
+  1369→          <Card className="border-red-200/50 dark:border-red-700/50 bg-red-50/30 dark:bg-red-950/30">
+  1370→            <CardContent className="flex items-start gap-4 p-4">
+  1371→              <IconX className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" />
+  1372→              <div>
+  1373→                <p className="font-medium text-red-800 dark:text-red-300">
+  1374→                  Desabilitar Modo de Teste antes de ir para Produção
+  1375→                </p>
+  1376→                <p className="text-sm text-red-700 dark:text-red-400">
+  1377→                  Certifique-se de que ambos os toggles estão desativados antes de colocar
+  1378→                  o sistema em produção. Modo de teste pode causar falhas críticas em ambiente
+  1379→                  de produção.
+  1380→                </p>
+  1381→              </div>
+  1382→            </CardContent>
+  1383→          </Card>
+  1384→        </TabsContent>
+  1385→      </Tabs>
+  1386→
+  1387→      {/* Estado das Integrações */}
+  1388→      <Card>
+  1389→        <CardHeader>
+  1390→          <CardTitle className="text-base flex items-center gap-2">
+  1391→            <IconServer className="h-5 w-5" />
+  1392→            Estado das Integrações
+  1393→          </CardTitle>
+  1394→          <CardDescription>
+  1395→            Monitore a saúde das integrações externas
+  1396→          </CardDescription>
+  1397→        </CardHeader>
+  1398→        <CardContent>
+  1399→          {loading ? (
+  1400→            <div className="space-y-4">
+  1401→              {Array.from({ length: 3 }).map((_, i) => (
+  1402→                <Skeleton key={i} className="h-16 w-full" />
+  1403→              ))}
+  1404→            </div>
+  1405→          ) : integrations.length > 0 ? (
+  1406→            <div className="space-y-4">
+  1407→              {integrations.map((integration) => (
+  1408→                <div
+  1409→                  key={integration.name}
+  1410→                  className="flex items-center justify-between p-4 border rounded-lg"
+  1411→                >
+  1412→                  <div className="flex items-center gap-3">
+  1413→                    <div
+  1414→                      className={`h-3 w-3 rounded-full ${getStatusColor(integration.status)}`}
+  1415→                    />
+  1416→                    <div>
+  1417→                      <p className="font-medium">{integration.name}</p>
+  1418→                      <p className="text-sm text-muted-foreground">
+  1419→                        {integration.lastWebhook
+  1420→                          ? `Último webhook: ${new Date(
+  1421→                              integration.lastWebhook,
+  1422→                            ).toLocaleString("pt-PT")}`
+  1423→                          : "Nenhum webhook recebido"}
+  1424→                      </p>
+  1425→                    </div>
+  1426→                  </div>
+  1427→                  <div className="flex items-center gap-2">
+  1428→                    <Badge
+  1429→                      variant={
+  1430→                        integration.connected ? "default" : "destructive"
+  1431→                      }
+  1432→                    >
+  1433→                      {integration.connected ? "Conectado" : "Desconectado"}
+  1434→                    </Badge>
+  1435→                    <Button
+  1436→                      variant="outline"
+  1437→                      size="sm"
+  1438→                      onClick={() => testConnection(integration.name)}
+  1439→                    >
+  1440→                      Testar
+  1441→                    </Button>
+  1442→                  </div>
+  1443→                </div>
+  1444→              ))}
+  1445→            </div>
+  1446→          ) : (
+  1447→            <p className="text-sm text-muted-foreground">
+  1448→              Configure as integrações acima para ver o status aqui.
+  1449→            </p>
+  1450→          )}
+  1451→        </CardContent>
+  1452→      </Card>
+  1453→
+  1454→      {/* Zona de Perigo - Reset da Base de Dados */}
+  1455→      <Card className="border-destructive/30">
+  1456→        <CardHeader>
+  1457→          <CardTitle className="text-base flex items-center gap-2 text-destructive">
+  1458→            <IconTrash className="h-5 w-5" />
+  1459→            Zona de Perigo
+  1460→          </CardTitle>
+  1461→          <CardDescription>
+  1462→            Ações irreversíveis. Use com extremo cuidado.
+  1463→          </CardDescription>
+  1464→        </CardHeader>
+  1465→        <CardContent className="space-y-4">
+  1466→          <div className="flex items-start justify-between p-4 border border-destructive/20 rounded-lg bg-destructive/5">
+  1467→            <div className="flex items-start gap-3">
+  1468→              <IconServer className="h-5 w-5 text-destructive mt-0.5" />
+  1469→              <div>
+  1470→                <p className="font-medium text-destructive">Resetar Base de Dados</p>
+  1471→                <p className="text-sm text-muted-foreground mt-1">
+  1472→                  Elimina TODOS os dados de utilizadores, contratos, propostas, pagamentos e outras tabelas de negócio.
+  1473→                  As <strong>PlatformSettings</strong> (definições, taxas, modo de teste) são preservadas.
+  1474→                </p>
+  1475→                <p className="text-xs text-muted-foreground mt-2">
+  1476→                  ⚠️ Todos os utilizadores terão de se voltar a registar. Esta ação não pode ser revertida.
+  1477→                </p>
+  1478→              </div>
+  1479→            </div>
+  1480→            <Button
+  1481→              variant="destructive"
+  1482→              onClick={handlePreviewReset}
+  1483→              disabled={resettingDb}
+  1484→            >
+  1485→              <IconTrash className="h-4 w-4 mr-2" />
+  1486→              Resetar Dados
+  1487→            </Button>
+  1488→          </div>
+  1489→
+  1490→          {showResetConfirm && resetPreview && (
+  1491→            <div className="border-2 border-destructive/40 rounded-lg p-5 space-y-4 bg-destructive/5">
+  1492→              <div className="flex items-start gap-3">
+  1493→                <IconAlertTriangle className="h-6 w-6 text-destructive mt-0.5" />
+  1494→                <div>
+  1495→                  <p className="font-bold text-destructive text-lg">
+  1496→                    Confirmar Reset da Base de Dados
+  1497→                  </p>
+  1498→                  <p className="text-sm text-muted-foreground mt-1">
+  1499→                    Serão eliminados <strong>{resetPreview.totalRowsToDelete} registos</strong> das seguintes tabelas:
+  1500→                  </p>
+  1501→                </div>
+  1502→              </div>
+  1503→
+  1504→              <div className="max-h-48 overflow-y-auto rounded-lg border bg-card p-3 text-xs space-y-1">
+  1505→                {Object.entries(resetPreview.tables || {})
+  1506→                  .filter(([, count]: [string, any]) => count > 0)
+  1507→                  .map(([table, count]: [string, any]) => (
+  1508→                    <div key={table} className="flex justify-between py-0.5">
+  1509→                      <span className="font-mono text-muted-foreground">{table}</span>
+  1510→                      <span className="font-bold text-destructive">{count} registos</span>
+  1511→                    </div>
+  1512→                  ))}
+  1513→              </div>
+  1514→
+  1515→              {resetPreview.preservedSettings && (
+  1516→                <div className="rounded-lg border border-success/30 bg-success/5 p-3 text-xs">
+  1517→                  <p className="font-bold text-success mb-1">✓ Definições preservadas (PlatformSettings):</p>
+  1518→                  <p className="text-muted-foreground">
+  1519→                    Taxa ativação: €{Number(resetPreview.preservedSettings.activationCostEurCents) / 100} •
+  1520→                    Taxa contrato: €{Number(resetPreview.preservedSettings.contractFeeEurCents) / 100} •
+  1521→                    KYC teste: {resetPreview.preservedSettings.kycTestModeEnabled ? "Ativo" : "Inativo"} •
+  1522→                    Pagamento teste: {resetPreview.preservedSettings.paymentTestModeEnabled ? "Ativo" : "Inativo"}
+  1523→                  </p>
+  1524→                </div>
+  1525→              )}
+  1526→
+  1527→              <div className="flex gap-3">
+  1528→                <Button
+  1529→                  variant="destructive"
+  1530→                  onClick={handleResetDatabase}
+  1531→                  disabled={resettingDb}
+  1532→                  className="flex-1"
+  1533→                >
+  1534→                  {resettingDb ? (
+  1535→                    <>
+  1536→                      <span className="animate-spin mr-2">⏳</span>
+  1537→                      A resetar...
+  1538→                    </>
+  1539→                  ) : (
+  1540→                    <>
+  1541→                      <IconTrash className="h-4 w-4 mr-2" />
+  1542→                      Confirmar — Eliminar Tudo
+  1543→                    </>
+  1544→                  )}
+  1545→                </Button>
+  1546→                <Button
+  1547→                  variant="outline"
+  1548→                  onClick={() => {
+  1549→                    setShowResetConfirm(false);
+  1550→                    setResetPreview(null);
+  1551→                  }}
+  1552→                  disabled={resettingDb}
+  1553→                >
+  1554→                  Cancelar
+  1555→                </Button>
+  1556→              </div>
+  1557→            </div>
+  1558→          )}
+  1559→        </CardContent>
+  1560→      </Card>
+  1561→    </div>
+  1562→  );
+  1563→}
+  1564→
