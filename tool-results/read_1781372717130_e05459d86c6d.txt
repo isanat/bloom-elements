@@ -1,0 +1,2002 @@
+     1→export const translations = {
+     2→  // ============================================
+     3→  // PORTUGUÊS (Portugal)
+     4→  // ============================================
+     5→  pt: {
+     6→    appName: "Evyra",
+     7→    tagline: "Saúde que vem até si",
+     8→    loading: "A carregar...",
+     9→    error: "Ocorreu um erro",
+    10→    successMessage: "Sucesso!",
+    11→    save: "Guardar",
+    12→    cancel: "Cancelar",
+    13→    delete: "Eliminar",
+    14→    edit: "Editar",
+    15→    back: "Voltar",
+    16→    next: "Seguinte",
+    17→    submit: "Submeter",
+    18→    close: "Fechar",
+    19→    searchLabel: "Pesquisar",
+    20→    filter: "Filtrar",
+    21→    all: "Todos",
+    22→    none: "Nenhum",
+    23→    yes: "Sim",
+    24→    no: "Não",
+    25→    
+    26→    nav: {
+    27→      home: "Início",
+    28→      howItWorks: "Como Funciona",
+    29→      forFamilies: "Para si e a sua família",
+    30→      forCaregivers: "Para Profissionais de Saúde",
+    31→      pricing: "Preços",
+    32→      about: "Sobre",
+    33→      dashboard: "Painel",
+    34→      contracts: "Contratos",
+    35→      wallet: "Carteira",
+    36→      chat: "Mensagens",
+    37→      settings: "Definições",
+    38→      profile: "O Meu Perfil",
+    39→      searchCaregivers: "Procurar Profissionais de Saúde",
+    40→      login: "Entrar",
+    41→      register: "Registar",
+    42→      logout: "Sair",
+    43→    },
+    44→    
+    45→    auth: {
+    46→      login: "Entrar",
+    47→      logout: "Sair",
+    48→      register: "Criar Conta",
+    49→      forgotPassword: "Esqueci a Palavra-passe",
+    50→      resetPassword: "Redefinir Palavra-passe",
+    51→      email: "E-mail",
+    52→      password: "Palavra-passe",
+    53→      confirmPassword: "Confirmar Palavra-passe",
+    54→      name: "Nome",
+    55→      phone: "Telefone",
+    56→      role: "Tipo de Conta",
+    57→      family: "Família",
+    58→      caregiver: "Profissional de Saúde",
+    59→      loginSuccess: "Sessão iniciada com sucesso!",
+    60→      logoutSuccess: "Terminou a sua sessão",
+    61→      registerSuccess: "Conta criada com sucesso!",
+    62→      noAccount: "Não tem uma conta?",
+    63→      hasAccount: "Já tem uma conta?",
+    64→    },
+    65→    
+    66→    theme: {
+    67→      light: "Modo Claro",
+    68→      dark: "Modo Escuro",
+    69→      system: "Sistema",
+    70→      toggle: "Alternar tema",
+    71→    },
+    72→    
+    73→    language: {
+    74→      pt: "Português",
+    75→      en: "Inglês",
+    76→      it: "Italiano",
+    77→      es: "Espanhol",
+    78→      select: "Idioma",
+    79→    },
+    80→    
+    81→    dashboard: {
+    82→      welcome: "Olá",
+    83→      familyPanel: "Painel Familiar",
+    84→      caregiverPanel: "Painel do Profissional de Saúde",
+    85→      balance: "Saldo",
+    86→      activeContracts: "Contratos Activos",
+    87→      hoursWorked: "Horas Trabalhadas",
+    88→      rating: "Avaliação",
+    89→      reviews: "avaliações",
+    90→      recentActivity: "Actividade Recente",
+    91→      noActivity: "Sem actividade recente",
+    92→      viewAll: "Ver Histórico Completo",
+    93→      allSet: "Tudo pronto!",
+    94→      allSetFamily: "Está pronto para procurar profissionais e criar contratos.",
+    95→      allSetCaregiver: "O seu perfil está completo e pode receber propostas de trabalho.",
+    96→      status: {
+    97→        active: "Activo",
+    98→        pending: "Pendente",
+    99→      },
+   100→      nextSteps: {
+   101→        title: "Próximos Passos",
+   102→        payment: "Completar pagamento de activação",
+   103→        kyc: "Verificar a sua identidade",
+   104→        profile: "Completar o seu perfil profissional",
+   105→      },
+   106→    },
+   107→    
+   108→    contracts: {
+   109→      title: "Meus Contratos",
+   110→      new: "Novo Contrato",
+   111→      active: "Activos",
+   112→      completed: "Concluídos",
+   113→      pending: "Pendentes",
+   114→      noContracts: "Nenhum contrato encontrado",
+   115→      status: {
+   116→        draft: "Rascunho",
+   117→        pendingAcceptance: "Aguardando Aceite",
+   118→        pendingPayment: "Aguardando Pagamento",
+   119→        active: "Activo",
+   120→        completed: "Concluído",
+   121→        cancelled: "Cancelado",
+   122→        disputed: "Em Disputa",
+   123→      },
+   124→      acceptance: "Aceite Legal",
+   125→      family: "Família",
+   126→      caregiver: "Profissional de Saúde",
+   127→      familyAcceptedAt: "Família aceitou em",
+   128→      caregiverAcceptedAt: "Profissional aceitou em",
+   129→      acceptContract: "Aceitar Contrato",
+   130→      acceptInfo: "Ao aceitar, concorda com os termos do contrato. O seu aceite será registado legalmente.",
+   131→      confirmAccept: "Confirmar Aceite",
+   132→      confirmAcceptInfo: "Ao aceitar este contrato, concorda com todos os termos e condições. O seu aceite será registado com data, hora e endereço IP para fins legais.",
+   133→      payment: "Pagamento Pendente",
+   134→      paymentInfo: "Ambas as partes aceitaram. Prossiga com o pagamento para iniciar o contrato.",
+   135→      rate: "Taxa horária",
+   136→      total: "Total",
+   137→      hours: "Horas",
+   138→      hoursPerWeek: "Horas/semana",
+   139→      startDate: "Início",
+   140→      endDate: "Fim",
+   141→    },
+   142→    
+   143→    wallet: {
+   144→      title: "A Minha Carteira",
+   145→      balance: "Saldo",
+   146→      value: "Valor em EUR",
+   147→      history: "Histórico",
+   148→      noTransactions: "Sem transações",
+   149→      deposit: "Depositar",
+   150→      withdraw: "Levantar",
+   151→      addFunds: "Adicionar",
+   152→    },
+   153→
+   154→    chat: {
+   155→      title: "Mensagens",
+   156→      new: "Nova Conversa",
+   157→      placeholder: "Escreva a sua mensagem...",
+   158→      noMessages: "Sem mensagens ainda",
+   159→      noChats: "Sem conversas",
+   160→      online: "Online",
+   161→      offline: "Offline",
+   162→      typing: "a escrever...",
+   163→    },
+   164→    
+   165→    settings: {
+   166→      title: "Definições",
+   167→      profile: "Perfil",
+   168→      account: "Conta",
+   169→      notifications: "Notificações",
+   170→      security: "Segurança",
+   171→      language: "Idioma",
+   172→      theme: "Aparência",
+   173→      privacy: "Privacidade",
+   174→      saveChanges: "Guardar Alterações",
+   175→      saved: "Definições guardadas!",
+   176→    },
+   177→    
+   178→    footer: {
+   179→      platform: "Plataforma",
+   180→      company: "Empresa",
+   181→      legal: "Legal",
+   182→      support: "Suporte",
+   183→      about: "Sobre Nós",
+   184→      blog: "Blog",
+   185→      careers: "Carreiras",
+   186→      press: "Imprensa",
+   187→      privacy: "Política de Privacidade",
+   188→      terms: "Termos de Utilização",
+   189→      cookies: "Política de Cookies",
+   190→      gdpr: "RGPD",
+   191→      help: "Centro de Ajuda",
+   192→      contact: "Contacto",
+   193→      faq: "Perguntas Frequentes",
+   194→      security: "Segurança",
+   195→      rights: "Todos os direitos reservados.",
+   196→      poweredBy: "Portugal · Espanha · Itália",
+   197→    },
+   198→    
+   199→    payment: {
+   200→      title: "Activar a sua Conta",
+   201→      description: "Complete o pagamento para activar a sua conta e aceder a todos os recursos",
+   202→      activationFee: "Taxa de Activação",
+   203→      features: "O que recebe:",
+   204→      accountActivated: "Conta Activada",
+   205→      accountActivatedDesc: "Acesso completo à plataforma",
+   206→      securePayment: "Pagamento Seguro",
+   207→      processedByStripe: "Processado por Stripe",
+   208→      terms: "Ao continuar, concorda com os nossos",
+   209→      and: "e",
+   210→      proceed: "Pagar e Activar",
+   211→      processing: "A processar...",
+   212→      paymentCancelled: "Pagamento cancelado. Tente novamente.",
+   213→      paymentError: "Erro ao criar sessão de pagamento",
+   214→      genericError: "Erro ao processar pagamento",
+   215→      selectMethod: "Seleccione o método de pagamento",
+   216→      multibancoDesc: "Pague em qualquer ATM ou home banking",
+   217→      mbwayDesc: "Pague com o seu telemóvel",
+   218→      creditCard: "Cartão de Crédito",
+   219→      creditCardDesc: "Visa, Mastercard, American Express",
+   220→      optional: "(opcional)",
+   221→      mbwayPhoneHint: "Número associado à sua conta MB WAY",
+   222→      nifHint: "Para facturação (opcional)",
+   223→      processedByEasypay: "Processado por Easypay",
+   224→      paymentCreated: "Pagamento Criado!",
+   225→      followInstructions: "Siga as instruções abaixo para completar o pagamento",
+   226→      checkPhone: "Verifique o pedido de pagamento no número",
+   227→      expiresAt: "Válido até",
+   228→      afterPayment: "Após o pagamento, a sua conta será activada automaticamente em alguns minutos.",
+   229→      or: "ou",
+   230→    },
+   231→
+   232→    success: {
+   233→      title: "Conta Activada!",
+   234→      message: "Parabéns! A sua conta foi activada com sucesso.",
+   235→      readyToStart: "Está pronto para começar a usar o",
+   236→      nextSteps: "Próximos passos:",
+   237→      completeProfile: "Complete o seu perfil",
+   238→      verifyAccount: "Verifique a sua conta para mais credibilidade",
+   239→      startSearching: "Comece a procurar profissionais ou receba propostas",
+   240→      goToDashboard: "Ir para o Painel",
+   241→      welcome: "Bem-vindo ao",
+   242→    },
+   243→    
+   244→    forgotPassword: {
+   245→      title: "Recuperar Palavra-passe",
+   246→      description: "Introduza o seu email para receber instruções de recuperação",
+   247→      emailLabel: "Email",
+   248→      sendReset: "Enviar Instruções",
+   249→      sending: "A enviar...",
+   250→      backToLogin: "Voltar para Entrar",
+   251→      emailSent: "Email Enviado!",
+   252→      checkInbox: "Se existir uma conta com este email, receberá instruções para redefinir a sua palavra-passe.",
+   253→      rememberedPassword: "Lembrou-se da sua palavra-passe?",
+   254→      loginLink: "Entrar",
+   255→      sendError: "Erro ao enviar email. Tente novamente.",
+   256→    },
+   257→    
+   258→    terms: {
+   259→      title: "Termos de Utilização",
+   260→      lastUpdate: "Última actualização: Fevereiro de 2025",
+   261→      sections: {
+   262→        introduction: {
+   263→          title: "1. Introdução",
+   264→          content: "Bem-vindo ao Evyra. Ao usar a nossa plataforma, concorda com estes Termos de Utilização. A nossa plataforma liga pessoas a profissionais de saúde verificados, facilitando contratos e pagamentos de forma segura e transparente.",
+   265→        },
+   266→        eligibility: {
+   267→          title: "2. Elegibilidade",
+   268→          content: "Para usar a nossa plataforma, deve:",
+   269→          item1: "Ter pelo menos 18 anos de idade",
+   270→          item2: "Ter capacidade legal para celebrar contratos",
+   271→          item3: "Fornecer informações verdadeiras e precisas",
+   272→        },
+   273→        accounts: {
+   274→          title: "3. Contas de Utilizador",
+   275→          content: "Ao criar uma conta, é responsável por:",
+   276→          item1: "Manter a confidencialidade das suas credenciais",
+   277→          item2: "Todas as actividades realizadas na sua conta",
+   278→          item3: "Notificar-nos imediatamente sobre qualquer uso não autorizado",
+   279→        },
+   280→        services: {
+   281→          title: "4. Serviços da Plataforma",
+   282→          content: "O Evyra oferece:",
+   283→          item1: "Marketplace para conexão entre famílias e profissionais",
+   284→          item2: "Sistema de contratos digitais",
+   285→          item3: "Pagamentos seguros e protegidos",
+   286→        },
+   287→        payments: {
+   288→          title: "5. Pagamentos e Taxas",
+   289→          content: "Ao usar os nossos serviços:",
+   290→          item1: "Taxa de activação: €35 (única)",
+   291→          item2: "Taxa de contrato: €5 por contrato criado",
+   292→          item3: "Comissão da plataforma: 10% sobre transacções",
+   293→        },
+   294→        prohibited: {
+   295→          title: "6. Condutas Proibidas",
+   296→          content: "É estritamente proibido:",
+   297→          item1: "Fornecer informações falsas ou enganosas",
+   298→          item2: "Usar a plataforma para actividades ilegais",
+   299→          item3: "Tentar contornar sistemas de segurança",
+   300→          item4: "Assediar ou discriminar outros utilizadores",
+   301→        },
+   302→        liability: {
+   303→          title: "7. Responsabilidade",
+   304→          content: "O Evyra actua como intermediário, não sendo responsável pela qualidade dos serviços prestados pelos profissionais. Recomendamos verificação de referências e documentos.",
+   305→        },
+   306→        termination: {
+   307→          title: "8. Rescisão",
+   308→          content: "Podemos suspender ou encerrar a sua conta em caso de violação destes termos, mediante notificação prévia quando possível.",
+   309→        },
+   310→        changes: {
+   311→          title: "9. Alterações nos Termos",
+   312→          content: "Reservamo-nos o direito de modificar estes termos a qualquer momento. Alterações significativas serão comunicadas por email.",
+   313→        },
+   314→        contact: {
+   315→          title: "10. Contacto",
+   316→          content: "Para dúvidas sobre estes termos:",
+   317→          email: "Email: termos@evyra.pt",
+   318→          address: "Morada: Lisboa, Portugal",
+   319→        },
+   320→      },
+   321→    },
+   322→    
+   323→    register: {
+   324→      acceptTerms: "Li e aceito os",
+   325→      termsOfUse: "Termos de Utilização",
+   326→      and: "e a",
+   327→      privacyPolicy: "Política de Privacidade",
+   328→      termsRequired: "Deve aceitar os termos para continuar",
+   329→      termsInfo: "Ao aceitar, concorda com os nossos termos e políticas. O seu aceite será registado com data, hora e IP para sua segurança.",
+   330→      legalNotice: "Aviso Legal",
+   331→      legalNoticeText: "O seu aceite será registado electronicamente com data, hora e endereço IP para fins de prova legal, conforme regulamento RGPD.",
+   332→    },
+   333→    
+   334→    accept: "Aceitar",
+   335→    pending: "Pendente",
+   336→    
+   337→    kyc: {
+   338→      title: "Verificação de Identidade",
+   339→      description: "Verifique a sua identidade para aumentar a sua credibilidade e receber mais contratos",
+   340→      status: {
+   341→        unverified: "Não Verificado",
+   342→        pending: "Em Verificação",
+   343→        verified: "Verificado",
+   344→        rejected: "Rejeitado",
+   345→      },
+   346→      benefits: {
+   347→        title: "Porquê verificar?",
+   348→        item1: "Maior credibilidade com famílias",
+   349→        item2: "Aparece primeiro nas pesquisas",
+   350→        item3: "Pode receber contratos de maior valor",
+   351→        item4: "Selo de verificado no perfil",
+   352→      },
+   353→      requirements: {
+   354→        title: "O que precisa",
+   355→        item1: "Documento de identidade válido (BI, Passaporte ou Carta de Condução)",
+   356→        item2: "Câmara para foto de selfie",
+   357→        item3: "Ambiente bem iluminado",
+   358→      },
+   359→      startVerification: "Iniciar Verificação",
+   360→      startNewVerification: "Iniciar Nova Verificação",
+   361→      processing: "A processar...",
+   362→      checkingStatus: "A verificar estado...",
+   363→      inProgress: "Verificação em Andamento",
+   364→      inProgressDesc: "A sua verificação está a ser processada. Receberá uma notificação quando for concluída.",
+   365→      verifiedTitle: "Identidade Verificada!",
+   366→      verifiedDesc: "A sua identidade foi verificada com sucesso. Agora tem mais credibilidade na plataforma.",
+   367→      rejectedTitle: "Verificação Rejeitada",
+   368→      rejectedDesc: "Não foi possível verificar a sua identidade. Por favor, tente novamente com documentos mais claros.",
+   369→      sessionExpired: "Sessão expirada. Por favor, inicie uma nova verificação.",
+   370→      error: "Erro ao iniciar verificação. Tente novamente.",
+   371→      onlyCaregivers: "Apenas profissionais podem verificar a sua identidade.",
+   372→      completedAt: "Verificado em",
+   373→      sessionId: "ID da Sessão",
+   374→      refreshStatus: "Atualizar",
+   375→      continueVerification: "Continuar",
+   376→      caregiverOnly: "Esta página é exclusiva para profissionais.",
+   377→    },
+   378→    
+   379→    profile: {
+   380→      title: "O Meu Perfil",
+   381→      description: "Gerir as suas informações públicas",
+   382→      verification: "Verificação",
+   383→      verified: "Verificado",
+   384→      notVerified: "Não verificado",
+   385→      editProfile: "Editar Perfil",
+   386→      hourlyRate: "Valor por Hora",
+   387→      radius: "Raio de Atendimento",
+   388→      services: "Serviços Oferecidos",
+   389→      experience: "Experiência",
+   390→      about: "Sobre",
+   391→      documents: "Documentos",
+   392→      languages: "Idiomas",
+   393→      city: "Cidade",
+   394→      address: "Morada",
+   395→      emergency: "Contacto de Emergência",
+   396→      contactInfo: "Informações de Contacto",
+   397→      elderInfo: "Informações da Pessoa a Cuidar",
+   398→      bio: "Biografia",
+   399→      years: "anos",
+   400→      elderNeeds: "Necessidades de Cuidado",
+   401→      titleLabel: "Título Profissional",
+   402→    },
+   403→    
+   404→    search: {
+   405→      title: "Procurar Profissionais de Saúde",
+   406→      placeholder: "Procurar por nome ou serviço...",
+   407→      filters: "Filtros",
+   408→      noResults: "Nenhum profissional encontrado",
+   409→      verified: "Verificado",
+   410→      rating: "Avaliação",
+   411→      hourlyRate: "Valor/hora",
+   412→      distance: "Distância",
+   413→      perHour: "/hora",
+   414→      sortBy: "Ordenar por",
+   415→      resultsFound: "profissionais encontrados",
+   416→    },
+   417→
+   418→    // ============================================
+   419→    // LANDING PAGE
+   420→    // ============================================
+   421→    landing: {
+   422→      badge: "Profissionais verificados · Portugal, Espanha, Itália",
+   423→      hero: {
+   424→        title: "Saúde que vem até si.",
+   425→        subtitle: "Encontre enfermeiros, fisioterapeutas, profissionais e outros profissionais de saúde que atendem em casa — verificados, contratados e pagos numa só plataforma.",
+   426→        cta: "Encontrar profissional",
+   427→        ctaFamily: "Encontrar profissional",
+   428→        ctaCaregiver: "Sou profissional de saúde",
+   429→      },
+   430→      stats: {
+   431→        caregivers: "Profissionais Verificados",
+   432→        families: "Famílias Atendidas",
+   433→        contracts: "Contratos Realizados",
+   434→        hours: "Horas de Cuidado",
+   435→      },
+   436→      domicilio: {
+   437→        label: "Atendimento domiciliar",
+   438→        title: "Profissionais que vão até si",
+   439→        subtitle: "Para recuperações pós-cirúrgicas, reabilitação, cuidado contínuo ou acompanhamento especializado em casa.",
+   440→        enfermagem: { title: "Enfermagem", description: "Curativos, medicação, cuidados pós-operatórios" },
+   441→        fisioterapia: { title: "Fisioterapia", description: "Reabilitação motora, mobilidade e recuperação" },
+   442→        cuidadores: { title: "Profissionais de Saúde Certificados", description: "Apoio a pessoas de todas as idades em casa" },
+   443→        educacaoFisica: { title: "Educação Física", description: "Exercício terapêutico e reabilitação funcional" },
+   444→        terapiaOcupacional: { title: "Terapia Ocupacional", description: "Autonomia e qualidade de vida no dia-a-dia" },
+   445→        auxEnfermagem: { title: "Aux. de Enfermagem", description: "Suporte de cuidados e acompanhamento diário" },
+   446→      },
+   447→      teleconsulta: {
+   448→        label: "Em breve",
+   449→        badge: "Em desenvolvimento",
+   450→        title: "Teleconsulta — onde estiver",
+   451→        subtitle: "Expansão para profissionais que atendem remotamente, com o mesmo nível de verificação e segurança.",
+   452→        psicologos: { title: "Psicólogos (Em breve)", description: "Consultas online, acompanhamento contínuo" },
+   453→        nutricionistas: { title: "Nutricionistas (Em breve)", description: "Planos alimentares e acompanhamento remoto" },
+   454→        medicosFamilia: { title: "Médicos de Família (Em breve)", description: "Triagem, orientação e referenciação" },
+   455→      },
+   456→      howItWorks: {
+   457→        title: "Como Funciona",
+   458→        subtitle: "Simples, seguro e transparente",
+   459→        step1: {
+   460→          title: "Crie a sua Conta",
+   461→          description: "Registe-se gratuitamente em minutos. Escolha se é família ou profissional.",
+   462→        },
+   463→        step2: {
+   464→          title: "Encontre o Profissional Ideal",
+   465→          description: "Famílias pesquisam profissionais verificados. Profissionais recebem propostas.",
+   466→        },
+   467→        step3: {
+   468→          title: "Contrate com Segurança",
+   469→          description: "Contratos digitais com todas as condições claras e definidas.",
+   470→        },
+   471→        step4: {
+   472→          title: "Acompanhe e Avalie",
+   473→          description: "Avalie o serviço e ajude outras famílias na sua decisão.",
+   474→        },
+   475→      },
+   476→      features: {
+   477→        title: "Por que a Evyra",
+   478→        verified: {
+   479→          title: "Profissionais verificados",
+   480→          description: "Identidade, antecedentes e qualificações confirmados antes de aparecer na plataforma",
+   481→        },
+   482→        contracts: {
+   483→          title: "Contratos digitais",
+   484→          description: "Condições claras, assinadas por ambas as partes. Sem ambiguidades",
+   485→        },
+   486→        security: {
+   487→          title: "Pagamentos seguros",
+   488→          description: "Processamento protegido. O profissional recebe, a família tem controlo",
+   489→        },
+   490→        support: {
+   491→          title: "Visibilidade total",
+   492→          description: "Registo de visitas, relatórios e comunicação centralizada numa só plataforma",
+   493→        },
+   494→      },
+   495→      caregiver: {
+   496→        title: "Para Profissionais de Saúde",
+   497→        subtitle: "A sua competência tem mercado aqui",
+   498→        payment: {
+   499→          title: "Pagamentos Garantidos",
+   500→          description: "Recebe diretamente na sua conta. Sem perseguir clientes, sem atrasos desnecessários.",
+   501→        },
+   502→        legal: {
+   503→          title: "Contratos que Protegem",
+   504→          description: "Documentação legal clara para ambas as partes. O seu trabalho está coberto.",
+   505→        },
+   506→        reputation: {
+   507→          title: "Reputação Verificada",
+   508→          description: "Avaliações reais de clientes reais. Um perfil sólido que cresce com a sua carreira.",
+   509→        },
+   510→        flexibility: {
+   511→          title: "Controlo Total da Agenda",
+   512→          description: "Escolhe quando, onde e quantas horas quer trabalhar. Sem imposições de horário.",
+   513→        },
+   514→        visibility: {
+   515→          title: "Visibilidade Geográfica",
+   516→          description: "Apareça para clientes na sua zona. Expanda quando quiser para outras regiões.",
+   517→        },
+   518→        verifiedBadge: {
+   519→          title: "Selo de Verificado",
+   520→          description: "Credibilidade imediata. As famílias confiam em quem foi verificado pela Evyra.",
+   521→        },
+   522→        cta: "Criar perfil profissional",
+   523→      },
+   524→      pilares: {
+   525→        title: "Simples para quem contrata. Sério para quem cuida.",
+   526→        pilar1: {
+   527→          title: "Profissionais verificados",
+   528→          description: "Identidade, antecedentes e qualificações confirmados antes de aparecer na plataforma",
+   529→        },
+   530→        pilar2: {
+   531→          title: "Contratos digitais",
+   532→          description: "Condições claras, assinadas por ambas as partes. Sem ambiguidades",
+   533→        },
+   534→        pilar3: {
+   535→          title: "Pagamentos seguros",
+   536→          description: "Processamento protegido. O profissional recebe, a família tem controlo",
+   537→        },
+   538→        pilar4: {
+   539→          title: "Visibilidade total",
+   540→          description: "Registo de visitas, relatórios e comunicação centralizada numa só plataforma",
+   541→        },
+   542→      },
+   543→      testimonials: {
+   544→        title: "O que dizem sobre nós",
+   545→      },
+   546→      cta: {
+   547→        title: "Precisas de um profissional de saúde em casa?",
+   548→        subtitle: "Cria uma conta gratuita e encontra o perfil certo em minutos.",
+   549→        button: "Começar agora",
+   550→      },
+   551→      scopeNote: "Disponível em Portugal · Espanha · Itália — a expandir para toda a Europa",
+   552→      pricing: {
+   553→        badge: "Sem compromisso",
+   554→        title: "Comece gratuitamente",
+   555→        subtitle: "Sem mensalidades. Pague apenas quando encontrar o profissional certo.",
+   556→        family: {
+   557→          title: "Para Famílias",
+   558→          price: "€35",
+   559→          priceHint: "Pagamento único de ativação",
+   560→          cta: "Criar conta gratuita",
+   561→          features: [
+   562→            "Pesquisa ilimitada de profissionais",
+   563→            "Verificação de antecedentes",
+   564→            "Contratos digitais protegidos",
+   565→            "Pagamentos seguros com proteção",
+   566→            "Reembolso em até 7 dias",
+   567→          ],
+   568→        },
+   569→        caregiver: {
+   570→          title: "Para Profissionais",
+   571→          price: "Gratuito",
+   572→          priceHint: "Sem custos de registo ou mensalidades",
+   573→          cta: "Registar-me gratuitamente",
+   574→          features: [
+   575→            "Perfil profissional verificado",
+   576→            "Receba propostas de famílias",
+   577→            "Contratos protegidos pela plataforma",
+   578→            "Pagamentos processados com segurança",
+   579→            "Controlo total da sua disponibilidade",
+   580→          ],
+   581→        },
+   582→        trustLine: "Pagamentos processados de forma segura. Todas as taxas são apresentadas com total transparência antes de qualquer compromisso.",
+   583→      },
+   584→    },
+   585→    
+   586→    // ============================================
+   587→    // PAGES
+   588→    // ============================================
+   589→    howItWorksPage: {
+   590→      badge: "Guia Completo",
+   591→      heroDescription: "Uma plataforma simples e segura que liga pessoas a profissionais de saúde verificados, oferecendo transparência e confiança em cada passo.",
+   592→      steps: {
+   593→        signup: {
+   594→          title: "Registo & Escolha de Perfil",
+   595→          description: "Crie a sua conta em menos de 2 minutos. Escolha se é uma família à procura de cuidados ou um profissional a oferecer serviços.",
+   596→          family: "Família",
+   597→          familyDesc: "Procura profissionais",
+   598→          caregiver: "Profissional de Saúde",
+   599→          caregiverDesc: "Oferece serviços",
+   600→        },
+   601→        activation: {
+   602→          title: "Activação da Conta",
+   603→          description: "Pague a taxa única de activação de €35 para ter acesso completo à plataforma.",
+   604→          fee: "Taxa de Activação: €35",
+   605→          feeDesc: "Acesso completo à plataforma",
+   606→        },
+   607→        match: {
+   608→          title: "Encontre o Profissional",
+   609→          description: "Famílias pesquisam profissionais por localização, especialidade e preço. Profissionais recebem propostas e podem aceitar ou recusar.",
+   610→          features: [
+   611→            "Pesquisa por distância e disponibilidade",
+   612→            "Filtro por especialidades (Alzheimer, Paliativos, etc.)",
+   613→            "Verificação de qualificações e antecedentes",
+   614→            "Sistema de avaliações e reputação"
+   615→          ],
+   616→        },
+   617→        contract: {
+   618→          title: "Contrato Digital",
+   619→          description: "Crie contratos claros com todas as condições definidas. Taxa de €5 por contrato, oferecendo segurança jurídica para ambas as partes.",
+   620→          immutable: "Contratos Seguros",
+   621→          immutableDesc: "Registados com todas as condições definidas",
+   622→        },
+   623→        payments: {
+   624→          title: "Pagamentos & Avaliação",
+   625→          description: "Pague serviços com segurança. Avalie o profissional e ajude outras famílias.",
+   626→          wallet: "Pagamento Seguro",
+   627→          walletDesc: "Sistema protegido",
+   628→          tips: "Gorjetas",
+   629→          tipsDesc: "Recompense bons cuidados",
+   630→          security: "Proteção",
+   631→          securityDesc: "100% seguro",
+   632→        },
+   633→      },
+   634→      cta: {
+   635→        title: "Pronto para começar?",
+   636→        description: "Organize o cuidado com profissionais verificados e confiança real.",
+   637→      },
+   638→    },
+   639→    
+   640→    forFamiliesPage: {
+   641→      badge: "Para Famílias",
+   642→      heroTitle: "Encontre profissionais de confiança para os seus entes queridos",
+   643→      heroDescription: "A plataforma que oferece transparência, segurança e qualidade no atendimento ao domicílio.",
+   644→      stats: {
+   645→        caregivers: "Profissionais de Saúde",
+   646→        families: "Famílias",
+   647→        rating: "Avaliação",
+   648→        support: "Suporte",
+   649→      },
+   650→      whyChoose: {
+   651→        title: "Porquê escolher o Evyra?",
+   652→        description: "Segurança, transparência e qualidade em cada etapa do cuidado.",
+   653→        verified: {
+   654→          title: "Profissionais Verificados",
+   655→          description: "Verificação completa de identidade, antecedentes criminais e qualificações profissionais.",
+   656→        },
+   657→        contracts: {
+   658→          title: "Contratos Digitais",
+   659→          description: "Documentos claros com todas as condições definidas. Segurança jurídica garantida.",
+   660→        },
+   661→        reputation: {
+   662→          title: "Sistema de Reputação",
+   663→          description: "Avaliações reais de famílias atendidas. Veja histórico completo antes de contratar.",
+   664→        },
+   665→      },
+   666→      howItWorks: {
+   667→        title: "Como funciona para famílias",
+   668→        step1: "Crie a sua conta",
+   669→        step1Desc: "Registo rápido e gratuito",
+   670→        step2: "Active a sua conta",
+   671→        step2Desc: "€35 taxa única",
+   672→        step3: "Encontre profissionais",
+   673→        step3Desc: "Pesquise por perfil e local",
+   674→        step4: "Contrate com segurança",
+   675→        step4Desc: "Contrato digital",
+   676→      },
+   677→      pricing: {
+   678→        title: "Investimento Transparente",
+   679→        description: "Sem surpresas. Todos os custos são claros desde o início. Só paga pelo que utiliza.",
+   680→        feesTitle: "Taxas para Famílias",
+   681→        search: "Pesquisa de profissionais",
+   682→        free: "Gratuito",
+   683→        activation: "Activação da conta",
+   684→        contractFee: "Taxa por contrato",
+   685→        commission: "Comissão da plataforma",
+   686→        tips: "Gorjetas",
+   687→        optional: "Opcional",
+   688→      },
+   689→      included: {
+   690→        title: "O que está incluído",
+   691→        access: "Acesso ilimitado a profissionais",
+   692→        accessDesc: "Pesquise e contacte quantos quiser",
+   693→        verification: "Verificação completa",
+   694→        verificationDesc: "Antecedentes e qualificações",
+   695→        support: "Suporte dedicado",
+   696→        supportDesc: "Chat e telefone 24/7",
+   697→        protected: "Contratos protegidos",
+   698→        protectedDesc: "Segurança jurídica",
+   699→        guarantee: "Política de reembolso",
+   700→        guaranteeDesc: "Reembolso em até 7 dias",
+   701→      },
+   702→      cta: {
+   703→        title: "Comece hoje mesmo",
+   704→        description: "Encontre o profissional ideal para a sua família em poucos minutos.",
+   705→        button: "Criar Conta Gratuita",
+   706→      },
+   707→    },
+   708→    
+   709→    forCaregiversPage: {
+   710→      badge: "Para Profissionais de Saúde",
+   711→      heroTitle: "A sua competência tem mercado aqui.",
+   712→      heroDescription: "A Evyra liga profissionais de saúde a pessoas que precisam de atendimento em casa — com contratos claros, pagamentos seguros e uma plataforma que valoriza o seu trabalho.",
+   713→      benefits: {
+   714→        title: "O que ganha",
+   715→        description: "Menos burocracia. Mais tempo a trabalhar.",
+   716→        profile: {
+   717→          title: "Pagamentos Garantidos",
+   718→          description: "Recebe diretamente na sua conta. Sem perseguir clientes, sem atrasos desnecessários.",
+   719→        },
+   720→        verified: {
+   721→          title: "Contratos que Protegem",
+   722→          description: "Documentação legal clara para ambas as partes. O seu trabalho está coberto.",
+   723→        },
+   724→        support: {
+   725→          title: "Reputação Verificada",
+   726→          description: "Avaliações reais de clientes reais. Um perfil sólido que cresce com a sua carreira.",
+   727→        },
+   728→      },
+   729→      earnings: {
+   730→        title: "Quanto fica para si",
+   731→        description: "A Evyra fica apenas com 10% de comissão por serviço. O resto é seu — sempre.",
+   732→        feesTitle: "Informações para Profissionais",
+   733→        profile: "Perfil profissional",
+   734→        activation: "Gratuito",
+   735→        contractFee: "Sem taxa",
+   736→        receive: "Recebimento de serviços",
+   737→        tipsValue: "Gorjetas",
+   738→        example: {
+   739→          title: "Exemplo de Ganhos Mensais",
+   740→          hours: "Trabalhando 20 horas/semana",
+   741→          perMonth: "por mês (90% de €1.200)",
+   742→          averageTips: "+ Gorjetas médias",
+   743→          total: "Total estimado",
+   744→        },
+   745→      },
+   746→      features: {
+   747→        title: "Tudo o que precisa para crescer",
+   748→        reputation: {
+   749→          title: "Reputação Sólida",
+   750→          description: "Avaliações verificadas que constroem a sua credibilidade",
+   751→        },
+   752→        protected: {
+   753→          title: "Contratos Protegidos",
+   754→          description: "Segurança jurídica em todos os contratos",
+   755→        },
+   756→        payments: {
+   757→          title: "Pagamentos Rápidos",
+   758→          description: "Receba directamente na sua conta bancária",
+   759→        },
+   760→        support: {
+   761→          title: "Suporte",
+   762→          description: "Equipa disponível para ajudar",
+   763→        },
+   764→      },
+   765→      cta: {
+   766→        title: "Pronto para expandir a sua prática?",
+   767→        description: "Crie o seu perfil gratuitamente. Sem mensalidades, sem compromissos.",
+   768→        button: "Criar perfil profissional",
+   769→      },
+   770→    },
+   771→    
+   772→    pricingPage: {
+   773→      badge: "Preços",
+   774→      title: "Comece gratuitamente",
+   775→      subtitle: "Sem mensalidades, sem compromissos. Pague apenas quando encontrar o profissional certo.",
+   776→      family: {
+   777→        title: "Para Famílias",
+   778→        priceHint: "Pagamento único de ativação",
+   779→        cta: "Criar conta gratuita",
+   780→        features: [
+   781→          "Pesquisa ilimitada de profissionais",
+   782→          "Verificação de antecedentes",
+   783→          "Contratos digitais protegidos",
+   784→          "Pagamentos seguros com proteção",
+   785→          "Suporte dedicado",
+   786→          "Reembolso em até 7 dias",
+   787→        ],
+   788→      },
+   789→      caregiver: {
+   790→        title: "Para Profissionais de Saúde",
+   791→        price: "Gratuito",
+   792→        priceHint: "Sem custos de registo ou mensalidades",
+   793→        cta: "Registar-me gratuitamente",
+   794→        features: [
+   795→          "Perfil profissional verificado",
+   796→          "Receba propostas de famílias",
+   797→          "Contratos protegidos pela plataforma",
+   798→          "Pagamentos processados com segurança",
+   799→          "Controlo total da sua disponibilidade",
+   800→          "Suporte dedicado",
+   801→        ],
+   802→      },
+   803→      trustLine: "Pagamentos processados de forma segura. Todas as taxas são apresentadas com total transparência antes de qualquer compromisso.",
+   804→      cta: {
+   805→        title: "Pronto para começar?",
+   806→        description: "Crie a sua conta gratuita hoje mesmo. Sem compromisso.",
+   807→        familyBtn: "Sou família",
+   808→        caregiverBtn: "Sou profissional",
+   809→      },
+   810→    },
+   811→    
+   812→    // ============================================
+   813→    // AJUDA PAGE
+   814→    // ============================================
+   815→    ajudaPage: {
+   816→      title: "Centro de Ajuda",
+   817→      subtitle: "Encontre respostas para as dúvidas mais comuns ou entre em contacto com o nosso suporte.",
+   818→      notFound: "Não encontrou o que procurava?",
+   819→      supportReady: "A nossa equipa de suporte está pronta para o ajudar.",
+   820→      contactSupport: "Falar com Suporte",
+   821→      categories: {
+   822→        forFamilies: "Para Famílias",
+   823→        forCaregivers: "Para Profissionais de Saúde",
+   824→        security: "Segurança e Privacidade",
+   825→      },
+   826→      faqs: {
+   827→        families: [
+   828→          {
+   829→            q: "Como encontro um profissional?",
+   830→            a: "Após criar a sua conta, aceda à pesquisa de profissionais. Pode filtrar por tipo de serviço, localização, disponibilidade e avaliações de outras famílias."
+   831→          },
+   832→          {
+   833→            q: "Como funciona o pagamento?",
+   834→            a: "Paga mensalmente pelo serviço contratado. O valor é calculado com base nas horas acordadas. A plataforma retém uma pequena taxa para garantir a segurança da transacção."
+   835→          },
+   836→          {
+   837→            q: "Posso trocar de profissional?",
+   838→            a: "Sim. Se não estiver satisfeito, pode encerrar o contrato atual e procurar um novo profissional. Recomendamos sempre conversar antes para resolver possíveis problemas."
+   839→          }
+   840→        ],
+   841→        caregivers: [
+   842→          {
+   843→            q: "Como me registo como profissional?",
+   844→            a: "Clique em 'Criar Conta', seleccione a opção 'Sou Profissional de Saúde' e preencha os seus dados profissionais. Após verificação, o seu perfil estará visível para famílias."
+   845→          },
+   846→          {
+   847→            q: "Quanto custa usar a plataforma?",
+   848→            a: "O registo é gratuito. Cobramos uma pequena taxa (10%) sobre cada pagamento recebido para manter a plataforma e garantir a sua segurança."
+   849→          },
+   850→          {
+   851→            q: "Como recebo os meus pagamentos?",
+   852→            a: "Os pagamentos são depositados automaticamente na sua carteira digital. Pode levantar para a sua conta bancária a qualquer momento."
+   853→          }
+   854→        ],
+   855→        security: [
+   856→          {
+   857→            q: "Como verificam os profissionais?",
+   858→            a: "Realizamos verificação de identidade, antecedentes criminais e validamos certificações profissionais. Profissionais verificados têm um selo no seu perfil."
+   859→          },
+   860→          {
+   861→            q: "Os meus dados estão seguros?",
+   862→            a: "Sim. Utilizamos criptografia de ponta a ponta, seguimos as normas RGPD e não vendemos os seus dados. Os seus contratos são registados de forma segura para garantir transparência."
+   863→          }
+   864→        ]
+   865→      }
+   866→    },
+   867→    
+   868→    // ============================================
+   869→    // CONTATO PAGE
+   870→    // ============================================
+   871→    contatoPage: {
+   872→      title: "Entre em Contacto",
+   873→      subtitle: "A nossa equipa está pronta para o ajudar. Envie a sua mensagem ou utilize os nossos canais de atendimento.",
+   874→      form: {
+   875→        title: "Envie uma Mensagem",
+   876→        name: "Nome",
+   877→        namePlaceholder: "O seu nome",
+   878→        email: "Email",
+   879→        emailPlaceholder: "o-seu@email.com",
+   880→        subject: "Assunto",
+   881→        subjectPlaceholder: "Como podemos ajudar?",
+   882→        message: "Mensagem",
+   883→        messagePlaceholder: "Descreva a sua dúvida ou sugestão...",
+   884→        submit: "Enviar Mensagem",
+   885→      },
+   886→      info: {
+   887→        email: "Email",
+   888→        emailValue: "contacto@evyra.eu",
+   889→        emailSupport: "suporte@evyra.eu",
+   890→        phone: "Telefone",
+   891→        phoneValue: "+351 912 345 678",
+   892→        phoneHours: "Segunda a Sexta, 9h às 18h",
+   893→        address: "Morada",
+   894→        addressValue1: "Av. da Liberdade, 123",
+   895→        addressValue2: "1250-096 Lisboa, Portugal",
+   896→        hours: "Horário de Atendimento",
+   897→        hoursWeekday: "Segunda a Sexta: 9h - 18h",
+   898→        hoursSaturday: "Sábado: 9h - 13h",
+   899→      },
+   900→    },
+   901→    
+   902→    // ============================================
+   903→    // BLOG PAGE
+   904→    // ============================================
+   905→    blogPage: {
+   906→      title: "Blog Evyra",
+   907→      subtitle: "Dicas, artigos e novidades sobre atendimento ao domicílio e a nossa plataforma.",
+   908→      categories: {
+   909→        all: "Todos",
+   910→        tips: "Dicas",
+   911→        health: "Saúde",
+   912→        technology: "Tecnologia",
+   913→        platform: "Plataforma",
+   914→        rights: "Direitos",
+   915→      },
+   916→      readTime: "min",
+   917→      newsletter: {
+   918→        title: "Receba as Nossas Novidades",
+   919→        subtitle: "Registe-se para receber dicas e actualizações da plataforma.",
+   920→        placeholder: "o-seu@email.com",
+   921→        subscribe: "Subscrever",
+   922→      },
+   923→      posts: [
+   924→        {
+   925→          title: "Como Escolher o Profissional Ideal para Si",
+   926→          excerpt: "A escolha de um profissional é uma decisão importante. Confira os principais factores a considerar.",
+   927→          category: "Dicas",
+   928→          author: "Equipa Evyra",
+   929→          readTime: "5 min",
+   930→        },
+   931→        {
+   932→          title: "Saúde Mental e Bem-Estar",
+   933→          excerpt: "A saúde mental é tão importante quanto a física. Saiba como apoiar o seu ente querido.",
+   934→          category: "Saúde",
+   935→          author: "Dra. Maria Santos",
+   936→          readTime: "7 min",
+   937→        },
+   938→        {
+   939→          title: "Benefícios da Tecnologia para a Saúde em Casa",
+   940→          excerpt: "Como dispositivos e aplicações podem melhorar a qualidade de vida dos mais velhos.",
+   941→          category: "Tecnologia",
+   942→          author: "Equipa Evyra",
+   943→          readTime: "4 min",
+   944→        }
+   945→      ]
+   946→    },
+   947→    
+   948→    // ============================================
+   949→    // SOBRE PAGE
+   950→    // ============================================
+   951→    sobrePage: {
+   952→      badge: "A Nossa História",
+   953→      title: "Sobre o",
+   954→      subtitle: "Somos uma empresa de tecnologia com propósito: transformar o atendimento ao domicílio através de confiança, transparência e valorização profissional.",
+   955→      mission: {
+   956→        title: "A Nossa Missão",
+   957→        paragraph1: "O Evyra nasceu da observação de um problema real: famílias a lutar para encontrar profissionais de confiança, e profissionais sem reconhecimento ou valorização adequada.",
+   958→        paragraph2: "Utilizamos tecnologia de ponta para resolver problemas humanos: garantir que contratos sejam seguros, pagamentos sejam protegidos e profissionais sejam valorizados a longo prazo.",
+   959→        values: {
+   960→          care: "Cuidado",
+   961→          trust: "Confiança",
+   962→          value: "Valor",
+   963→        },
+   964→      },
+   965→      stats: {
+   966→        title: "Os Nossos Números",
+   967→        caregivers: "Profissionais activos",
+   968→        families: "Famílias atendidas",
+   969→        hours: "Horas de cuidado",
+   970→        countries: "Países",
+   971→      },
+   972→      values: {
+   973→        title: "Os Nossos Valores",
+   974→        humanity: {
+   975→          title: "Humanidade",
+   976→          description: "Tecnologia ao serviço das pessoas. Cada decisão considera o impacto em famílias e profissionais.",
+   977→        },
+   978→        transparency: {
+   979→          title: "Transparência",
+   980→          description: "Contratos claros, taxas transparentes, sem surpresas. Tudo registado de forma segura e auditável.",
+   981→        },
+   982→        appreciation: {
+   983→          title: "Valorização",
+   984→          description: "Profissionais merecem reconhecimento. A nossa plataforma permite que ganhem e valorizem o seu trabalho com justiça.",
+   985→        },
+   986→      },
+   987→      team: {
+   988→        title: "A Nossa Equipa",
+   989→        subtitle: "Profissionais apaixonados por tecnologia e cuidados de saúde.",
+   990→        members: [
+   991→          { name: "Ana Silva", role: "CEO & Co-founder" },
+   992→          { name: "Carlos Santos", role: "CTO & Co-founder" },
+   993→          { name: "Maria Costa", role: "Head of Care" },
+   994→          { name: "João Pereira", role: "Head of Product" },
+   995→        ],
+   996→      },
+   997→      contact: {
+   998→        title: "Entre em Contacto",
+   999→        subtitle: "Estamos aqui para ajudar. Entre em contacto connosco.",
+  1000→        email: "Email",
+  1001→        emailValue: "contacto@evyra.eu",
+  1002→        phone: "Telefone",
+  1003→        phoneValue: "+351 210 000 000",
+  1004→        location: "Localização",
+  1005→        locationValue: "Lisboa, Portugal",
+  1006→      },
+  1007→      cta: {
+  1008→        title: "Junte-se a nós",
+  1009→        subtitle: "Faça parte da transformação do atendimento ao domicílio.",
+  1010→        familyButton: "Sou Família",
+  1011→        caregiverButton: "Sou Profissional de Saúde",
+  1012→      },
+  1013→    },
+  1014→    
+  1015→    // ============================================
+  1016→    // PRIVACIDADE PAGE
+  1017→    // ============================================
+  1018→    privacidadePage: {
+  1019→      title: "Política de Privacidade",
+  1020→      lastUpdate: "Última actualização: Janeiro de 2024",
+  1021→      sections: {
+  1022→        introduction: {
+  1023→          title: "1. Introdução",
+  1024→          content: "O Evyra está comprometido em proteger a privacidade dos seus utilizadores. Esta Política de Privacidade explica como recolhemos, usamos, armazenamos e protegemos as suas informações pessoais.",
+  1025→        },
+  1026→        dataCollected: {
+  1027→          title: "2. Informações que Recolhemos",
+  1028→          content: "Podemos recolher os seguintes tipos de informações:",
+  1029→          items: [
+  1030→            "Dados de identificação: nome, email, telefone, NIF",
+  1031→            "Dados de localização: morada, cidade, código postal",
+  1032→            "Dados de perfil: foto, descrição, qualificações profissionais",
+  1033→            "Dados de transacção: histórico de contratos, pagamentos",
+  1034→            "Dados de uso: logs de acesso, navegação, preferências"
+  1035→          ],
+  1036→        },
+  1037→        dataUsage: {
+  1038→          title: "3. Como Utilizamos as Suas Informações",
+  1039→          content: "Utilizamos as suas informações para:",
+  1040→          items: [
+  1041→            "Fornecer e melhorar os nossos serviços",
+  1042→            "Processar transacções e pagamentos",
+  1043→            "Comunicar-nos consigo sobre a sua conta",
+  1044→            "Enviar notificações relevantes sobre profissionais e contratos",
+  1045→            "Cumprir obrigações legais e regulatórias",
+  1046→            "Prevenir fraudes e garantir a segurança"
+  1047→          ],
+  1048→        },
+  1049→        dataSharing: {
+  1050→          title: "4. Partilha de Dados",
+  1051→          content: "Não vendemos as suas informações pessoais. Podemos partilhar dados com:",
+  1052→          items: [
+  1053→            "Outros utilizadores (conforme necessário para contratos)",
+  1054→            "Processadores de pagamento (Stripe)",
+  1055→            "Autoridades legais (quando exigido por lei)",
+  1056→            "Fornecedores de serviços essenciais (hospedagem, análise)"
+  1057→          ],
+  1058→        },
+  1059→        security: {
+  1060→          title: "5. Segurança dos Dados",
+  1061→          content: "Implementamos medidas de segurança técnicas e organizacionais para proteger os seus dados, incluindo:",
+  1062→          items: [
+  1063→            "Criptografia SSL/TLS em todas as comunicações",
+  1064→            "Armazenamento seguro com criptografia em repouso",
+  1065→            "Controlo de acesso restrito aos dados",
+  1066→            "Proteção contínua da segurança da plataforma"
+  1067→          ],
+  1068→        },
+  1069→        rights: {
+  1070→          title: "6. Os Seus Direitos (RGPD)",
+  1071→          content: "O utilizador tem direito a:",
+  1072→          items: [
+  1073→            "Aceder aos seus dados pessoais",
+  1074→            "Corrigir dados incorrectos",
+  1075→            "Solicitar eliminação dos seus dados",
+  1076→            "Portabilidade de dados",
+  1077→            "Retirar consentimento a qualquer momento",
+  1078→            "Opor-se a determinados tratamentos"
+  1079→          ],
+  1080→        },
+  1081→        cookies: {
+  1082→          title: "7. Cookies e Tecnologias Similares",
+  1083→          content: "Utilizamos cookies essenciais para funcionamento da plataforma e cookies analíticos para melhorar os nossos serviços. Pode gerir as suas preferências de cookies nas definições do navegador.",
+  1084→        },
+  1085→        contact: {
+  1086→          title: "8. Contacto",
+  1087→          content: "Para exercer os seus direitos ou esclarecer dúvidas sobre privacidade, entre em contacto:",
+  1088→          items: [
+  1089→            "Email: privacidade@evyra.eu",
+  1090→            "Morada: Av. da Liberdade, 123, 1250-096 Lisboa, Portugal"
+  1091→          ],
+  1092→        },
+  1093→      },
+  1094→      backHome: "Voltar ao Início",
+  1095→    },
+  1096→  },
+  1097→
+  1098→  // ============================================
+  1099→  // ENGLISH
+  1100→  // ============================================
+  1101→  en: {
+  1102→    appName: "Evyra",
+  1103→    tagline: "Quality Care for Those You Love",
+  1104→    loading: "Loading...",
+  1105→    error: "An error occurred",
+  1106→    successMessage: "Success!",
+  1107→    save: "Save",
+  1108→    cancel: "Cancel",
+  1109→    delete: "Delete",
+  1110→    edit: "Edit",
+  1111→    back: "Back",
+  1112→    next: "Next",
+  1113→    submit: "Submit",
+  1114→    close: "Close",
+  1115→    searchLabel: "Search",
+  1116→    filter: "Filter",
+  1117→    all: "All",
+  1118→    none: "None",
+  1119→    yes: "Yes",
+  1120→    no: "No",
+  1121→    
+  1122→    nav: {
+  1123→      home: "Home",
+  1124→      howItWorks: "How It Works",
+  1125→      forFamilies: "For Families",
+  1126→      forCaregivers: "For Health Professionals",
+  1127→      pricing: "Pricing",
+  1128→      about: "About",
+  1129→      dashboard: "Dashboard",
+  1130→      contracts: "Contracts",
+  1131→      wallet: "Wallet",
+  1132→      chat: "Messages",
+  1133→      settings: "Settings",
+  1134→      profile: "My Profile",
+  1135→      searchCaregivers: "Find Health Professionals",
+  1136→      login: "Sign In",
+  1137→      register: "Sign Up",
+  1138→      logout: "Sign Out",
+  1139→    },
+  1140→    
+  1141→    auth: {
+  1142→      login: "Sign In",
+  1143→      logout: "Sign Out",
+  1144→      register: "Create Account",
+  1145→      forgotPassword: "Forgot Password",
+  1146→      resetPassword: "Reset Password",
+  1147→      email: "Email",
+  1148→      password: "Password",
+  1149→      confirmPassword: "Confirm Password",
+  1150→      name: "Name",
+  1151→      phone: "Phone",
+  1152→      role: "Account Type",
+  1153→      family: "Family",
+  1154→      caregiver: "Health Professional",
+  1155→      loginSuccess: "Successfully signed in!",
+  1156→      logoutSuccess: "You have been signed out",
+  1157→      registerSuccess: "Account created successfully!",
+  1158→      noAccount: "Don't have an account?",
+  1159→      hasAccount: "Already have an account?",
+  1160→    },
+  1161→    
+  1162→    theme: {
+  1163→      light: "Light Mode",
+  1164→      dark: "Dark Mode",
+  1165→      system: "System",
+  1166→      toggle: "Toggle theme",
+  1167→    },
+  1168→    
+  1169→    language: {
+  1170→      pt: "Portuguese",
+  1171→      en: "English",
+  1172→      it: "Italian",
+  1173→      es: "Spanish",
+  1174→      select: "Language",
+  1175→    },
+  1176→    
+  1177→    dashboard: {
+  1178→      welcome: "Hello",
+  1179→      familyPanel: "Family Panel",
+  1180→      caregiverPanel: "Health Professional Panel",
+  1181→      balance: "Balance",
+  1182→      activeContracts: "Active Contracts",
+  1183→      hoursWorked: "Hours Worked",
+  1184→      rating: "Rating",
+  1185→      reviews: "reviews",
+  1186→      recentActivity: "Recent Activity",
+  1187→      noActivity: "No recent activity",
+  1188→      viewAll: "View Full History",
+  1189→      allSet: "All set!",
+  1190→      allSetFamily: "You're ready to search for health professionals and create contracts.",
+  1191→      allSetCaregiver: "Your profile is complete and you can receive work proposals.",
+  1192→      status: {
+  1193→        active: "Active",
+  1194→        pending: "Pending",
+  1195→      },
+  1196→      nextSteps: {
+  1197→        title: "Next Steps",
+  1198→        payment: "Complete activation payment",
+  1199→        kyc: "Verify your identity",
+  1200→        profile: "Complete your professional profile",
+  1201→      },
+  1202→    },
+  1203→    
+  1204→    contracts: {
+  1205→      title: "My Contracts",
+  1206→      new: "New Contract",
+  1207→      active: "Active",
+  1208→      completed: "Completed",
+  1209→      pending: "Pending",
+  1210→      noContracts: "No contracts found",
+  1211→      status: {
+  1212→        draft: "Draft",
+  1213→        pendingAcceptance: "Pending Acceptance",
+  1214→        pendingPayment: "Pending Payment",
+  1215→        active: "Active",
+  1216→        completed: "Completed",
+  1217→        cancelled: "Cancelled",
+  1218→        disputed: "Disputed",
+  1219→      },
+  1220→      acceptance: "Legal Acceptance",
+  1221→      family: "Family",
+  1222→      caregiver: "Health Professional",
+  1223→      familyAcceptedAt: "Family accepted on",
+  1224→      caregiverAcceptedAt: "Health Professional accepted on",
+  1225→      acceptContract: "Accept Contract",
+  1226→      acceptInfo: "By accepting, you agree to the contract terms. Your acceptance will be legally registered.",
+  1227→      confirmAccept: "Confirm Acceptance",
+  1228→      confirmAcceptInfo: "By accepting this contract, you agree to all terms and conditions. Your acceptance will be registered with date, time and IP address for legal purposes.",
+  1229→      payment: "Payment Pending",
+  1230→      paymentInfo: "Both parties have accepted. Proceed with payment to start the contract.",
+  1231→      rate: "Hourly rate",
+  1232→      total: "Total",
+  1233→      hours: "Hours",
+  1234→      hoursPerWeek: "Hours/week",
+  1235→      startDate: "Start",
+  1236→      endDate: "End",
+  1237→    },
+  1238→    
+  1239→    wallet: {
+  1240→      title: "My Wallet",
+  1241→      balance: "Balance",
+  1242→      value: "Value in EUR",
+  1243→      history: "History",
+  1244→      noTransactions: "No transactions",
+  1245→      deposit: "Deposit",
+  1246→      withdraw: "Withdraw",
+  1247→      addFunds: "Add Funds",
+  1248→    },
+  1249→
+  1250→    chat: {
+  1251→      title: "Messages",
+  1252→      new: "New Conversation",
+  1253→      placeholder: "Type your message...",
+  1254→      noMessages: "No messages yet",
+  1255→      noChats: "No conversations",
+  1256→      online: "Online",
+  1257→      offline: "Offline",
+  1258→      typing: "typing...",
+  1259→    },
+  1260→    
+  1261→    settings: {
+  1262→      title: "Settings",
+  1263→      profile: "Profile",
+  1264→      account: "Account",
+  1265→      notifications: "Notifications",
+  1266→      security: "Security",
+  1267→      language: "Language",
+  1268→      theme: "Appearance",
+  1269→      privacy: "Privacy",
+  1270→      saveChanges: "Save Changes",
+  1271→      saved: "Settings saved!",
+  1272→    },
+  1273→    
+  1274→    footer: {
+  1275→      platform: "Platform",
+  1276→      company: "Company",
+  1277→      legal: "Legal",
+  1278→      support: "Support",
+  1279→      about: "About Us",
+  1280→      blog: "Blog",
+  1281→      careers: "Careers",
+  1282→      press: "Press",
+  1283→      privacy: "Privacy Policy",
+  1284→      terms: "Terms of Use",
+  1285→      cookies: "Cookie Policy",
+  1286→      gdpr: "GDPR",
+  1287→      help: "Help Center",
+  1288→      contact: "Contact",
+  1289→      faq: "FAQ",
+  1290→      security: "Security",
+  1291→      rights: "All rights reserved.",
+  1292→      poweredBy: "Portugal · Spain · Italy",
+  1293→    },
+  1294→    
+  1295→    payment: {
+  1296→      title: "Activate Your Account",
+  1297→      description: "Complete payment to activate your account and access all features",
+  1298→      activationFee: "Activation Fee",
+  1299→      features: "What you receive:",
+  1300→      accountActivated: "Account Activated",
+  1301→      accountActivatedDesc: "Full platform access",
+  1302→      securePayment: "Secure Payment",
+  1303→      processedByStripe: "Processed by Stripe",
+  1304→      terms: "By continuing, you agree to our",
+  1305→      and: "and",
+  1306→      proceed: "Pay and Activate",
+  1307→      processing: "Processing...",
+  1308→      paymentCancelled: "Payment cancelled. Please try again.",
+  1309→      paymentError: "Error creating payment session",
+  1310→      genericError: "Error processing payment",
+  1311→      selectMethod: "Select payment method",
+  1312→      multibancoDesc: "Pay at any ATM or online banking",
+  1313→      mbwayDesc: "Pay with your mobile phone",
+  1314→      creditCard: "Credit Card",
+  1315→      creditCardDesc: "Visa, Mastercard, American Express",
+  1316→      optional: "(optional)",
+  1317→      mbwayPhoneHint: "Number associated with your MB WAY account",
+  1318→      nifHint: "For invoicing (optional)",
+  1319→      processedByEasypay: "Processed by Easypay",
+  1320→      paymentCreated: "Payment Created!",
+  1321→      followInstructions: "Follow the instructions below to complete payment",
+  1322→      checkPhone: "Check the payment request on number",
+  1323→      expiresAt: "Valid until",
+  1324→      afterPayment: "After payment, your account will be activated automatically in a few minutes.",
+  1325→      or: "or",
+  1326→    },
+  1327→
+  1328→    success: {
+  1329→      title: "Account Activated!",
+  1330→      message: "Congratulations! Your account has been successfully activated.",
+  1331→      readyToStart: "You are ready to start using",
+  1332→      nextSteps: "Next steps:",
+  1333→      completeProfile: "Complete your profile",
+  1334→      verifyAccount: "Verify your account for more credibility",
+  1335→      startSearching: "Start searching for health professionals or receive proposals",
+  1336→      goToDashboard: "Go to Dashboard",
+  1337→      welcome: "Welcome to",
+  1338→    },
+  1339→    
+  1340→    forgotPassword: {
+  1341→      title: "Recover Password",
+  1342→      description: "Enter your email to receive recovery instructions",
+  1343→      emailLabel: "Email",
+  1344→      sendReset: "Send Instructions",
+  1345→      sending: "Sending...",
+  1346→      backToLogin: "Back to Sign In",
+  1347→      emailSent: "Email Sent!",
+  1348→      checkInbox: "If an account with this email exists, you will receive instructions to reset your password.",
+  1349→      rememberedPassword: "Remembered your password?",
+  1350→      loginLink: "Sign in",
+  1351→      sendError: "Error sending email. Please try again.",
+  1352→    },
+  1353→    
+  1354→    terms: {
+  1355→      title: "Terms of Use",
+  1356→      lastUpdate: "Last updated: February 2025",
+  1357→      sections: {
+  1358→        introduction: {
+  1359→          title: "1. Introduction",
+  1360→          content: "Welcome to Evyra. By using our platform, you agree to these Terms of Use. Our platform connects families with qualified home care professionals, facilitating contracts and payments securely and transparently.",
+  1361→        },
+  1362→        eligibility: {
+  1363→          title: "2. Eligibility",
+  1364→          content: "To use our platform, you must:",
+  1365→          item1: "Be at least 18 years old",
+  1366→          item2: "Have legal capacity to enter into contracts",
+  1367→          item3: "Provide true and accurate information",
+  1368→        },
+  1369→        accounts: {
+  1370→          title: "3. User Accounts",
+  1371→          content: "When creating an account, you are responsible for:",
+  1372→          item1: "Keeping your credentials confidential",
+  1373→          item2: "All activities performed on your account",
+  1374→          item3: "Notifying us immediately of any unauthorized use",
+  1375→        },
+  1376→        services: {
+  1377→          title: "4. Platform Services",
+  1378→          content: "Evyra offers:",
+  1379→          item1: "Marketplace for connecting families and health professionals",
+  1380→          item2: "Digital contract system",
+  1381→          item3: "Secure and protected payments",
+  1382→        },
+  1383→        payments: {
+  1384→          title: "5. Payments and Fees",
+  1385→          content: "When using our services:",
+  1386→          item1: "Activation fee: €35 (one-time)",
+  1387→          item2: "Contract fee: €5 per contract created",
+  1388→          item3: "Platform commission: 10% on transactions",
+  1389→        },
+  1390→        prohibited: {
+  1391→          title: "6. Prohibited Conduct",
+  1392→          content: "It is strictly prohibited to:",
+  1393→          item1: "Provide false or misleading information",
+  1394→          item2: "Use the platform for illegal activities",
+  1395→          item3: "Attempt to bypass security systems",
+  1396→          item4: "Harass or discriminate against other users",
+  1397→        },
+  1398→        liability: {
+  1399→          title: "7. Liability",
+  1400→          content: "Evyra acts as an intermediary and is not responsible for the quality of services provided by health professionals. We recommend verifying references and documents.",
+  1401→        },
+  1402→        termination: {
+  1403→          title: "8. Termination",
+  1404→          content: "We may suspend or terminate your account in case of violation of these terms, with prior notice when possible.",
+  1405→        },
+  1406→        changes: {
+  1407→          title: "9. Changes to Terms",
+  1408→          content: "We reserve the right to modify these terms at any time. Significant changes will be communicated by email.",
+  1409→        },
+  1410→        contact: {
+  1411→          title: "10. Contact",
+  1412→          content: "For questions about these terms:",
+  1413→          email: "Email: terms@evyra.pt",
+  1414→          address: "Address: Lisbon, Portugal",
+  1415→        },
+  1416→      },
+  1417→    },
+  1418→    
+  1419→    register: {
+  1420→      acceptTerms: "I have read and accept the",
+  1421→      termsOfUse: "Terms of Use",
+  1422→      and: "and the",
+  1423→      privacyPolicy: "Privacy Policy",
+  1424→      termsRequired: "You must accept the terms to continue",
+  1425→      termsInfo: "By accepting, you agree to our terms and policies. Your acceptance will be registered with date, time and IP for your security.",
+  1426→      legalNotice: "Legal Notice",
+  1427→      legalNoticeText: "Your acceptance will be electronically registered with date, time and IP address for legal proof purposes, in accordance with GDPR regulations.",
+  1428→    },
+  1429→    
+  1430→    accept: "Accept",
+  1431→    pending: "Pending",
+  1432→    
+  1433→    kyc: {
+  1434→      title: "Identity Verification",
+  1435→      description: "Verify your identity to increase your credibility and receive more contracts",
+  1436→      status: {
+  1437→        unverified: "Not Verified",
+  1438→        pending: "In Verification",
+  1439→        verified: "Verified",
+  1440→        rejected: "Rejected",
+  1441→      },
+  1442→      benefits: {
+  1443→        title: "Why verify?",
+  1444→        item1: "Greater credibility with families",
+  1445→        item2: "Appears first in searches",
+  1446→        item3: "Can receive higher value contracts",
+  1447→        item4: "Verified badge on profile",
+  1448→      },
+  1449→      requirements: {
+  1450→        title: "What you need",
+  1451→        item1: "Valid identity document (ID, Passport or Driver's License)",
+  1452→        item2: "Camera for selfie photo",
+  1453→        item3: "Well-lit environment",
+  1454→      },
+  1455→      startVerification: "Start Verification",
+  1456→      startNewVerification: "Start New Verification",
+  1457→      processing: "Processing...",
+  1458→      checkingStatus: "Checking status...",
+  1459→      inProgress: "Verification in Progress",
+  1460→      inProgressDesc: "Your verification is being processed. You will receive a notification when it is completed.",
+  1461→      verifiedTitle: "Identity Verified!",
+  1462→      verifiedDesc: "Your identity has been successfully verified. You now have more credibility on the platform.",
+  1463→      rejectedTitle: "Verification Rejected",
+  1464→      rejectedDesc: "It was not possible to verify your identity. Please try again with clearer documents.",
+  1465→      sessionExpired: "Session expired. Please start a new verification.",
+  1466→      error: "Error starting verification. Please try again.",
+  1467→      onlyCaregivers: "Only health professionals can verify their identity.",
+  1468→      completedAt: "Verified on",
+  1469→      sessionId: "Session ID",
+  1470→      refreshStatus: "Refresh",
+  1471→      continueVerification: "Continue",
+  1472→      caregiverOnly: "This page is for health professionals only.",
+  1473→    },
+  1474→    
+  1475→    profile: {
+  1476→      title: "My Profile",
+  1477→      description: "Manage your public information",
+  1478→      verification: "Verification",
+  1479→      verified: "Verified",
+  1480→      notVerified: "Not verified",
+  1481→      editProfile: "Edit Profile",
+  1482→      hourlyRate: "Hourly Rate",
+  1483→      radius: "Service Radius",
+  1484→      services: "Services Offered",
+  1485→      experience: "Experience",
+  1486→      about: "About",
+  1487→      documents: "Documents",
+  1488→      languages: "Languages",
+  1489→      city: "City",
+  1490→      address: "Address",
+  1491→      emergency: "Emergency Contact",
+  1492→      contactInfo: "Contact Information",
+  1493→      elderInfo: "Care Recipient Information",
+  1494→      bio: "Biography",
+  1495→      years: "years",
+  1496→      elderNeeds: "Care Needs",
+  1497→      titleLabel: "Professional Title",
+  1498→    },
+  1499→    
+  1500→    search: {
+  1501→      title: "Find Health Professionals",
+  1502→      placeholder: "Search by name or service...",
+  1503→      filters: "Filters",
+  1504→      noResults: "No health professionals found",
+  1505→      verified: "Verified",
+  1506→      rating: "Rating",
+  1507→      hourlyRate: "Hourly rate",
+  1508→      distance: "Distance",
+  1509→      perHour: "/hour",
+  1510→      sortBy: "Sort by",
+  1511→      resultsFound: "health professionals found",
+  1512→    },
+  1513→
+  1514→    // ============================================
+  1515→    // LANDING PAGE
+  1516→    // ============================================
+  1517→    landing: {
+  1518→      badge: "Portuguese Evyra Platform",
+  1519→      hero: {
+  1520→        title: "Quality Care for Those You Love",
+  1521→        subtitle: "We connect families with verified home care professionals, with total security, trust and transparency.",
+  1522→        cta: "Get Started",
+  1523→        ctaFamily: "I'm a Family",
+  1524→        ctaCaregiver: "I'm a Health Professional",
+  1525→      },
+  1526→      stats: {
+  1527→        caregivers: "Verified Health Professionals",
+  1528→        families: "Families Served",
+  1529→        contracts: "Contracts Completed",
+  1530→        hours: "Hours of Care",
+  1531→      },
+  1532→      howItWorks: {
+  1533→        title: "How It Works",
+  1534→        subtitle: "Simple, secure and transparent",
+  1535→        step1: {
+  1536→          title: "Create Your Account",
+  1537→          description: "Register for free in minutes. Choose if you're family or health professional.",
+  1538→        },
+  1539→        step2: {
+  1540→          title: "Find the Ideal Health Professional",
+  1541→          description: "Families search verified health professionals. Health professionals receive proposals.",
+  1542→        },
+  1543→        step3: {
+  1544→          title: "Hire with Security",
+  1545→          description: "Digital contracts with all conditions clearly defined.",
+  1546→        },
+  1547→        step4: {
+  1548→          title: "View and Rate",
+  1549→          description: "Rate the service and help other families in their decision.",
+  1550→        },
+  1551→      },
+  1552→      features: {
+  1553→        title: "Why choose Evyra?",
+  1554→        verified: {
+  1555→          title: "Verified Health Professionals",
+  1556→          description: "All health professionals go through identity, background and qualification verification.",
+  1557→        },
+  1558→        contracts: {
+  1559→          title: "Digital Contracts",
+  1560→          description: "Clear documents with all conditions defined and accepted by both parties.",
+  1561→        },
+  1562→        security: {
+  1563→          title: "Secure Payments",
+  1564→          description: "Protected payment system with secure infrastructure.",
+  1565→        },
+  1566→        support: {
+  1567→          title: "Dedicated Support",
+  1568→          description: "Team available to help at every step of the process.",
+  1569→        },
+  1570→      },
+  1571→      caregiver: {
+  1572→        title: "For Care Professionals",
+  1573→        subtitle: "Evyra values your work",
+  1574→        payment: {
+  1575→          title: "Protected Payments",
+  1576→          description: "Receive secure and timely payments via the platform",
+  1577→        },
+  1578→        legal: {
+  1579→          title: "Legal Protection",
+  1580→          description: "Contracts that protect both sides",
+  1581→        },
+  1582→        reputation: {
+  1583→          title: "Public Reputation",
+  1584→          description: "Verified reviews that build your career",
+  1585→        },
+  1586→        flexibility: {
+  1587→          title: "Total Flexibility",
+  1588→          description: "Choose when, where and how much you want to work",
+  1589→        },
+  1590→        cta: "Create Professional Profile",
+  1591→      },
+  1592→      pilares: {
+  1593→        title: "Why Evyra is different",
+  1594→        pilar1: {
+  1595→          title: "Verified Professionals",
+  1596→          description: "Identity, background and qualification verification — for family peace of mind and professional credibility.",
+  1597→        },
+  1598→        pilar2: {
+  1599→          title: "Centralized Visibility",
+  1600→          description: "All care information accessible to families and health professionals — transparency for everyone.",
+  1601→        },
+  1602→        pilar3: {
+  1603→          title: "Secure Contracts & Payments",
+  1604→          description: "Clear legal documentation, protected payments — security for those who hire and those who care.",
+  1605→        },
+  1606→      },
+  1607→      testimonials: {
+  1608→        title: "What they say about us",
+  1609→      },
+  1610→      cta: {
+  1611→        title: "Ready to get started?",
+  1612→        subtitle: "Join thousands of families and health professionals who trust Evyra",
+  1613→        button: "Create Free Account",
+  1614→      },
+  1615→      pricing: {
+  1616→        badge: "No commitment",
+  1617→        title: "Start for free",
+  1618→        subtitle: "No monthly fees. Pay only when you find the right professional.",
+  1619→        family: {
+  1620→          title: "For Families",
+  1621→          price: "€35",
+  1622→          priceHint: "One-time activation payment",
+  1623→          cta: "Create free account",
+  1624→          features: [
+  1625→            "Unlimited professional search",
+  1626→            "Background verification",
+  1627→            "Protected digital contracts",
+  1628→            "Secure payments with protection",
+  1629→            "Refund within 7 days",
+  1630→          ],
+  1631→        },
+  1632→        caregiver: {
+  1633→          title: "For Professionals",
+  1634→          price: "Free",
+  1635→          priceHint: "No registration fees or monthly costs",
+  1636→          cta: "Register for free",
+  1637→          features: [
+  1638→            "Verified professional profile",
+  1639→            "Receive proposals from families",
+  1640→            "Platform-protected contracts",
+  1641→            "Securely processed payments",
+  1642→            "Full control of your availability",
+  1643→          ],
+  1644→        },
+  1645→        trustLine: "Payments processed securely. All fees are shown with full transparency before any commitment.",
+  1646→      },
+  1647→    },
+  1648→    
+  1649→    // ============================================
+  1650→    // PAGES
+  1651→    // ============================================
+  1652→    howItWorksPage: {
+  1653→      badge: "Complete Guide",
+  1654→      heroDescription: "A simple and secure platform that connects people to verified health professionals, ensuring transparency and trust every step of the way.",
+  1655→      steps: {
+  1656→        signup: {
+  1657→          title: "Registration & Profile Selection",
+  1658→          description: "Create your account in less than 2 minutes. Choose if you're a family looking for care or a health professional offering services.",
+  1659→          family: "Family",
+  1660→          familyDesc: "Looking for health professionals",
+  1661→          caregiver: "Health Professional",
+  1662→          caregiverDesc: "Offers services",
+  1663→        },
+  1664→        activation: {
+  1665→          title: "Account Activation",
+  1666→          description: "Pay the one-time activation fee of €35 for full platform access.",
+  1667→          fee: "Activation Fee: €35",
+  1668→          feeDesc: "Full platform access",
+  1669→        },
+  1670→        match: {
+  1671→          title: "Find the Health Professional",
+  1672→          description: "Families search health professionals by location, specialty and price. Health professionals receive proposals and can accept or decline.",
+  1673→          features: [
+  1674→            "Search by distance and availability",
+  1675→            "Filter by specialties (Alzheimer's, Palliative, etc.)",
+  1676→            "Qualification and background verification",
+  1677→            "Rating and reputation system"
+  1678→          ],
+  1679→        },
+  1680→        contract: {
+  1681→          title: "Digital Contract",
+  1682→          description: "Create clear contracts with all conditions defined. €5 fee per contract, ensuring legal security for both parties.",
+  1683→          immutable: "Secure Contracts",
+  1684→          immutableDesc: "Registered with all conditions defined",
+  1685→        },
+  1686→        payments: {
+  1687→          title: "Payments & Rating",
+  1688→          description: "Pay for services securely. Rate the health professional and help other families.",
+  1689→          wallet: "Secure Payment",
+  1690→          walletDesc: "Protected system",
+  1691→          tips: "Tips",
+  1692→          tipsDesc: "Reward good care",
+  1693→          security: "Protection",
+  1694→          securityDesc: "100% secure",
+  1695→        },
+  1696→      },
+  1697→      cta: {
+  1698→        title: "Ready to get started?",
+  1699→        description: "Join thousands of families and health professionals who already trust Evyra.",
+  1700→      },
+  1701→    },
+  1702→    
+  1703→    forFamiliesPage: {
+  1704→      badge: "For Families",
+  1705→      heroTitle: "Find trusted health professionals for your loved ones",
+  1706→      heroDescription: "The platform that offers transparency, security and quality in in-home health care.",
+  1707→      stats: {
+  1708→        caregivers: "Health Professionals",
+  1709→        families: "Families",
+  1710→        rating: "Rating",
+  1711→        support: "Support",
+  1712→      },
+  1713→      whyChoose: {
+  1714→        title: "Why choose Evyra?",
+  1715→        description: "Security, transparency and quality at every step of care.",
+  1716→        verified: {
+  1717→          title: "Verified Health Professionals",
+  1718→          description: "Complete verification of identity, criminal background and professional qualifications.",
+  1719→        },
+  1720→        contracts: {
+  1721→          title: "Digital Contracts",
+  1722→          description: "Clear documents with all conditions defined. Legal security guaranteed.",
+  1723→        },
+  1724→        reputation: {
+  1725→          title: "Reputation System",
+  1726→          description: "Real reviews from families served. View complete history before hiring.",
+  1727→        },
+  1728→      },
+  1729→      howItWorks: {
+  1730→        title: "How it works for families",
+  1731→        step1: "Create your account",
+  1732→        step1Desc: "Quick and free registration",
+  1733→        step2: "Activate your account",
+  1734→        step2Desc: "€35 one-time fee",
+  1735→        step3: "Find health professionals",
+  1736→        step3Desc: "Search by profile and location",
+  1737→        step4: "Hire with security",
+  1738→        step4Desc: "Digital contract",
+  1739→      },
+  1740→      pricing: {
+  1741→        title: "Transparent Investment",
+  1742→        description: "No surprises. All costs are clear from the start. You only pay for what you use.",
+  1743→        feesTitle: "Fees for Families",
+  1744→        search: "Health professional search",
+  1745→        free: "Free",
+  1746→        activation: "Account activation",
+  1747→        contractFee: "Fee per contract",
+  1748→        commission: "Platform commission",
+  1749→        tips: "Tips",
+  1750→        optional: "Optional",
+  1751→      },
+  1752→      included: {
+  1753→        title: "What's included",
+  1754→        access: "Unlimited access to health professionals",
+  1755→        accessDesc: "Search and contact as many as you want",
+  1756→        verification: "Complete verification",
+  1757→        verificationDesc: "Background and qualifications",
+  1758→        support: "Dedicated support",
+  1759→        supportDesc: "Chat and phone 24/7",
+  1760→        protected: "Protected contracts",
+  1761→        protectedDesc: "Legal security",
+  1762→        guarantee: "Refund policy",
+  1763→        guaranteeDesc: "Refund within 7 days",
+  1764→      },
+  1765→      cta: {
+  1766→        title: "Start today",
+  1767→        description: "Find the ideal health professional for your family in just a few minutes.",
+  1768→        button: "Create Free Account",
+  1769→      },
+  1770→    },
+  1771→    
+  1772→    forCaregiversPage: {
+  1773→      badge: "For Health Professionals",
+  1774→      heroTitle: "Build your career with security",
+  1775→      heroDescription: "More than just working, build your professional reputation and have a stable and recognized career.",
+  1776→      benefits: {
+  1777→        title: "Why be a health professional on Evyra?",
+  1778→        description: "We value your work and build tools for your career to grow.",
+  1779→        profile: {
+  1780→          title: "Professional Profile",
+  1781→          description: "Show your qualifications, experience and specializations.",
+  1782→        },
+  1783→        verified: {
+  1784→          title: "Verified Badge",
+  1785→          description: "Increase your credibility with identity verification.",
+  1786→        },
+  1787→        support: {
+  1788→          title: "Dedicated Support",
+  1789→          description: "Team available to help in all situations.",
+  1790→        },
+  1791→      },
+  1792→      earnings: {
+  1793→        title: "How much can you earn?",
+  1794→        description: "With Evyra, you receive 90% of each service provided.",
+  1795→        feesTitle: "Information for Health Professionals",
+  1796→        profile: "Professional profile",
+  1797→        activation: "Free",
+  1798→        contractFee: "No fee",
+  1799→        receive: "Service receipt",
+  1800→        tipsValue: "Tips",
+  1801→        example: {
+  1802→          title: "Example Monthly Earnings",
+  1803→          hours: "Working 20 hours/week",
+  1804→          perMonth: "per month (90% of €1,200)",
+  1805→          averageTips: "+ Average tips",
+  1806→          total: "Estimated total",
+  1807→        },
+  1808→      },
+  1809→      features: {
+  1810→        title: "Everything you need to grow",
+  1811→        reputation: {
+  1812→          title: "Solid Reputation",
+  1813→          description: "Verified reviews that build your credibility"
+  1814→        },
+  1815→        protected: {
+  1816→          title: "Protected Contracts",
+  1817→          description: "Legal security in all contracts"
+  1818→        },
+  1819→        payments: {
+  1820→          title: "Fast Payments",
+  1821→          description: "Receive directly in your bank account"
+  1822→        },
+  1823→        support: {
+  1824→          title: "Support",
+  1825→          description: "Team available to help"
+  1826→        },
+  1827→      },
+  1828→      cta: {
+  1829→        title: "Start your journey today",
+  1830→        description: "Join thousands of health professionals who are already building their careers at Evyra.",
+  1831→        button: "Create Health Professional Profile",
+  1832→      },
+  1833→    },
+  1834→    
+  1835→    pricingPage: {
+  1836→      badge: "Pricing",
+  1837→      title: "Start for free",
+  1838→      subtitle: "No monthly fees, no commitments. Pay only when you find the right professional.",
+  1839→      family: {
+  1840→        title: "For Families",
+  1841→        priceHint: "One-time activation payment",
+  1842→        cta: "Create free account",
+  1843→        features: [
+  1844→          "Unlimited professional search",
+  1845→          "Background verification",
+  1846→          "Protected digital contracts",
+  1847→          "Secure payments with protection",
+  1848→          "Dedicated support",
+  1849→          "Refund within 7 days",
+  1850→        ],
+  1851→      },
+  1852→      caregiver: {
+  1853→        title: "For Health Professionals",
+  1854→        price: "Free",
+  1855→        priceHint: "No registration fees or monthly costs",
+  1856→        cta: "Register for free",
+  1857→        features: [
+  1858→          "Verified professional profile",
+  1859→          "Receive proposals from families",
+  1860→          "Platform-protected contracts",
+  1861→          "Securely processed payments",
+  1862→          "Full control of your availability",
+  1863→          "Dedicated support",
+  1864→        ],
+  1865→      },
+  1866→      trustLine: "Payments processed securely. All fees are shown with full transparency before any commitment.",
+  1867→      cta: {
+  1868→        title: "Ready to get started?",
+  1869→        description: "Create your free account today. No commitment.",
+  1870→        familyBtn: "I'm a family",
+  1871→        caregiverBtn: "I'm a professional",
+  1872→      },
+  1873→    },
+  1874→    
+  1875→    // ============================================
+  1876→    // AJUDA PAGE
+  1877→    // ============================================
+  1878→    ajudaPage: {
+  1879→      title: "Help Center",
+  1880→      subtitle: "Find answers to the most common questions or contact our support.",
+  1881→      notFound: "Didn't find what you were looking for?",
+  1882→      supportReady: "Our support team is ready to help you.",
+  1883→      contactSupport: "Contact Support",
+  1884→      categories: {
+  1885→        forFamilies: "For Families",
+  1886→        forCaregivers: "For Health Professionals",
+  1887→        security: "Security and Privacy",
+  1888→      },
+  1889→      faqs: {
+  1890→        families: [
+  1891→          {
+  1892→            q: "How do I find a health professional?",
+  1893→            a: "After creating your account, access the health professional search. You can filter by type of service, location, availability and reviews from other families."
+  1894→          },
+  1895→          {
+  1896→            q: "How does payment work?",
+  1897→            a: "You pay monthly for the contracted service. The value is calculated based on the agreed hours. The platform retains a small fee to ensure transaction security."
+  1898→          },
+  1899→          {
+  1900→            q: "Can I change health professionals?",
+  1901→            a: "Yes. If you're not satisfied, you can end the current contract and look for a new health professional. We always recommend talking first to resolve any issues."
+  1902→          }
+  1903→        ],
+  1904→        caregivers: [
+  1905→          {
+  1906→            q: "How do I register as a health professional?",
+  1907→            a: "Click on 'Create Account', select the 'I'm a Health Professional' option and fill in your professional details. After verification, your profile will be visible to families."
+  1908→          },
+  1909→          {
+  1910→            q: "How much does it cost to use the platform?",
+  1911→            a: "Registration is free. We charge a small fee (10%) on each payment received to maintain the platform and ensure your security."
+  1912→          },
+  1913→          {
+  1914→            q: "How do I receive my payments?",
+  1915→            a: "Payments are automatically deposited into your digital wallet. You can withdraw to your bank account at any time."
+  1916→          }
+  1917→        ],
+  1918→        security: [
+  1919→          {
+  1920→            q: "How do you verify health professionals?",
+  1921→            a: "We perform identity verification, criminal background checks and validate professional certifications. Verified health professionals have a badge on their profile."
+  1922→          },
+  1923→          {
+  1924→            q: "Is my data safe?",
+  1925→            a: "Yes. We use end-to-end encryption, follow GDPR/LGPD standards and don't sell your data. Your contracts are securely recorded to ensure transparency."
+  1926→          }
+  1927→        ]
+  1928→      }
+  1929→    },
+  1930→    
+  1931→    // ============================================
+  1932→    // CONTATO PAGE
+  1933→    // ============================================
+  1934→    contatoPage: {
+  1935→      title: "Contact Us",
+  1936→      subtitle: "Our team is ready to help you. Send your message or use our service channels.",
+  1937→      form: {
+  1938→        title: "Send a Message",
+  1939→        name: "Name",
+  1940→        namePlaceholder: "Your name",
+  1941→        email: "Email",
+  1942→        emailPlaceholder: "your@email.com",
+  1943→        subject: "Subject",
+  1944→        subjectPlaceholder: "How can we help?",
+  1945→        message: "Message",
+  1946→        messagePlaceholder: "Describe your question or suggestion...",
+  1947→        submit: "Send Message",
+  1948→      },
+  1949→      info: {
+  1950→        email: "Email",
+  1951→        emailValue: "contact@evyra.eu",
+  1952→        emailSupport: "support@evyra.eu",
+  1953→        phone: "Phone",
+  1954→        phoneValue: "+351 912 345 678",
+  1955→        phoneHours: "Monday to Friday, 9am to 6pm",
+  1956→        address: "Address",
+  1957→        addressValue1: "Av. da Liberdade, 123",
+  1958→        addressValue2: "1250-096 Lisbon, Portugal",
+  1959→        hours: "Service Hours",
+  1960→        hoursWeekday: "Monday to Friday: 9am - 6pm",
+  1961→        hoursSaturday: "Saturday: 9am - 1pm",
+  1962→      },
+  1963→    },
+  1964→    
+  1965→    // ============================================
+  1966→    // BLOG PAGE
+  1967→    // ============================================
+  1968→    blogPage: {
+  1969→      title: "Evyra Blog",
+  1970→      subtitle: "Tips, articles and news about in-home health care and our platform.",
+  1971→      categories: {
+  1972→        all: "All",
+  1973→        tips: "Tips",
+  1974→        health: "Health",
+  1975→        technology: "Technology",
+  1976→        platform: "Platform",
+  1977→        rights: "Rights",
+  1978→      },
+  1979→      readTime: "min",
+  1980→      newsletter: {
+  1981→        title: "Get Our News",
+  1982→        subtitle: "Sign up to receive tips and platform updates.",
+  1983→        placeholder: "your@email.com",
+  1984→        subscribe: "Subscribe",
+  1985→      },
+  1986→      posts: [
+  1987→        {
+  1988→          title: "How to Choose the Ideal Health Professional for You",
+  1989→          excerpt: "Choosing a health professional is an important decision. Check out the main factors to consider.",
+  1990→          category: "Tips",
+  1991→          author: "Evyra Team",
+  1992→          readTime: "5 min",
+  1993→        },
+  1994→        {
+  1995→          title: "Mental Health and Well-being",
+  1996→          excerpt: "Mental health is just as important as physical health. Learn how to support your loved one.",
+  1997→          category: "Health",
+  1998→          author: "Dr. Maria Santos",
+  1999→          readTime: "7 min",
+  2000→        },
+
+[showing lines 1-2000 of 4290; use offset=2001 with limit to continue reading]

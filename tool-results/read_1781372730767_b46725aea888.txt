@@ -1,0 +1,631 @@
+     1→'use client';
+     2→
+     3→import { useState, useEffect, useCallback } from 'react';
+     4→import {
+     5→  Search, MapPin, Clock, Star, Shield, Heart,
+     6→  Check, SlidersHorizontal, X,
+     7→  ChevronRight, CalendarDays
+     8→} from 'lucide-react';
+     9→import { Button } from '@/components/ui/button';
+    10→import { motion, AnimatePresence } from 'framer-motion';
+    11→import { toast } from 'sonner';
+    12→import { apiFetch } from '@/lib/api-client';
+    13→import { cn } from '@/lib/utils';
+    14→import {
+    15→  BloomCard,
+    16→  BloomCardSkeleton,
+    17→} from '@/components/bloom-custom';
+    18→import { PageLayout, PageHeader } from '@/components/layout/PageLayout';
+    19→import { IconSearch } from '@/components/icons';
+    20→import { CaregiverProfileModal } from '@/components/caregivers/CaregiverProfileModal';
+    21→
+    22→// ── Bloom animation variants ────────────────────────────────────────
+    23→const containerVariants = {
+    24→  hidden: { opacity: 0 },
+    25→  show: { opacity: 1, transition: { staggerChildren: 0.06 } }
+    26→};
+    27→const itemVariants = {
+    28→  hidden: { opacity: 0, y: 16 },
+    29→  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" as const } }
+    30→};
+    31→
+    32→// ── Types ──────────────────────────────────────────────────────────
+    33→interface Caregiver {
+    34→  id: string;
+    35→  name: string;
+    36→  title: string | null;
+    37→  bio: string | null;
+    38→  city: string | null;
+    39→  averageRating: number;
+    40→  totalReviews: number;
+    41→  totalContracts: number;
+    42→  experienceYears: number | null;
+    43→  hourlyRateEur: number;
+    44→  services: string[];
+    45→  verificationStatus: string;
+    46→  featured: number;
+    47→  profileImage: string | null;
+    48→  distanceKm: number | null;
+    49→  availableDays?: string[];
+    50→}
+    51→
+    52→// ── Service categories for filter pills ─────────────────────────────
+    53→const SERVICE_CATEGORIES = [
+    54→  { key: 'ALL', label: 'Todos' },
+    55→  { key: 'NURSING_CARE', label: 'Enfermagem' },
+    56→  { key: 'PHYSIOTHERAPY', label: 'Fisioterapia' },
+    57→  { key: 'PERSONAL_CARE', label: 'Cuidados Pessoais' },
+    58→  { key: 'COMPANIONSHIP', label: 'Companhia' },
+    59→  { key: 'NIGHT_CARE', label: 'Apoio Noturno' },
+    60→  { key: 'PALLIATIVE_CARE', label: 'Cuidados Paliativos' },
+    61→  { key: 'COGNITIVE_SUPPORT', label: 'Estimulação Cognitiva' },
+    62→];
+    63→
+    64→const SERVICE_LABELS: Record<string, string> = {
+    65→  PERSONAL_CARE: 'Higiene Pessoal',
+    66→  MEDICATION: 'Medicação',
+    67→  PHYSIOTHERAPY: 'Fisioterapia',
+    68→  COMPANIONSHIP: 'Companhia',
+    69→  TRANSPORTATION: 'Transporte',
+    70→  NURSING_CARE: 'Enfermagem',
+    71→  MEAL_PREPARATION: 'Refeições',
+    72→  NIGHT_CARE: 'Apoio Noturno',
+    73→  MOBILITY: 'Mobilidade',
+    74→  LIGHT_HOUSEWORK: 'Tarefas Domésticas',
+    75→  COGNITIVE_SUPPORT: 'Estim. Cognitiva',
+    76→  PALLIATIVE_CARE: 'Cuidados Paliativos',
+    77→};
+    78→
+    79→const POPULAR_CITIES = [
+    80→  'Lisboa', 'Porto', 'Braga', 'Coimbra', 'Faro',
+    81→  'Setúbal', 'Aveiro', 'Leiria', 'Viseu', 'Viana do Castelo'
+    82→];
+    83→
+    84→// ── Main Page ──────────────────────────────────────────────────────
+    85→export default function SearchPage() {
+    86→  const [caregivers, setCaregivers] = useState<Caregiver[]>([]);
+    87→  const [loading, setLoading] = useState(true);
+    88→  const [searchTerm, setSearchTerm] = useState('');
+    89→  const [showFilters, setShowFilters] = useState(false);
+    90→  const [cityFilter, setCityFilter] = useState('');
+    91→  const [maxRate, setMaxRate] = useState('');
+    92→  const [debouncedCity, setDebouncedCity] = useState('');
+    93→  const [selectedCategory, setSelectedCategory] = useState('ALL');
+    94→  const [selectedCaregiverId, setSelectedCaregiverId] = useState<string | null>(null);
+    95→  const [modalOpen, setModalOpen] = useState(false);
+    96→  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+    97→
+    98→  // Debounce city filter
+    99→  useEffect(() => {
+   100→    const timer = setTimeout(() => setDebouncedCity(cityFilter), 400);
+   101→    return () => clearTimeout(timer);
+   102→  }, [cityFilter]);
+   103→
+   104→  // Fetch caregivers
+   105→  useEffect(() => {
+   106→    let cancelled = false;
+   107→    const params = new URLSearchParams();
+   108→    if (debouncedCity) params.set('city', debouncedCity);
+   109→
+   110→    apiFetch(`/api/caregivers?${params}`)
+   111→      .then(r => r.json())
+   112→      .then(data => { if (!cancelled) { setCaregivers(data.caregivers || []); setLoading(false); } })
+   113→      .catch(() => { if (!cancelled) { toast.error('Erro ao carregar profissionais'); setLoading(false); } });
+   114→
+   115→    return () => { cancelled = true; };
+   116→  }, [debouncedCity]);
+   117→
+   118→  // Client-side filtering
+   119→  const filtered = caregivers.filter(c => {
+   120→    const term = searchTerm.toLowerCase();
+   121→    const matchesSearch = !term ||
+   122→      c.name.toLowerCase().includes(term) ||
+   123→      (c.title || '').toLowerCase().includes(term) ||
+   124→      (c.city || '').toLowerCase().includes(term) ||
+   125→      c.services.some(s => (SERVICE_LABELS[s] || s).toLowerCase().includes(term));
+   126→    const matchesRate = !maxRate || c.hourlyRateEur <= Number(maxRate);
+   127→    const matchesCategory = selectedCategory === 'ALL' || c.services.includes(selectedCategory);
+   128→    return matchesSearch && matchesRate && matchesCategory;
+   129→  });
+   130→
+   131→  // Featured first
+   132→  const featuredCaregivers = filtered.filter(c => c.featured > 0 || c.verificationStatus === 'VERIFIED');
+   133→  const otherCaregivers = filtered.filter(c => c.featured === 0 && c.verificationStatus !== 'VERIFIED');
+   134→
+   135→  const openProfileModal = useCallback((caregiver: Caregiver) => {
+   136→    setSelectedCaregiverId(caregiver.id);
+   137→    setModalOpen(true);
+   138→  }, []);
+   139→
+   140→  const toggleFavorite = useCallback((id: string, e?: React.MouseEvent) => {
+   141→    e?.stopPropagation();
+   142→    setFavorites(prev => {
+   143→      const next = new Set(prev);
+   144→      if (next.has(id)) next.delete(id);
+   145→      else next.add(id);
+   146→      return next;
+   147→    });
+   148→  }, []);
+   149→
+   150→  // ── Loading state ────────────────────────────────────────────────
+   151→  if (loading && caregivers.length === 0) {
+   152→    return (
+   153→      <PageLayout spacing="normal">
+   154→        <div className="space-y-6">
+   155→          <div className="flex items-center gap-3">
+   156→            <div className="h-8 w-24 bg-muted animate-pulse rounded-xl" />
+   157→          </div>
+   158→          <div className="h-10 w-64 bg-muted animate-pulse rounded-xl" />
+   159→          <div className="bg-card rounded-3xl p-5 sm:p-7 border border-border shadow-card">
+   160→            <div className="h-12 bg-muted animate-pulse rounded-2xl" />
+   161→          </div>
+   162→          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+   163→            {[1, 2, 3, 4, 5, 6].map(i => (
+   164→              <BloomCardSkeleton key={i} />
+   165→            ))}
+   166→          </div>
+   167→        </div>
+   168→      </PageLayout>
+   169→    );
+   170→  }
+   171→
+   172→  return (
+   173→    <PageLayout spacing="normal">
+   174→      <div className="space-y-6">
+   175→        {/* ── Section Header ──────────────────────────────────────── */}
+   176→        <PageHeader
+   177→          title="Explorar Profissionais"
+   178→          subtitle="Encontre os melhores profissionais de saúde verificados para o seu familiar"
+   179→          icon={<IconSearch size={22} className="text-primary" />}
+   180→        />
+   181→
+   182→        {/* ── Search Bar + Filters ────────────────────────────────── */}
+   183→        <BloomCard>
+   184→          <div className="flex flex-col sm:flex-row gap-3">
+   185→            <div className="flex-1 relative">
+   186→              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+   187→              <input
+   188→                type="text"
+   189→                value={searchTerm}
+   190→                onChange={e => setSearchTerm(e.target.value)}
+   191→                placeholder="Pesquisar por especialidade ou localização..."
+   192→                className="w-full bg-secondary border border-border rounded-2xl pl-11 pr-10 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+   193→              />
+   194→              {searchTerm && (
+   195→                <button
+   196→                  onClick={() => setSearchTerm('')}
+   197→                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+   198→                >
+   199→                  <X size={16} />
+   200→                </button>
+   201→              )}
+   202→            </div>
+   203→            <div className="flex gap-2">
+   204→              <Button
+   205→                variant={showFilters ? 'default' : 'outline'}
+   206→                className="rounded-2xl px-5 shrink-0"
+   207→                onClick={() => setShowFilters(!showFilters)}
+   208→              >
+   209→                <SlidersHorizontal size={16} className="mr-2" /> Filtros
+   210→              </Button>
+   211→            </div>
+   212→          </div>
+   213→
+   214→          {/* ── Expanded Filter Section ──────────────────────────── */}
+   215→          <AnimatePresence>
+   216→            {showFilters && (
+   217→              <motion.div
+   218→                initial={{ height: 0, opacity: 0 }}
+   219→                animate={{ height: 'auto', opacity: 1 }}
+   220→                exit={{ height: 0, opacity: 0 }}
+   221→                className="overflow-hidden"
+   222→              >
+   223→                <div className="mt-4 pt-4 border-t border-border space-y-4">
+   224→                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+   225→                    <div className="space-y-1.5">
+   226→                      <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">
+   227→                        Localização
+   228→                      </label>
+   229→                      <div className="relative">
+   230→                        <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary" />
+   231→                        <input
+   232→                          type="text"
+   233→                          value={cityFilter}
+   234→                          onChange={e => setCityFilter(e.target.value)}
+   235→                          placeholder="Lisboa..."
+   236→                          className="w-full bg-secondary border border-border rounded-2xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+   237→                        />
+   238→                      </div>
+   239→                    </div>
+   240→                    <div className="space-y-1.5">
+   241→                      <label className="text-xs font-display font-semibold text-muted-foreground tracking-widest">
+   242→                        Tarifa Máx (€/h)
+   243→                      </label>
+   244→                      <input
+   245→                        type="number"
+   246→                        value={maxRate}
+   247→                        onChange={e => setMaxRate(e.target.value)}
+   248→                        placeholder="50"
+   249→                        className="w-full bg-secondary border border-border rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+   250→                      />
+   251→                    </div>
+   252→                  </div>
+   253→
+   254→                  {/* Quick city chips */}
+   255→                  <div className="flex flex-wrap gap-2">
+   256→                    {POPULAR_CITIES.map(city => (
+   257→                      <button
+   258→                        key={city}
+   259→                        onClick={() => setCityFilter(city === cityFilter ? '' : city)}
+   260→                        className={cn(
+   261→                          'text-xs font-display font-bold tracking-wide px-3 py-1.5 rounded-full border transition-all',
+   262→                          cityFilter === city
+   263→                            ? 'bg-primary text-primary-foreground border-primary'
+   264→                            : 'bg-secondary text-muted-foreground border-border hover:border-primary/40'
+   265→                        )}
+   266→                      >
+   267→                        {city}
+   268→                      </button>
+   269→                    ))}
+   270→                  </div>
+   271→
+   272→                  <div className="flex justify-end">
+   273→                    <Button
+   274→                      variant="ghost"
+   275→                      size="sm"
+   276→                      className="text-xs text-muted-foreground"
+   277→                      onClick={() => {
+   278→                        setCityFilter('');
+   279→                        setMaxRate('');
+   280→                        setSearchTerm('');
+   281→                        setSelectedCategory('ALL');
+   282→                      }}
+   283→                    >
+   284→                      <X size={12} className="mr-1" /> Limpar
+   285→                    </Button>
+   286→                  </div>
+   287→                </div>
+   288→              </motion.div>
+   289→            )}
+   290→          </AnimatePresence>
+   291→        </BloomCard>
+   292→
+   293→        {/* ── Category Filter Pills ───────────────────────────────── */}
+   294→        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+   295→          {SERVICE_CATEGORIES.map(cat => (
+   296→            <button
+   297→              key={cat.key}
+   298→              onClick={() => setSelectedCategory(cat.key)}
+   299→              className={cn(
+   300→                'text-xs font-display font-bold tracking-wide px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border whitespace-nowrap transition-all shrink-0',
+   301→                selectedCategory === cat.key
+   302→                  ? 'bg-primary text-primary-foreground border-primary shadow-glow'
+   303→                  : 'bg-card text-muted-foreground border-border hover:border-primary/40 hover:bg-primary/5'
+   304→              )}
+   305→            >
+   306→              {cat.label}
+   307→            </button>
+   308→          ))}
+   309→        </div>
+   310→
+   311→        {/* ── Results count ──────────────────────────────────────── */}
+   312→        <div className="flex items-center justify-between">
+   313→          <p className="text-sm text-muted-foreground font-medium">
+   314→            <span className="font-display font-black text-foreground">{filtered.length}</span> profissionais encontrados
+   315→            {debouncedCity && (
+   316→              <span> em <span className="font-display font-bold text-primary">{debouncedCity}</span></span>
+   317→            )}
+   318→          </p>
+   319→          {debouncedCity && (
+   320→            <button
+   321→              onClick={() => setCityFilter('')}
+   322→              className="text-xs text-primary font-display font-bold hover:underline flex items-center gap-1"
+   323→            >
+   324→              <X size={12} /> Limpar
+   325→            </button>
+   326→          )}
+   327→        </div>
+   328→
+   329→        {/* ── Caregiver Cards Grid ────────────────────────────────── */}
+   330→        {filtered.length > 0 ? (
+   331→          <motion.div
+   332→            variants={containerVariants}
+   333→            initial="hidden"
+   334→            animate="show"
+   335→            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+   336→          >
+   337→            {featuredCaregivers.map(c => (
+   338→              <CaregiverCard
+   339→                key={c.id}
+   340→                caregiver={c}
+   341→                isFavorite={favorites.has(c.id)}
+   342→                onOpenModal={() => openProfileModal(c)}
+   343→                onToggleFavorite={(e) => toggleFavorite(c.id, e)}
+   344→              />
+   345→            ))}
+   346→            {otherCaregivers.map(c => (
+   347→              <CaregiverCard
+   348→                key={c.id}
+   349→                caregiver={c}
+   350→                isFavorite={favorites.has(c.id)}
+   351→                onOpenModal={() => openProfileModal(c)}
+   352→                onToggleFavorite={(e) => toggleFavorite(c.id, e)}
+   353→              />
+   354→            ))}
+   355→          </motion.div>
+   356→        ) : (
+   357→          <EmptyState onSearchCity={setCityFilter} />
+   358→        )}
+   359→      </div>
+   360→
+   361→      {/* ── Caregiver Profile Modal ───────────────────────────────── */}
+   362→      <CaregiverProfileModal
+   363→        caregiverId={selectedCaregiverId}
+   364→        open={modalOpen}
+   365→        onOpenChange={setModalOpen}
+   366→        isFavorite={selectedCaregiverId ? favorites.has(selectedCaregiverId) : false}
+   367→        onToggleFavorite={() => { if (selectedCaregiverId) toggleFavorite(selectedCaregiverId); }}
+   368→      />
+   369→    </PageLayout>
+   370→  );
+   371→}
+   372→
+   373→// ── Caregiver Card (UI-kit pattern) ────────────────────────────────
+   374→function CaregiverCard({
+   375→  caregiver: c,
+   376→  isFavorite,
+   377→  onOpenModal,
+   378→  onToggleFavorite,
+   379→}: {
+   380→  caregiver: Caregiver;
+   381→  isFavorite: boolean;
+   382→  onOpenModal: () => void;
+   383→  onToggleFavorite: (e?: React.MouseEvent) => void;
+   384→}) {
+   385→  const inits = c.name.split(' ').map(n => n[0]).slice(0, 2).join('');
+   386→  const isVerified = c.verificationStatus === 'VERIFIED';
+   387→  const isFeatured = c.featured > 0;
+   388→
+   389→  return (
+   390→    <motion.div variants={itemVariants}>
+   391→      <BloomCard
+   392→        variant={isFeatured ? 'topBar' : 'default'}
+   393→        topBar
+   394→        topBarColor={isFeatured ? 'bg-primary' : isVerified ? 'bg-success' : ''}
+   395→        className="cursor-pointer hover:border-primary/30 active:scale-[0.985] group relative"
+   396→        onClick={onOpenModal}
+   397→      >
+   398→        {/* Favorite button */}
+   399→        <button
+   400→          onClick={(e) => onToggleFavorite(e)}
+   401→          className="absolute top-3 right-3 p-1.5 rounded-xl bg-secondary/80 hover:bg-primary/10 transition-all z-10"
+   402→        >
+   403→          <Heart
+   404→            size={14}
+   405→            className={cn(
+   406→              'transition-all',
+   407→              isFavorite ? 'fill-destructive text-destructive' : 'text-muted-foreground'
+   408→            )}
+   409→          />
+   410→        </button>
+   411→
+   412→        {/* Profile image + name */}
+   413→        <div className="flex flex-col items-center text-center">
+   414→          {/* Avatar */}
+   415→          <div className="relative mb-3">
+   416→            {c.profileImage ? (
+   417→              <img
+   418→                src={c.profileImage}
+   419→                alt={c.name}
+   420→                className={cn(
+   421→                  'w-16 h-16 rounded-2xl object-cover',
+   422→                  isVerified ? 'border-2 border-success' : 'border border-border'
+   423→                )}
+   424→              />
+   425→            ) : (
+   426→              <div className={cn(
+   427→                'w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center text-sm font-display font-black text-foreground',
+   428→                isVerified ? 'border-2 border-success' : 'border border-border'
+   429→              )}>
+   430→                {inits}
+   431→              </div>
+   432→            )}
+   433→            {isVerified && (
+   434→              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success rounded-full border-2 border-card flex items-center justify-center">
+   435→                <Check size={10} className="text-success-foreground" />
+   436→              </div>
+   437→            )}
+   438→          </div>
+   439→
+   440→          {/* Name + specialty */}
+   441→          <h3 className="font-display font-semibold text-foreground text-sm tracking-tight">
+   442→            {c.name}
+   443→          </h3>
+   444→          <p className="text-xs text-muted-foreground font-bold tracking-wide mt-0.5">
+   445→            {c.title || 'Profissional de Saúde'}
+   446→          </p>
+   447→
+   448→          {/* Rating + Location */}
+   449→          <div className="flex items-center justify-center gap-3 mt-2">
+   450→            <div className="flex items-center gap-1">
+   451→              <Star size={12} className="text-warning fill-warning" />
+   452→              <span className="text-xs font-bold text-warning">{c.averageRating.toFixed(1)}</span>
+   453→            </div>
+   454→            {c.city && (
+   455→              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+   456→                <MapPin size={11} />
+   457→                <span className="font-medium">{c.city}</span>
+   458→              </div>
+   459→            )}
+   460→          </div>
+   461→        </div>
+   462→
+   463→        {/* Bio excerpt */}
+   464→        {c.bio && (
+   465→          <p className="text-[11px] text-muted-foreground mt-3 line-clamp-2 text-center leading-relaxed">
+   466→            {c.bio}
+   467→          </p>
+   468→        )}
+   469→
+   470→        {/* Services tags */}
+   471→        {c.services.length > 0 && (
+   472→          <div className="flex flex-wrap justify-center gap-1.5 mt-3">
+   473→            {c.services.slice(0, 3).map(s => (
+   474→              <span
+   475→                key={s}
+   476→                className="text-xs font-display font-bold tracking-wide px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20"
+   477→              >
+   478→                {SERVICE_LABELS[s] || s}
+   479→              </span>
+   480→            ))}
+   481→            {c.services.length > 3 && (
+   482→              <span className="text-xs font-display font-bold text-muted-foreground">
+   483→                +{c.services.length - 3}
+   484→              </span>
+   485→            )}
+   486→          </div>
+   487→        )}
+   488→
+   489→        {/* Price + CTA */}
+   490→        <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/50">
+   491→          <div>
+   492→            <span className="text-xs text-muted-foreground tracking-wide font-display font-bold">Tarifa base</span>
+   493→            <div className="text-lg font-display font-black text-foreground tracking-tighter leading-none mt-0.5">
+   494→              {c.hourlyRateEur.toFixed(2).replace('.', ',')}€<span className="text-xs font-bold text-muted-foreground">/h</span>
+   495→            </div>
+   496→          </div>
+   497→          <Button
+   498→            variant="outline"
+   499→            size="sm"
+   500→            className="rounded-2xl text-xs font-display font-bold tracking-wide"
+   501→            onClick={(e) => { e.stopPropagation(); onOpenModal(); }}
+   502→          >
+   503→            Ver Perfil <ChevronRight size={12} className="ml-0.5" />
+   504→          </Button>
+   505→        </div>
+   506→
+   507→        {/* Pending verification */}
+   508→        {c.verificationStatus === 'PENDING' && (
+   509→          <div className="mt-2">
+   510→            <p className="text-xs text-warning font-display font-bold flex items-center justify-center gap-1">
+   511→              <Clock size={10} /> Verificação em curso
+   512→            </p>
+   513→          </div>
+   514→        )}
+   515→      </BloomCard>
+   516→    </motion.div>
+   517→  );
+   518→}
+   519→
+   520→// ── Empty State ─────────────────────────────────────────────────────
+   521→function EmptyState({ onSearchCity }: { onSearchCity: (city: string) => void }) {
+   522→  return (
+   523→    <motion.div
+   524→      variants={containerVariants}
+   525→      initial="hidden"
+   526→      animate="show"
+   527→      className="space-y-6 sm:space-y-8"
+   528→    >
+   529→      {/* Hero Banner */}
+   530→      <motion.div variants={itemVariants}>
+   531→        <BloomCard className="border-primary/20">
+   532→          <div className="flex flex-col items-center text-center space-y-4 py-4">
+   533→            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+   534→              <Search size={28} className="text-primary" />
+   535→            </div>
+   536→            <div>
+   537→              <h3 className="text-xl sm:text-2xl font-display font-semibold text-foreground tracking-tighter">
+   538→                A sua comunidade está a crescer
+   539→              </h3>
+   540→              <p className="text-sm text-muted-foreground mt-2 max-w-lg leading-relaxed">
+   541→                Novos profissionais estão a juntar-se todos os dias. Entretanto, veja como funciona a plataforma.
+   542→              </p>
+   543→            </div>
+   544→          </div>
+   545→        </BloomCard>
+   546→      </motion.div>
+   547→
+   548→      {/* How It Works */}
+   549→      <motion.div variants={itemVariants}>
+   550→        <BloomCard>
+   551→          <div>
+   552→            <p className="text-xs font-display font-semibold text-muted-foreground tracking-[0.4em] border-l-4 border-primary pl-3 mb-4">
+   553→              Como Funciona
+   554→            </p>
+   555→            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+   556→              {[
+   557→                { step: '1', icon: <Heart size={18} />, title: 'Registe-se como Família', desc: 'Crie o seu perfil e descreva as necessidades do seu familiar.' },
+   558→                { step: '2', icon: <Search size={18} />, title: 'Encontre o Profissional Ideal', desc: 'Pesquise profissionais qualificados na sua área.' },
+   559→                { step: '3', icon: <Shield size={18} />, title: 'Receba Cuidados de Qualidade', desc: 'Contrate com segurança e acompanhe à distância.' },
+   560→              ].map(item => (
+   561→                <div key={item.step} className="bg-secondary rounded-2xl p-4 text-center hover:bg-primary/5 transition-all group">
+   562→                  <div className="flex items-center justify-center gap-3 mb-3">
+   563→                    <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-xs font-display font-black text-primary-foreground">
+   564→                      {item.step}
+   565→                    </div>
+   566→                    <div className="w-10 h-10 rounded-2xl bg-card flex items-center justify-center text-primary border border-border group-hover:scale-110 transition-transform">
+   567→                      {item.icon}
+   568→                    </div>
+   569→                  </div>
+   570→                  <p className="text-xs font-display font-semibold text-foreground">{item.title}</p>
+   571→                  <p className="text-xs text-muted-foreground font-medium mt-1 leading-relaxed">{item.desc}</p>
+   572→                </div>
+   573→              ))}
+   574→            </div>
+   575→          </div>
+   576→        </BloomCard>
+   577→      </motion.div>
+   578→
+   579→      {/* Search by City */}
+   580→      <motion.div variants={itemVariants}>
+   581→        <BloomCard>
+   582→          <div>
+   583→            <p className="text-xs font-display font-semibold text-muted-foreground tracking-[0.4em] border-l-4 border-primary pl-3 mb-4">
+   584→              Pesquisar por Cidade
+   585→            </p>
+   586→            <div className="flex flex-wrap gap-2 sm:gap-3">
+   587→              {POPULAR_CITIES.map(city => (
+   588→                <button
+   589→                  key={city}
+   590→                  onClick={() => onSearchCity(city)}
+   591→                  className="flex items-center gap-2 px-4 py-2.5 bg-secondary rounded-2xl text-sm font-display font-bold text-foreground hover:bg-primary/5 hover:border-primary/30 border border-border/50 transition-all group"
+   592→                >
+   593→                  <MapPin size={14} className="text-primary group-hover:scale-110 transition-transform" />
+   594→                  {city}
+   595→                </button>
+   596→              ))}
+   597→            </div>
+   598→          </div>
+   599→        </BloomCard>
+   600→      </motion.div>
+   601→
+   602→      {/* Benefits */}
+   603→      <motion.div variants={itemVariants}>
+   604→        <BloomCard>
+   605→          <div>
+   606→            <p className="text-xs font-display font-semibold text-muted-foreground tracking-[0.4em] border-l-4 border-primary pl-3 mb-4">
+   607→              Benefícios da Plataforma
+   608→            </p>
+   609→            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+   610→              {[
+   611→                { icon: <Shield size={18} />, title: 'Profissionais Verificados', sub: 'KYC e antecedentes' },
+   612→                { icon: <Check size={18} />, title: 'Contratos Jurídicos', sub: 'Assinatura digital' },
+   613→                { icon: <Heart size={18} />, title: 'Pagamento Seguro', sub: 'Proteção financeira' },
+   614→                { icon: <CalendarDays size={18} />, title: 'Recibos Fiscais', sub: 'Válidos para IRS' },
+   615→              ].map((benefit, i) => (
+   616→                <div key={i} className="bg-secondary rounded-2xl p-4 text-center hover:bg-primary/5 transition-all group">
+   617→                  <div className="w-10 h-10 rounded-2xl bg-card flex items-center justify-center text-primary mx-auto mb-3 group-hover:scale-110 transition-transform border border-border">
+   618→                    {benefit.icon}
+   619→                  </div>
+   620→                  <p className="text-xs font-display font-semibold text-foreground">{benefit.title}</p>
+   621→                  <p className="text-xs text-muted-foreground font-medium mt-1">{benefit.sub}</p>
+   622→                </div>
+   623→              ))}
+   624→            </div>
+   625→          </div>
+   626→        </BloomCard>
+   627→      </motion.div>
+   628→    </motion.div>
+   629→  );
+   630→}
+   631→
