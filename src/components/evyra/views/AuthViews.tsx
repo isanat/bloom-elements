@@ -4,8 +4,9 @@ import { Eye, EyeOff, Loader2, Mail, Lock, Heart, Users, Check } from 'lucide-re
 import { toast } from 'sonner';
 
 const LOGO = () => (
-  <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-glow">
-    <Heart size={26} className="text-primary-foreground" fill="currentColor" />
+  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto">
+    {/* Logo is loaded dynamically from admin uploads via EvyraLogoMark */}
+    {/* No fallback icon is shown when no logo is uploaded */}
   </div>
 );
 
@@ -30,7 +31,7 @@ export const LoginView = ({
         await onSubmit(email, password);
       } else {
         await new Promise(r => setTimeout(r, 1200));
-        toast.success('Login efetuado!');
+        toast.success('Sessão iniciada!');
         onNavigate?.('dashboard');
       }
     } catch (error) {
@@ -48,7 +49,7 @@ export const LoginView = ({
           <LOGO />
           <div>
             <h1 className="text-3xl font-display font-black uppercase tracking-tighter text-foreground">EVYRA</h1>
-            <p className="text-sm text-muted-foreground font-medium mt-1">Plataforma de cuidados sénior</p>
+            <p className="text-sm text-muted-foreground font-medium mt-1">Cuidados de saúde ao domicílio</p>
           </div>
         </div>
 
@@ -153,8 +154,8 @@ export const RegisterView = ({
   };
 
   const roles: { id: Role; icon: React.ElementType; title: string; desc: string; tag: string; tagClass: string }[] = [
-    { id: 'FAMILY', icon: Users, title: 'Família', desc: 'Procuro um cuidador para o meu familiar', tag: '€29 ativação', tagClass: 'bg-warning/10 text-warning border border-warning/30' },
-    { id: 'CAREGIVER', icon: Heart, title: 'Cuidador(a)', desc: 'Sou profissional de saúde ou cuidador', tag: 'Gratuito', tagClass: 'bg-success/10 text-success border border-success/30' },
+    { id: 'FAMILY', icon: Users, title: 'Procuro Cuidados', desc: 'Procuro um profissional de saúde que atenda em casa', tag: '€35 ativação', tagClass: 'bg-warning/10 text-warning border border-warning/30' },
+    { id: 'CAREGIVER', icon: Heart, title: 'Profissional de Saúde', desc: 'Sou profissional de saúde que atende ao domicílio', tag: 'Gratuito', tagClass: 'bg-success/10 text-success border border-success/30' },
   ];
 
   return (
@@ -182,7 +183,7 @@ export const RegisterView = ({
           {step === 1 && (
             <div className="space-y-5">
               <div>
-                <h2 className="text-lg font-display font-black uppercase tracking-tighter">Qual é o seu papel?</h2>
+                <h2 className="text-lg font-display font-black uppercase tracking-tighter">Como pretende utilizar a plataforma?</h2>
                 <p className="text-sm text-muted-foreground mt-1">Escolha o tipo de conta a criar</p>
               </div>
               <div className="space-y-3">
@@ -214,7 +215,7 @@ export const RegisterView = ({
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="flex items-center gap-3 p-4 bg-secondary rounded-2xl">
                 {role === 'FAMILY' ? <Users size={18} className="text-muted-foreground" /> : <Heart size={18} className="text-muted-foreground" />}
-                <span className="font-display font-bold text-sm text-foreground">{role === 'FAMILY' ? 'Família' : 'Cuidador(a)'}</span>
+                <span className="font-display font-bold text-sm text-foreground">{role === 'FAMILY' ? 'Procuro Cuidados' : 'Profissional de Saúde'}</span>
                 <button type="button" onClick={() => setStep(1)} className="ml-auto text-[10px] font-display font-black text-primary uppercase tracking-widest hover:underline">Alterar</button>
               </div>
               {[
@@ -233,7 +234,7 @@ export const RegisterView = ({
 
               {role === 'FAMILY' && (
                 <div className="p-4 bg-warning/5 border border-warning/20 rounded-2xl">
-                  <p className="text-xs font-display font-black text-foreground uppercase">Taxa de Ativação — €29</p>
+                  <p className="text-xs font-display font-black text-foreground uppercase">Taxa de Ativação — €35</p>
                   <p className="text-xs text-muted-foreground mt-1">Taxa única para acesso completo, verificação KYC e suporte dedicado.</p>
                 </div>
               )}
