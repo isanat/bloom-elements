@@ -1,0 +1,1173 @@
+     1→"use client";
+     2→
+     3→import { useEffect, useState } from "react";
+     4→import { PageHeader } from "@/components/admin/common/page-header";
+     5→import { StatsCard } from "@/components/admin/common/stats-card";
+     6→import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+     7→import { Button } from "@/components/ui/button";
+     8→import { Input } from "@/components/ui/input";
+     9→import { Badge } from "@/components/ui/badge";
+    10→import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+    11→import { Skeleton } from "@/components/ui/skeleton";
+    12→import {
+    13→  Select,
+    14→  SelectContent,
+    15→  SelectItem,
+    16→  SelectTrigger,
+    17→  SelectValue,
+    18→} from "@/components/ui/select";
+    19→import {
+    20→  IconCreditCard,
+    21→  IconRefresh,
+    22→  IconExternalLink,
+    23→  IconCoin,
+    24→  IconTrendingUp,
+    25→  IconAlertTriangle,
+    26→  IconCheck,
+    27→  IconX,
+    28→  IconSearch,
+    29→  IconLoader2,
+    30→  IconAlertCircle,
+    31→  IconArrowUp,
+    32→  IconArrowDown,
+    33→  IconUser,
+    34→  IconWallet,
+    35→  IconContract,
+    36→  IconEuro,
+    37→  IconShield,
+    38→} from "@/components/icons";
+    39→import { StatusBadge } from "@/components/admin/common/status-badge";
+    40→import { format } from "date-fns";
+    41→import { pt } from "date-fns/locale";
+    42→import { apiFetch } from "@/lib/api-client";
+    43→import { useToast } from "@/hooks/use-toast";
+    44→
+    45→// ==================== TYPES ====================
+    46→
+    47→interface Payment {
+    48→  id: string;
+    49→  userId: string;
+    50→  userName: string;
+    51→  userEmail: string;
+    52→  type: string;
+    53→  status: string;
+    54→  provider: string;
+    55→  amountEurCents: number;
+    56→  contractId: string | null;
+    57→  contractTitle: string | null;
+    58→  createdAt: string;
+    59→  paidAt: string | null;
+    60→  refundedAt: string | null;
+    61→  stripePaymentIntentId: string | null;
+    62→}
+    63→
+    64→interface PaymentStats {
+    65→  today: number;
+    66→  thisMonth: number;
+    67→  pendingRefunds: number;
+    68→  totalRevenue: number;
+    69→}
+    70→
+    71→interface AuditData {
+    72→  user: {
+    73→    id: string;
+    74→    email: string;
+    75→    name: string;
+    76→    role: string;
+    77→    status: string;
+    78→    phone: string | null;
+    79→    nif: string | null;
+    80→    createdAt: string;
+    81→  };
+    82→  wallet: { balanceEurCents: number };
+    83→  summary: {
+    84→    totalDeposits: number;
+    85→    depositFees: number;
+    86→    depositTokens: number;
+    87→    totalWithdrawals: number;
+    88→    withdrawalFees: number;
+    89→    totalContractFees: number;
+    90→    contractFeePlatform: number;
+    91→    totalServicePayments: number;
+    92→    servicePaymentFees: number;
+    93→    totalPlatformFees: number;
+    94→    pendingAmount: number;
+    95→    failedAmount: number;
+    96→    refundedAmount: number;
+    97→    totalTransactions: number;
+    98→    completedTransactions: number;
+    99→  };
+   100→  tipsSent: { total: number; qty: number };
+   101→  tipsReceived: { total: number; qty: number };
+   102→  crossCheck: {
+   103→    totalIn: number;
+   104→    totalOut: number;
+   105→    totalFees: number;
+   106→    totalRefunded: number;
+   107→    tipsSent: number;
+   108→    tipsReceived: number;
+   109→    expectedBalance: number;
+   110→    actualBalance: number;
+   111→    difference: number;
+   112→    isConsistent: boolean;
+   113→  };
+   114→  platformProfit: {
+   115→    totalFeesCollected: number;
+   116→    contractProfits: Array<{
+   117→      id: string;
+   118→      title: string;
+   119→      status: string;
+   120→      totalValue: number;
+   121→      platformFeePct: number;
+   122→      platformCut: number;
+   123→      otherParty: { name: string; email: string; role: string };
+   124→    }>;
+   125→    totalEscrowFees: number;
+   126→    totalReceiptFees: number;
+   127→  };
+   128→  paymentsGrouped: Array<{
+   129→    type: string;
+   130→    status: string;
+   131→    qty: number;
+   132→    totalAmount: number;
+   133→    totalFees: number;
+   134→  }>;
+   135→  ledgerGrouped: Array<{
+   136→    type: string;
+   137→    reason: string;
+   138→    qty: number;
+   139→    totalEurCents: number;
+   140→  }>;
+   141→  payments: Array<{
+   142→    id: string;
+   143→    type: string;
+   144→    status: string;
+   145→    provider: string;
+   146→    amountEurCents: number;
+   147→    platformFee: number;
+   148→    createdAt: string;
+   149→    paidAt: string | null;
+   150→    refundedAt: string | null;
+   151→    description: string | null;
+   152→    contractId: string | null;
+   153→    contractTitle: string | null;
+   154→  }>;
+   155→  contracts: Array<{
+   156→    id: string;
+   157→    title: string;
+   158→    status: string;
+   159→    totalValue: number;
+   160→    platformFeePct: number;
+   161→    platformCut: number;
+   162→    otherParty: { name: string; email: string; role: string };
+   163→  }>;
+   164→  escrows: any[];
+   165→  receipts: any[];
+   166→  recurring: any[];
+   167→}
+   168→
+   169→// ==================== HELPERS ====================
+   170→
+   171→const EUR = (cents: number) => `\u20AC${(cents / 100).toFixed(2)}`;
+   172→
+   173→const typeLabels: Record<string, string> = {
+   174→  ACTIVATION: "Ativacao",
+   175→  CONTRACT_FEE: "Taxa Contrato",
+   176→  SERVICE_PAYMENT: "Pag. Servico",
+   177→  REDEMPTION: "Resgate/Saque",
+   178→};
+   179→
+   180→const auditStatusColors: Record<string, string> = {
+   181→  COMPLETED: "bg-success/10 text-success",
+   182→  PENDING: "bg-warning/10 text-warning",
+   183→  FAILED: "bg-destructive/10 text-destructive",
+   184→  REFUNDED: "bg-primary/10 text-primary",
+   185→  PROCESSING: "bg-warning/10 text-warning",
+   186→  ACTIVE: "bg-success/10 text-success",
+   187→  CANCELLED: "bg-destructive/10 text-destructive",
+   188→  DRAFT: "bg-muted text-muted-foreground",
+   189→};
+   190→
+   191→const reasonLabels: Record<string, string> = {
+   192→  ACTIVATION_BONUS: "Bonus Ativacao",
+   193→  CONTRACT_FEE: "Taxa Contrato",
+   194→  SERVICE_PAYMENT: "Pag. Servico",
+   195→  PLATFORM_FEE: "Taxa Plataforma",
+   196→  REFERRAL_BONUS: "Bonus Indicacao",
+   197→  ADJUSTMENT: "Ajuste",
+   198→};
+   199→
+   200→// ==================== MAIN PAGE ====================
+   201→
+   202→export default function AdminPaymentsPage() {
+   203→  return (
+   204→    <div className="space-y-6">
+   205→      <PageHeader
+   206→        title="Auditoria Financeira"
+   207→        description="Transacoes, pagamentos e auditoria por cliente"
+   208→      />
+   209→
+   210→      <Tabs defaultValue="transactions" className="space-y-4">
+   211→        <TabsList className="h-10">
+   212→          <TabsTrigger value="transactions" className="text-sm">
+   213→            Transacoes
+   214→          </TabsTrigger>
+   215→          <TabsTrigger value="audit" className="text-sm">
+   216→            Auditoria por Cliente
+   217→          </TabsTrigger>
+   218→        </TabsList>
+   219→
+   220→        <TabsContent value="transactions">
+   221→          <TransactionsTab />
+   222→        </TabsContent>
+   223→
+   224→        <TabsContent value="audit">
+   225→          <CustomerAuditTab />
+   226→        </TabsContent>
+   227→      </Tabs>
+   228→    </div>
+   229→  );
+   230→}
+   231→
+   232→// ==================== TRANSACTIONS TAB ====================
+   233→
+   234→function TransactionsTab() {
+   235→  const { toast } = useToast();
+   236→  const [payments, setPayments] = useState<Payment[]>([]);
+   237→  const [stats, setStats] = useState<PaymentStats | null>(null);
+   238→  const [loading, setLoading] = useState(true);
+   239→  const [typeFilter, setTypeFilter] = useState("all");
+   240→  const [statusFilter, setStatusFilter] = useState("all");
+   241→  const [search, setSearch] = useState("");
+   242→
+   243→  const fetchData = async () => {
+   244→    setLoading(true);
+   245→    try {
+   246→      const params = new URLSearchParams();
+   247→      if (typeFilter !== "all") params.set("type", typeFilter);
+   248→      if (statusFilter !== "all") params.set("status", statusFilter);
+   249→      if (search) params.set("search", search);
+   250→
+   251→      const [paymentsRes, statsRes] = await Promise.all([
+   252→        apiFetch(`/api/admin/payments?${params}`),
+   253→        apiFetch("/api/admin/payments/stats"),
+   254→      ]);
+   255→
+   256→      if (paymentsRes.ok) {
+   257→        const data = await paymentsRes.json();
+   258→        setPayments(data.payments || []);
+   259→      }
+   260→      if (statsRes.ok) {
+   261→        setStats(await statsRes.json());
+   262→      }
+   263→    } catch (error) {
+   264→      console.error("Error fetching payments:", error);
+   265→    } finally {
+   266→      setLoading(false);
+   267→    }
+   268→  };
+   269→
+   270→  useEffect(() => {
+   271→    fetchData();
+   272→  }, [typeFilter, statusFilter]);
+   273→
+   274→  const formatCurrency = (cents: number) =>
+   275→    new Intl.NumberFormat("pt-PT", {
+   276→      style: "currency",
+   277→      currency: "EUR",
+   278→    }).format(cents / 100);
+   279→
+   280→  const getTypeLabel = (type: string) => {
+   281→    const labels: Record<string, string> = {
+   282→      ACTIVATION: "Ativacao",
+   283→      CONTRACT_FEE: "Taxa Contrato",
+   284→      SERVICE_PAYMENT: "Pagamento Servico",
+   285→      REDEMPTION: "Resgate",
+   286→    };
+   287→    return labels[type] || type;
+   288→  };
+   289→
+   290→  const handleRefund = async (paymentId: string) => {
+   291→    const reason = prompt("Motivo do reembolso:");
+   292→    if (!reason) return;
+   293→    try {
+   294→      const response = await apiFetch(
+   295→        `/api/admin/payments/${paymentId}/refund`,
+   296→        {
+   297→          method: "POST",
+   298→          headers: { "Content-Type": "application/json" },
+   299→          body: JSON.stringify({ reason }),
+   300→        },
+   301→      );
+   302→      if (response.ok) fetchData();
+   303→      else {
+   304→        const data = await response.json();
+   305→        toast({
+   306→          title: "Erro",
+   307→          description: data.error || "Erro ao processar reembolso",
+   308→          variant: "destructive",
+   309→        });
+   310→      }
+   311→    } catch {
+   312→      toast({
+   313→        title: "Erro",
+   314→        description: "Erro ao processar reembolso",
+   315→        variant: "destructive",
+   316→      });
+   317→    }
+   318→  };
+   319→
+   320→  return (
+   321→    <div className="space-y-4">
+   322→      {/* Stats */}
+   323→      <div className="grid gap-4 md:grid-cols-4">
+   324→        <StatsCard
+   325→          title="Hoje"
+   326→          value={formatCurrency(stats?.today || 0)}
+   327→          icon={<IconCreditCard className="h-5 w-5" />}
+   328→          loading={loading}
+   329→        />
+   330→        <StatsCard
+   331→          title="Este Mes"
+   332→          value={formatCurrency(stats?.thisMonth || 0)}
+   333→          icon={<IconTrendingUp className="h-5 w-5" />}
+   334→          loading={loading}
+   335→        />
+   336→        <StatsCard
+   337→          title="Reembolsos Pendentes"
+   338→          value={stats?.pendingRefunds || 0}
+   339→          icon={<IconAlertTriangle className="h-5 w-5" />}
+   340→          variant="warning"
+   341→          loading={loading}
+   342→        />
+   343→        <StatsCard
+   344→          title="Receita Total"
+   345→          value={formatCurrency(stats?.totalRevenue || 0)}
+   346→          icon={<IconCoin className="h-5 w-5" />}
+   347→          loading={loading}
+   348→        />
+   349→      </div>
+   350→
+   351→      {/* Filters */}
+   352→      <Card>
+   353→        <CardContent className="p-4">
+   354→          <div className="flex flex-col gap-4 md:flex-row">
+   355→            <div className="relative flex-1">
+   356→              <Input
+   357→                placeholder="Pesquisar por utilizador..."
+   358→                value={search}
+   359→                onChange={(e) => setSearch(e.target.value)}
+   360→                onKeyDown={(e) => e.key === "Enter" && fetchData()}
+   361→              />
+   362→            </div>
+   363→            <Select value={typeFilter} onValueChange={setTypeFilter}>
+   364→              <SelectTrigger className="w-full md:w-48">
+   365→                <SelectValue placeholder="Tipo" />
+   366→              </SelectTrigger>
+   367→              <SelectContent>
+   368→                <SelectItem value="all">Todos os Tipos</SelectItem>
+   369→                <SelectItem value="ACTIVATION">Ativacao</SelectItem>
+   370→                <SelectItem value="CONTRACT_FEE">Taxa Contrato</SelectItem>
+   371→              </SelectContent>
+   372→            </Select>
+   373→            <Select value={statusFilter} onValueChange={setStatusFilter}>
+   374→              <SelectTrigger className="w-full md:w-48">
+   375→                <SelectValue placeholder="Status" />
+   376→              </SelectTrigger>
+   377→              <SelectContent>
+   378→                <SelectItem value="all">Todos os Status</SelectItem>
+   379→                <SelectItem value="COMPLETED">Concluido</SelectItem>
+   380→                <SelectItem value="PENDING">Pendente</SelectItem>
+   381→                <SelectItem value="FAILED">Falhou</SelectItem>
+   382→                <SelectItem value="REFUNDED">Reembolsado</SelectItem>
+   383→              </SelectContent>
+   384→            </Select>
+   385→            <Button onClick={fetchData}>Filtrar</Button>
+   386→          </div>
+   387→        </CardContent>
+   388→      </Card>
+   389→
+   390→      {/* Table */}
+   391→      <Card>
+   392→        <CardContent className="p-0">
+   393→          <div className="overflow-x-auto">
+   394→            <table className="w-full">
+   395→              <thead className="bg-muted/50">
+   396→                <tr>
+   397→                  <th className="px-3 py-2 text-left text-xs font-medium">
+   398→                    ID
+   399→                  </th>
+   400→                  <th className="px-3 py-2 text-left text-xs font-medium">
+   401→                    Usuario
+   402→                  </th>
+   403→                  <th className="px-3 py-2 text-left text-xs font-medium">
+   404→                    Tipo
+   405→                  </th>
+   406→                  <th className="px-3 py-2 text-left text-xs font-medium">
+   407→                    Status
+   408→                  </th>
+   409→                  <th className="px-3 py-2 text-right text-xs font-medium">
+   410→                    Valor
+   411→                  </th>
+   412→                  <th className="px-3 py-2 text-left text-xs font-medium">
+   413→                    Data
+   414→                  </th>
+   415→                  <th className="px-3 py-2 text-left text-xs font-medium">
+   416→                    Acoes
+   417→                  </th>
+   418→                </tr>
+   419→              </thead>
+   420→              <tbody className="divide-y divide-border/30">
+   421→                {loading ? (
+   422→                  Array.from({ length: 5 }).map((_, i) => (
+   423→                    <tr key={i}>
+   424→                      {Array.from({ length: 7 }).map((_, j) => (
+   425→                        <td key={j} className="px-3 py-2">
+   426→                          <Skeleton className="h-4 w-16" />
+   427→                        </td>
+   428→                      ))}
+   429→                    </tr>
+   430→                  ))
+   431→                ) : payments.length === 0 ? (
+   432→                  <tr>
+   433→                    <td
+   434→                      colSpan={8}
+   435→                      className="px-3 py-8 text-center text-muted-foreground text-sm"
+   436→                    >
+   437→                      Nenhum pagamento encontrado
+   438→                    </td>
+   439→                  </tr>
+   440→                ) : (
+   441→                  payments.map((p) => (
+   442→                    <tr key={p.id} className="hover:bg-muted/30">
+   443→                      <td className="px-3 py-2 font-mono text-xs">
+   444→                        {p.id.slice(0, 8)}...
+   445→                      </td>
+   446→                      <td className="px-3 py-2">
+   447→                        <p className="text-sm font-medium">{p.userName}</p>
+   448→                        <p className="text-xs text-muted-foreground">
+   449→                          {p.userEmail}
+   450→                        </p>
+   451→                      </td>
+   452→                      <td className="px-3 py-2">
+   453→                        <Badge variant="outline" className="text-xs">
+   454→                          {getTypeLabel(p.type)}
+   455→                        </Badge>
+   456→                      </td>
+   457→                      <td className="px-3 py-2">
+   458→                        <StatusBadge
+   459→                          status={
+   460→                            p.status === "COMPLETED"
+   461→                              ? "completed"
+   462→                              : p.status === "PENDING"
+   463→                                ? "pending"
+   464→                                : p.status === "FAILED"
+   465→                                  ? "failed"
+   466→                                  : p.status === "REFUNDED"
+   467→                                    ? "refunded"
+   468→                                    : "processing"
+   469→                          }
+   470→                        />
+   471→                      </td>
+   472→                      <td className="px-3 py-2 text-right font-medium text-sm">
+   473→                        {formatCurrency(p.amountEurCents)}
+   474→                      </td>
+   475→                      <td className="px-3 py-2 text-xs text-muted-foreground">
+   476→                        {format(new Date(p.createdAt), "dd/MM/yyyy HH:mm", {
+   477→                          locale: pt,
+   478→                        })}
+   479→                      </td>
+   480→                      <td className="px-3 py-2">
+   481→                        <div className="flex gap-1">
+   482→                          {p.stripePaymentIntentId && (
+   483→                            <Button
+   484→                              variant="ghost"
+   485→                              size="sm"
+   486→                              className="h-7 w-7 p-0"
+   487→                              onClick={() =>
+   488→                                window.open(
+   489→                                  `https://dashboard.stripe.com/payments/${p.stripePaymentIntentId}`,
+   490→                                  "_blank",
+   491→                                )
+   492→                              }
+   493→                            >
+   494→                              <IconExternalLink className="h-3.5 w-3.5" />
+   495→                            </Button>
+   496→                          )}
+   497→                          {p.status === "COMPLETED" && !p.refundedAt && (
+   498→                            <Button
+   499→                              variant="ghost"
+   500→                              size="sm"
+   501→                              onClick={() => handleRefund(p.id)}
+   502→                              className="text-destructive hover:text-destructive h-7 text-xs px-2"
+   503→                            >
+   504→                              Reemb.
+   505→                            </Button>
+   506→                          )}
+   507→                        </div>
+   508→                      </td>
+   509→                    </tr>
+   510→                  ))
+   511→                )}
+   512→              </tbody>
+   513→            </table>
+   514→          </div>
+   515→        </CardContent>
+   516→      </Card>
+   517→    </div>
+   518→  );
+   519→}
+   520→
+   521→// ==================== CUSTOMER AUDIT TAB ====================
+   522→
+   523→function CustomerAuditTab() {
+   524→  const [email, setEmail] = useState("");
+   525→  const [loading, setLoading] = useState(false);
+   526→  const [error, setError] = useState<string | null>(null);
+   527→  const [data, setData] = useState<AuditData | null>(null);
+   528→
+   529→  const search = async () => {
+   530→    if (!email.trim()) return;
+   531→    setLoading(true);
+   532→    setError(null);
+   533→    setData(null);
+   534→    try {
+   535→      const res = await apiFetch(
+   536→        `/api/admin/audit/customer?email=${encodeURIComponent(email.trim())}`,
+   537→      );
+   538→      if (!res.ok) {
+   539→        const err = await res.json();
+   540→        throw new Error(err.error || "Erro");
+   541→      }
+   542→      setData(await res.json());
+   543→    } catch (e: any) {
+   544→      setError(e.message);
+   545→    } finally {
+   546→      setLoading(false);
+   547→    }
+   548→  };
+   549→
+   550→  return (
+   551→    <div className="space-y-4">
+   552→      {/* Search */}
+   553→      <Card>
+   554→        <CardContent className="p-4">
+   555→          <div className="flex gap-2">
+   556→            <Input
+   557→              placeholder="Email do cliente..."
+   558→              value={email}
+   559→              onChange={(e) => setEmail(e.target.value)}
+   560→              onKeyDown={(e) => e.key === "Enter" && search()}
+   561→              className="flex-1"
+   562→            />
+   563→            <Button onClick={search} disabled={loading}>
+   564→              {loading ? (
+   565→                <IconLoader2 className="h-4 w-4 animate-spin" />
+   566→              ) : (
+   567→                <IconSearch className="h-4 w-4 mr-1" />
+   568→              )}
+   569→              Buscar
+   570→            </Button>
+   571→          </div>
+   572→        </CardContent>
+   573→      </Card>
+   574→
+   575→      {error && (
+   576→        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 flex items-center gap-2 text-sm text-destructive">
+   577→          <IconAlertCircle className="h-4 w-4" /> {error}
+   578→        </div>
+   579→      )}
+   580→
+   581→      {data && (
+   582→        <>
+   583→          {/* Summary Cards */}
+   584→          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+   585→            <AuditInfoCard
+   586→              icon={<IconUser className="h-4 w-4" />}
+   587→              label="Cliente"
+   588→              value={data.user.name}
+   589→              sub={`${data.user.email} | ${data.user.role}`}
+   590→            />
+   591→            <AuditInfoCard
+   592→              icon={<IconWallet className="h-4 w-4" />}
+   593→              label="Saldo Carteira"
+   594→              value={EUR(data.wallet.balanceEurCents)}
+   595→            />
+   596→            <AuditInfoCard
+   597→              icon={<IconArrowUp className="h-4 w-4 text-success" />}
+   598→              label="Total Depositos"
+   599→              value={EUR(data.summary.totalDeposits)}
+   600→              sub={`${data.summary.completedTransactions} tx aprovadas`}
+   601→            />
+   602→            <AuditInfoCard
+   603→              icon={<IconArrowDown className="h-4 w-4 text-destructive" />}
+   604→              label="Total Saques"
+   605→              value={EUR(data.summary.totalWithdrawals)}
+   606→              sub={`Reemb: ${EUR(data.summary.refundedAmount)}`}
+   607→            />
+   608→          </div>
+   609→
+   610→          {/* Platform Profit */}
+   611→          <Card className="border-2 border-success/30 bg-success/10">
+   612→            <CardContent className="p-4">
+   613→              <div className="flex items-center justify-between mb-3">
+   614→                <div className="flex items-center gap-2">
+   615→                  <IconEuro className="h-5 w-5 text-success" />
+   616→                  <span className="font-bold">
+   617→                    Lucro da Plataforma com este cliente
+   618→                  </span>
+   619→                </div>
+   620→                <span className="text-xl font-bold text-success">
+   621→                  {EUR(data.platformProfit.totalFeesCollected)}
+   622→                </span>
+   623→              </div>
+   624→              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+   625→                <div className="bg-white rounded-lg p-2.5">
+   626→                  <p className="text-muted-foreground">
+   627→                    Taxas Cash-In (deposito)
+   628→                  </p>
+   629→                  <p className="font-bold text-sm">
+   630→                    {EUR(data.summary.depositFees)}
+   631→                  </p>
+   632→                </div>
+   633→                <div className="bg-white rounded-lg p-2.5">
+   634→                  <p className="text-muted-foreground">
+   635→                    Taxas Cash-Out (saque)
+   636→                  </p>
+   637→                  <p className="font-bold text-sm">
+   638→                    {EUR(data.summary.withdrawalFees)}
+   639→                  </p>
+   640→                </div>
+   641→                <div className="bg-white rounded-lg p-2.5">
+   642→                  <p className="text-muted-foreground">Taxas Contrato</p>
+   643→                  <p className="font-bold text-sm">
+   644→                    {EUR(data.summary.contractFeePlatform)}
+   645→                  </p>
+   646→                </div>
+   647→                <div className="bg-white rounded-lg p-2.5">
+   648→                  <p className="text-muted-foreground">Taxas Servico</p>
+   649→                  <p className="font-bold text-sm">
+   650→                    {EUR(data.summary.servicePaymentFees)}
+   651→                  </p>
+   652→                </div>
+   653→              </div>
+   654→              {(data.platformProfit.totalEscrowFees > 0 ||
+   655→                data.platformProfit.totalReceiptFees > 0) && (
+   656→                <div className="mt-2 text-xs text-muted-foreground">
+   657→                  Escrow: {EUR(data.platformProfit.totalEscrowFees)} | Recibos:{" "}
+   658→                  {EUR(data.platformProfit.totalReceiptFees)}
+   659→                </div>
+   660→              )}
+   661→            </CardContent>
+   662→          </Card>
+   663→
+   664→          {/* Cross-Check */}
+   665→          <Card
+   666→            className={
+   667→              data.crossCheck.isConsistent
+   668→                ? "border-success/30"
+   669→                : "border-2 border-destructive/30"
+   670→            }
+   671→          >
+   672→            <CardHeader className="pb-2 px-4 pt-4">
+   673→              <CardTitle className="text-sm flex items-center gap-2">
+   674→                <IconShield className="h-4 w-4" />
+   675→                Verificacao de Consistencia (Cruzamento)
+   676→                {data.crossCheck.isConsistent ? (
+   677→                  <Badge className="bg-success/10 text-success border-0 text-[10px]">
+   678→                    <IconCheck className="h-3 w-3 mr-0.5" />
+   679→                    OK
+   680→                  </Badge>
+   681→                ) : (
+   682→                  <Badge className="bg-destructive/10 text-destructive border-0 text-[10px]">
+   683→                    <IconX className="h-3 w-3 mr-0.5" />
+   684→                    Divergencia
+   685→                  </Badge>
+   686→                )}
+   687→              </CardTitle>
+   688→            </CardHeader>
+   689→            <CardContent className="p-4 pt-0">
+   690→              <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+   691→                <div className="flex justify-between py-1 border-b">
+   692→                  <span className="text-muted-foreground">
+   693→                    Entradas (depositos aprovados)
+   694→                  </span>
+   695→                  <span className="font-medium text-success">
+   696→                    +{EUR(data.crossCheck.totalIn)}
+   697→                  </span>
+   698→                </div>
+   699→                <div className="flex justify-between py-1 border-b">
+   700→                  <span className="text-muted-foreground">
+   701→                    Gorjetas recebidas
+   702→                  </span>
+   703→                  <span className="font-medium text-success">
+   704→                    +{EUR(data.crossCheck.tipsReceived)}
+   705→                  </span>
+   706→                </div>
+   707→                <div className="flex justify-between py-1 border-b">
+   708→                  <span className="text-muted-foreground">
+   709→                    Saidas (saques aprovados)
+   710→                  </span>
+   711→                  <span className="font-medium text-destructive">
+   712→                    -{EUR(data.crossCheck.totalOut)}
+   713→                  </span>
+   714→                </div>
+   715→                <div className="flex justify-between py-1 border-b">
+   716→                  <span className="text-muted-foreground">
+   717→                    Gorjetas enviadas
+   718→                  </span>
+   719→                  <span className="font-medium text-destructive">
+   720→                    -{EUR(data.crossCheck.tipsSent)}
+   721→                  </span>
+   722→                </div>
+   723→                <div className="flex justify-between py-1 border-b">
+   724→                  <span className="text-muted-foreground">
+   725→                    Taxas plataforma (total)
+   726→                  </span>
+   727→                  <span className="font-medium text-destructive">
+   728→                    -{EUR(data.crossCheck.totalFees)}
+   729→                  </span>
+   730→                </div>
+   731→                <div className="flex justify-between py-1 border-b">
+   732→                  <span className="text-muted-foreground">Reembolsos</span>
+   733→                  <span className="font-medium text-destructive">
+   734→                    -{EUR(data.crossCheck.totalRefunded)}
+   735→                  </span>
+   736→                </div>
+   737→                <div className="flex justify-between py-1.5 font-bold text-base">
+   738→                  <span>Saldo Esperado</span>
+   739→                  <span>{EUR(data.crossCheck.expectedBalance)}</span>
+   740→                </div>
+   741→                <div className="flex justify-between py-1.5 font-bold text-base">
+   742→                  <span>Saldo Real (carteira)</span>
+   743→                  <span>{EUR(data.crossCheck.actualBalance)}</span>
+   744→                </div>
+   745→              </div>
+   746→              {!data.crossCheck.isConsistent && (
+   747→                <div className="mt-3 bg-destructive/10 rounded-lg p-3 text-sm text-destructive font-medium">
+   748→                  Diferenca: {EUR(Math.abs(data.crossCheck.difference))} (
+   749→                  {data.crossCheck.difference > 0
+   750→                    ? "cliente sacou a mais"
+   751→                    : "saldo nao contabilizado"}
+   752→                  )
+   753→                </div>
+   754→              )}
+   755→            </CardContent>
+   756→          </Card>
+   757→
+   758→          {/* Detail Tabs */}
+   759→          <Tabs defaultValue="ctx">
+   760→            <TabsList className="h-9">
+   761→              <TabsTrigger value="ctx" className="text-xs">
+   762→                Transacoes ({data.payments.length})
+   763→              </TabsTrigger>
+   764→              <TabsTrigger value="grouped" className="text-xs">
+   765→                Agrupado
+   766→              </TabsTrigger>
+   767→              <TabsTrigger value="contracts" className="text-xs">
+   768→                Contratos ({data.contracts.length})
+   769→              </TabsTrigger>
+   770→              <TabsTrigger value="ledger" className="text-xs">
+   771→                Ledger
+   772→              </TabsTrigger>
+   773→              <TabsTrigger value="receipts" className="text-xs">
+   774→                Recibos ({data.receipts.length})
+   775→              </TabsTrigger>
+   776→            </TabsList>
+   777→
+   778→            {/* Individual transactions */}
+   779→            <TabsContent value="ctx" className="mt-3">
+   780→              <Card>
+   781→                <CardContent className="p-0">
+   782→                  <div className="overflow-x-auto">
+   783→                    <table className="w-full text-xs">
+   784→                      <thead className="bg-muted/50">
+   785→                        <tr>
+   786→                          <th className="px-2 py-2 text-left font-medium">
+   787→                            Data
+   788→                          </th>
+   789→                          <th className="px-2 py-2 text-left font-medium">
+   790→                            Tipo
+   791→                          </th>
+   792→                          <th className="px-2 py-2 text-left font-medium">
+   793→                            Status
+   794→                          </th>
+   795→                          <th className="px-2 py-2 text-right font-medium">
+   796→                            Valor Bruto
+   797→                          </th>
+   798→                          <th className="px-2 py-2 text-right font-medium">
+   799→                            Taxa Plataforma
+   800→                          </th>
+   801→                          <th className="px-2 py-2 text-right font-medium">
+   802→                            Valor Liquido
+   803→                          </th>
+   804→                          <th className="px-2 py-2 text-left font-medium">
+   805→                            Descricao
+   806→                          </th>
+   807→                        </tr>
+   808→                      </thead>
+   809→                      <tbody className="divide-y divide-border/30">
+   810→                        {data.payments.map((p) => (
+   811→                          <tr key={p.id} className="hover:bg-muted/30">
+   812→                            <td className="px-2 py-1.5 whitespace-nowrap">
+   813→                              {format(new Date(p.createdAt), "dd/MM/yy HH:mm", {
+   814→                                locale: pt,
+   815→                              })}
+   816→                            </td>
+   817→                            <td className="px-2 py-1.5">
+   818→                              {typeLabels[p.type] || p.type}
+   819→                            </td>
+   820→                            <td className="px-2 py-1.5">
+   821→                              <Badge
+   822→                                className={`${auditStatusColors[p.status] || "bg-muted"} border-0 text-[10px] px-1.5 py-0`}
+   823→                              >
+   824→                                {p.status}
+   825→                              </Badge>
+   826→                            </td>
+   827→                            <td className="px-2 py-1.5 text-right font-medium">
+   828→                              {EUR(p.amountEurCents)}
+   829→                            </td>
+   830→                            <td className="px-2 py-1.5 text-right text-warning font-medium">
+   831→                              {p.platformFee > 0 ? EUR(p.platformFee) : "-"}
+   832→                            </td>
+   833→                            <td className="px-2 py-1.5 text-right font-medium">
+   834→                              {EUR(p.amountEurCents - (p.platformFee || 0))}
+   835→                            </td>
+   836→                            <td className="px-2 py-1.5 truncate max-w-[120px]">
+   837→                              {p.description || p.contractTitle || "-"}
+   838→                            </td>
+   839→                          </tr>
+   840→                        ))}
+   841→                        {data.payments.length === 0 && (
+   842→                          <tr>
+   843→                            <td
+   844→                              colSpan={7}
+   845→                              className="px-2 py-6 text-center text-muted-foreground"
+   846→                            >
+   847→                              Nenhuma transacao
+   848→                            </td>
+   849→                          </tr>
+   850→                        )}
+   851→                      </tbody>
+   852→                    </table>
+   853→                  </div>
+   854→                </CardContent>
+   855→              </Card>
+   856→            </TabsContent>
+   857→
+   858→            {/* Grouped */}
+   859→            <TabsContent value="grouped" className="mt-3">
+   860→              <Card>
+   861→                <CardContent className="p-0">
+   862→                  <div className="overflow-x-auto">
+   863→                    <table className="w-full text-xs">
+   864→                      <thead className="bg-muted/50">
+   865→                        <tr>
+   866→                          <th className="px-2 py-2 text-left font-medium">
+   867→                            Tipo
+   868→                          </th>
+   869→                          <th className="px-2 py-2 text-left font-medium">
+   870→                            Status
+   871→                          </th>
+   872→                          <th className="px-2 py-2 text-right font-medium">
+   873→                            Qtd
+   874→                          </th>
+   875→                          <th className="px-2 py-2 text-right font-medium">
+   876→                            Valor Total
+   877→                          </th>
+   878→                          <th className="px-2 py-2 text-right font-medium">
+   879→                            Taxas Cobradas
+   880→                          </th>
+   881→                        </tr>
+   882→                      </thead>
+   883→                      <tbody className="divide-y divide-border/30">
+   884→                        {data.paymentsGrouped.map((g, i) => (
+   885→                          <tr key={i} className="hover:bg-muted/30">
+   886→                            <td className="px-2 py-1.5 font-medium">
+   887→                              {typeLabels[g.type] || g.type}
+   888→                            </td>
+   889→                            <td className="px-2 py-1.5">
+   890→                              <Badge
+   891→                                className={`${auditStatusColors[g.status] || "bg-muted"} border-0 text-[10px] px-1.5 py-0`}
+   892→                              >
+   893→                                {g.status}
+   894→                              </Badge>
+   895→                            </td>
+   896→                            <td className="px-2 py-1.5 text-right">{g.qty}</td>
+   897→                            <td className="px-2 py-1.5 text-right font-medium">
+   898→                              {EUR(g.totalAmount)}
+   899→                            </td>
+   900→                            <td className="px-2 py-1.5 text-right text-warning font-bold">
+   901→                              {g.totalFees > 0 ? EUR(g.totalFees) : "-"}
+   902→                            </td>
+   903→                          </tr>
+   904→                        ))}
+   905→                      </tbody>
+   906→                    </table>
+   907→                  </div>
+   908→                </CardContent>
+   909→              </Card>
+   910→            </TabsContent>
+   911→
+   912→            {/* Contracts */}
+   913→            <TabsContent value="contracts" className="mt-3">
+   914→              <Card>
+   915→                <CardContent className="p-0">
+   916→                  <div className="overflow-x-auto">
+   917→                    <table className="w-full text-xs">
+   918→                      <thead className="bg-muted/50">
+   919→                        <tr>
+   920→                          <th className="px-2 py-2 text-left font-medium">
+   921→                            Contrato
+   922→                          </th>
+   923→                          <th className="px-2 py-2 text-left font-medium">
+   924→                            Status
+   925→                          </th>
+   926→                          <th className="px-2 py-2 text-left font-medium">
+   927→                            Outra Parte
+   928→                          </th>
+   929→                          <th className="px-2 py-2 text-right font-medium">
+   930→                            Valor Total
+   931→                          </th>
+   932→                          <th className="px-2 py-2 text-right font-medium">
+   933→                            % Plataforma
+   934→                          </th>
+   935→                          <th className="px-2 py-2 text-right font-medium">
+   936→                            Lucro Plataforma
+   937→                          </th>
+   938→                        </tr>
+   939→                      </thead>
+   940→                      <tbody className="divide-y divide-border/30">
+   941→                        {data.contracts.map((c) => (
+   942→                          <tr key={c.id} className="hover:bg-muted/30">
+   943→                            <td className="px-2 py-1.5 font-medium truncate max-w-[120px]">
+   944→                              {c.title || c.id.slice(0, 8)}
+   945→                            </td>
+   946→                            <td className="px-2 py-1.5">
+   947→                              <Badge
+   948→                                className={`${auditStatusColors[c.status] || "bg-muted"} border-0 text-[10px] px-1.5 py-0`}
+   949→                              >
+   950→                                {c.status}
+   951→                              </Badge>
+   952→                            </td>
+   953→                            <td className="px-2 py-1.5">
+   954→                              {c.otherParty.name}{" "}
+   955→                              <span className="text-muted-foreground">
+   956→                                ({c.otherParty.role})
+   957→                              </span>
+   958→                            </td>
+   959→                            <td className="px-2 py-1.5 text-right font-medium">
+   960→                              {EUR(c.totalValue)}
+   961→                            </td>
+   962→                            <td className="px-2 py-1.5 text-right">
+   963→                              {c.platformFeePct}%
+   964→                            </td>
+   965→                            <td className="px-2 py-1.5 text-right font-bold text-success">
+   966→                              {EUR(c.platformCut)}
+   967→                            </td>
+   968→                          </tr>
+   969→                        ))}
+   970→                        {data.contracts.length === 0 && (
+   971→                          <tr>
+   972→                            <td
+   973→                              colSpan={6}
+   974→                              className="px-2 py-6 text-center text-muted-foreground"
+   975→                            >
+   976→                              Nenhum contrato
+   977→                            </td>
+   978→                          </tr>
+   979→                        )}
+   980→                      </tbody>
+   981→                    </table>
+   982→                  </div>
+   983→                </CardContent>
+   984→              </Card>
+   985→            </TabsContent>
+   986→
+   987→            {/* Ledger */}
+   988→            <TabsContent value="ledger" className="mt-3">
+   989→              <Card>
+   990→                <CardContent className="p-0">
+   991→                  <div className="overflow-x-auto">
+   992→                    <table className="w-full text-xs">
+   993→                      <thead className="bg-muted/50">
+   994→                        <tr>
+   995→                          <th className="px-2 py-2 text-left font-medium">
+   996→                            Tipo
+   997→                          </th>
+   998→                          <th className="px-2 py-2 text-left font-medium">
+   999→                            Razao
+  1000→                          </th>
+  1001→                          <th className="px-2 py-2 text-right font-medium">
+  1002→                            Qtd
+  1003→                          </th>
+  1004→                          <th className="px-2 py-2 text-right font-medium">
+  1005→                            EUR
+  1006→                          </th>
+  1007→                        </tr>
+  1008→                      </thead>
+  1009→                      <tbody className="divide-y divide-border/30">
+  1010→                        {data.ledgerGrouped.map((l, i) => (
+  1011→                          <tr key={i} className="hover:bg-muted/30">
+  1012→                            <td className="px-2 py-1.5">
+  1013→                              <Badge
+  1014→                                className={`${l.type === "CREDIT" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"} border-0 text-[10px] px-1.5 py-0`}
+  1015→                              >
+  1016→                                {l.type === "CREDIT" ? "ENTRADA" : "SAIDA"}
+  1017→                              </Badge>
+  1018→                            </td>
+  1019→                            <td className="px-2 py-1.5">
+  1020→                              {reasonLabels[l.reason] || l.reason}
+  1021→                            </td>
+  1022→                            <td className="px-2 py-1.5 text-right">{l.qty}</td>
+  1023→                            <td className="px-2 py-1.5 text-right">
+  1024→                              {EUR(l.totalEurCents)}
+  1025→                            </td>
+  1026→                          </tr>
+  1027→                        ))}
+  1028→                        {data.ledgerGrouped.length === 0 && (
+  1029→                          <tr>
+  1030→                            <td
+  1031→                              colSpan={4}
+  1032→                              className="px-2 py-6 text-center text-muted-foreground"
+  1033→                            >
+  1034→                              Nenhum movimento
+  1035→                            </td>
+  1036→                          </tr>
+  1037→                        )}
+  1038→                      </tbody>
+  1039→                    </table>
+  1040→                  </div>
+  1041→                </CardContent>
+  1042→              </Card>
+  1043→            </TabsContent>
+  1044→
+  1045→            {/* Receipts */}
+  1046→            <TabsContent value="receipts" className="mt-3">
+  1047→              <Card>
+  1048→                <CardContent className="p-0">
+  1049→                  <div className="overflow-x-auto">
+  1050→                    <table className="w-full text-xs">
+  1051→                      <thead className="bg-muted/50">
+  1052→                        <tr>
+  1053→                          <th className="px-2 py-2 text-left font-medium">
+  1054→                            Numero
+  1055→                          </th>
+  1056→                          <th className="px-2 py-2 text-left font-medium">
+  1057→                            Periodo
+  1058→                          </th>
+  1059→                          <th className="px-2 py-2 text-right font-medium">
+  1060→                            Horas
+  1061→                          </th>
+  1062→                          <th className="px-2 py-2 text-right font-medium">
+  1063→                            Total
+  1064→                          </th>
+  1065→                          <th className="px-2 py-2 text-right font-medium">
+  1066→                            Taxa Plataforma
+  1067→                          </th>
+  1068→                          <th className="px-2 py-2 text-right font-medium">
+  1069→                            Profissional
+  1070→                          </th>
+  1071→                        </tr>
+  1072→                      </thead>
+  1073→                      <tbody className="divide-y divide-border/30">
+  1074→                        {(data.receipts as any[]).map((r: any) => (
+  1075→                          <tr key={r.id} className="hover:bg-muted/30">
+  1076→                            <td className="px-2 py-1.5 font-mono">
+  1077→                              {r.receiptNumber}
+  1078→                            </td>
+  1079→                            <td className="px-2 py-1.5">
+  1080→                              {format(new Date(r.periodStart), "dd/MM/yy", {
+  1081→                                locale: pt,
+  1082→                              })}{" "}
+  1083→                              -{" "}
+  1084→                              {format(new Date(r.periodEnd), "dd/MM/yy", {
+  1085→                                locale: pt,
+  1086→                              })}
+  1087→                            </td>
+  1088→                            <td className="px-2 py-1.5 text-right">
+  1089→                              {r.hoursWorked}h
+  1090→                            </td>
+  1091→                            <td className="px-2 py-1.5 text-right font-medium">
+  1092→                              {EUR(r.totalAmountCents)}
+  1093→                            </td>
+  1094→                            <td className="px-2 py-1.5 text-right text-warning font-medium">
+  1095→                              {EUR(r.platformFeeCents)}
+  1096→                            </td>
+  1097→                            <td className="px-2 py-1.5 text-right">
+  1098→                              {EUR(r.caregiverAmountCents)}
+  1099→                            </td>
+  1100→                          </tr>
+  1101→                        ))}
+  1102→                        {data.receipts.length === 0 && (
+  1103→                          <tr>
+  1104→                            <td
+  1105→                              colSpan={6}
+  1106→                              className="px-2 py-6 text-center text-muted-foreground"
+  1107→                            >
+  1108→                              Nenhum recibo
+  1109→                            </td>
+  1110→                          </tr>
+  1111→                        )}
+  1112→                      </tbody>
+  1113→                    </table>
+  1114→                  </div>
+  1115→                </CardContent>
+  1116→              </Card>
+  1117→            </TabsContent>
+  1118→          </Tabs>
+  1119→
+  1120→          {/* Bottom stats */}
+  1121→          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+  1122→            <AuditInfoCard
+  1123→              label="Gorjetas Enviadas"
+  1124→              value={EUR(data.tipsSent.total)}
+  1125→              sub={`${data.tipsSent.qty} gorjetas`}
+  1126→            />
+  1127→            <AuditInfoCard
+  1128→              label="Gorjetas Recebidas"
+  1129→              value={EUR(data.tipsReceived.total)}
+  1130→              sub={`${data.tipsReceived.qty} gorjetas`}
+  1131→            />
+  1132→            <AuditInfoCard
+  1133→              label="Pendente"
+  1134→              value={EUR(data.summary.pendingAmount)}
+  1135→              sub="Aguardando aprovacao"
+  1136→            />
+  1137→            <AuditInfoCard
+  1138→              label="Falhou"
+  1139→              value={EUR(data.summary.failedAmount)}
+  1140→              sub="Transacoes com erro"
+  1141→            />
+  1142→          </div>
+  1143→        </>
+  1144→      )}
+  1145→    </div>
+  1146→  );
+  1147→}
+  1148→
+  1149→function AuditInfoCard({
+  1150→  icon,
+  1151→  label,
+  1152→  value,
+  1153→  sub,
+  1154→}: {
+  1155→  icon?: React.ReactNode;
+  1156→  label: string;
+  1157→  value: string | number;
+  1158→  sub?: string;
+  1159→}) {
+  1160→  return (
+  1161→    <Card>
+  1162→      <CardContent className="p-3">
+  1163→        <div className="flex items-center gap-1.5 mb-1">
+  1164→          {icon}
+  1165→          <span className="text-[10px] text-muted-foreground">{label}</span>
+  1166→        </div>
+  1167→        <p className="text-sm font-bold">{value}</p>
+  1168→        {sub && <p className="text-[10px] text-muted-foreground">{sub}</p>}
+  1169→      </CardContent>
+  1170→    </Card>
+  1171→  );
+  1172→}
+  1173→

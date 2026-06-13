@@ -1,0 +1,1007 @@
+     1→"use client";
+     2→
+     3→import { Suspense, useEffect, useState } from "react";
+     4→import { useParams, useRouter, useSearchParams } from "next/navigation";
+     5→import { PageHeader } from "@/components/admin/common/page-header";
+     6→import { StatsCard } from "@/components/admin/common/stats-card";
+     7→import { StatusBadge } from "@/components/admin/common/status-badge";
+     8→import {
+     9→  Card,
+    10→  CardContent,
+    11→  CardHeader,
+    12→  CardTitle,
+    13→  CardDescription,
+    14→} from "@/components/ui/card";
+    15→import { Button } from "@/components/ui/button";
+    16→import { Badge } from "@/components/ui/badge";
+    17→import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+    18→import { Separator } from "@/components/ui/separator";
+    19→import { Textarea } from "@/components/ui/textarea";
+    20→import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+    21→import {
+    22→  IconFile,
+    23→  IconUsers,
+    24→  IconEuro,
+    25→  IconCoins,
+    26→  IconCalendar,
+    27→  IconClock,
+    28→  IconMapPin,
+    29→  IconMail,
+    30→  IconPhone,
+    31→  IconAlertCircle,
+    32→  IconCheck,
+    33→  IconX,
+    34→  IconLoader2,
+    35→  IconSend,
+    36→  IconShield,
+    37→  IconCreditCard,
+    38→  IconEye,
+    39→} from "@/components/icons";
+    40→import { useToast } from "@/hooks/use-toast";
+    41→import Link from "next/link";
+    42→import { apiFetch } from "@/lib/api-client";
+    43→
+    44→interface ContractDetails {
+    45→  contract: {
+    46→    id: string;
+    47→    title: string;
+    48→    description?: string;
+    49→    status: string;
+    50→    totalEurCents: number;
+    51→    totalTokens: number;
+    52→    platformFeeCents: number;
+    53→    caregiverAmountCents: number;
+    54→    startDate?: string;
+    55→    endDate?: string;
+    56→    hoursPerWeek?: number;
+    57→    serviceAddress?: string;
+    58→    serviceCity?: string;
+    59→    notes?: string;
+    60→    cancellationReason?: string;
+    61→    cancelledAt?: string;
+    62→    createdAt: string;
+    63→    familyUserId: string;
+    64→    caregiverUserId: string;
+    65→    familyName: string;
+    66→    familyEmail: string;
+    67→    familyPhone?: string;
+    68→    caregiverName: string;
+    69→    caregiverEmail: string;
+    70→    caregiverPhone?: string;
+    71→  };
+    72→  acceptance?: {
+    73→    id: string;
+    74→    familyAcceptedAt?: string;
+    75→    familyIpAddress?: string;
+    76→    familyUserAgent?: string;
+    77→    caregiverAcceptedAt?: string;
+    78→    caregiverIpAddress?: string;
+    79→    caregiverUserAgent?: string;
+    80→  };
+    81→  payments: Array<{
+    82→    id: string;
+    83→    type: string;
+    84→    status: string;
+    85→    amountEurCents: number;
+    86→    provider?: string;
+    87→    providerId?: string;
+    88→    createdAt: string;
+    89→  }>;
+    90→  escrow?: {
+    91→    id: string;
+    92→    status: string;
+    93→    amountHeldCents: number;
+    94→    amountReleasedCents?: number;
+    95→    createdAt: string;
+    96→    releasedAt?: string;
+    97→  };
+    98→  reviews: Array<{
+    99→    id: string;
+   100→    rating: number;
+   101→    comment?: string;
+   102→    fromUserName: string;
+   103→    toUserName: string;
+   104→    createdAt: string;
+   105→  }>;
+   106→}
+   107→
+   108→export default function AdminContractDetailPage() {
+   109→  return (
+   110→    <Suspense>
+   111→      <AdminContractDetailContent />
+   112→    </Suspense>
+   113→  );
+   114→}
+   115→
+   116→function AdminContractDetailContent() {
+   117→  const params = useParams();
+   118→  const router = useRouter();
+   119→  const searchParams = useSearchParams();
+   120→  const { toast } = useToast();
+   121→  const [data, setData] = useState<ContractDetails | null>(null);
+   122→  const [loading, setLoading] = useState(true);
+   123→  const [actionLoading, setActionLoading] = useState(false);
+   124→  const [disputeResolution, setDisputeResolution] = useState("");
+   125→  const [cancelReason, setCancelReason] = useState("");
+   126→
+   127→  const defaultTab = searchParams.get("tab") || "overview";
+   128→
+   129→  const fetchContract = async () => {
+   130→    setLoading(true);
+   131→    try {
+   132→      const response = await apiFetch(`/api/admin/contracts/${params.id}`);
+   133→      if (!response.ok) {
+   134→        throw new Error("Contract not found");
+   135→      }
+   136→      const result = await response.json();
+   137→      setData(result);
+   138→    } catch (error) {
+   139→      console.error("Error fetching contract:", error);
+   140→      toast({
+   141→        title: "Erro",
+   142→        description: "Falha ao carregar dados do contrato",
+   143→        variant: "destructive",
+   144→      });
+   145→      router.push("/admin/contracts");
+   146→    } finally {
+   147→      setLoading(false);
+   148→    }
+   149→  };
+   150→
+   151→  useEffect(() => {
+   152→    if (params.id) {
+   153→      fetchContract();
+   154→    }
+   155→  }, [params.id]);
+   156→
+   157→  const handleCancel = async () => {
+   158→    if (!cancelReason.trim()) {
+   159→      toast({
+   160→        title: "Erro",
+   161→        description: "Informe o motivo do cancelamento",
+   162→        variant: "destructive",
+   163→      });
+   164→      return;
+   165→    }
+   166→
+   167→    setActionLoading(true);
+   168→    try {
+   169→      const response = await apiFetch(
+   170→        `/api/admin/contracts/${params.id}/cancel`,
+   171→        {
+   172→          method: "POST",
+   173→          headers: { "Content-Type": "application/json" },
+   174→          body: JSON.stringify({ reason: cancelReason }),
+   175→        },
+   176→      );
+   177→
+   178→      if (!response.ok) throw new Error("Failed to cancel");
+   179→
+   180→      toast({
+   181→        title: "Sucesso",
+   182→        description: "Contrato cancelado com sucesso",
+   183→      });
+   184→      fetchContract();
+   185→    } catch (error) {
+   186→      toast({
+   187→        title: "Erro",
+   188→        description: "Falha ao cancelar contrato",
+   189→        variant: "destructive",
+   190→      });
+   191→    } finally {
+   192→      setActionLoading(false);
+   193→    }
+   194→  };
+   195→
+   196→  const handleResolveDispute = async (
+   197→    resolution: "favor_family" | "favor_caregiver" | "split",
+   198→  ) => {
+   199→    if (!disputeResolution.trim()) {
+   200→      toast({
+   201→        title: "Erro",
+   202→        description: "Informe os detalhes da resolução",
+   203→        variant: "destructive",
+   204→      });
+   205→      return;
+   206→    }
+   207→
+   208→    setActionLoading(true);
+   209→    try {
+   210→      const response = await apiFetch(
+   211→        `/api/admin/contracts/${params.id}/resolve`,
+   212→        {
+   213→          method: "POST",
+   214→          headers: { "Content-Type": "application/json" },
+   215→          body: JSON.stringify({ resolution, notes: disputeResolution }),
+   216→        },
+   217→      );
+   218→
+   219→      if (!response.ok) throw new Error("Failed to resolve");
+   220→
+   221→      toast({
+   222→        title: "Sucesso",
+   223→        description: "Disputa resolvida com sucesso",
+   224→      });
+   225→      fetchContract();
+   226→    } catch (error) {
+   227→      toast({
+   228→        title: "Erro",
+   229→        description: "Falha ao resolver disputa",
+   230→        variant: "destructive",
+   231→      });
+   232→    } finally {
+   233→      setActionLoading(false);
+   234→    }
+   235→  };
+   236→
+   237→  const formatCurrency = (cents?: number) => {
+   238→    if (!cents) return "€0,00";
+   239→    return new Intl.NumberFormat("pt-PT", {
+   240→      style: "currency",
+   241→      currency: "EUR",
+   242→    }).format(cents / 100);
+   243→  };
+   244→
+   245→  const formatDate = (date?: string) => {
+   246→    if (!date) return "-";
+   247→    return new Date(date).toLocaleDateString("pt-PT", {
+   248→      day: "2-digit",
+   249→      month: "2-digit",
+   250→      year: "numeric",
+   251→      hour: "2-digit",
+   252→      minute: "2-digit",
+   253→    });
+   254→  };
+   255→
+   256→  const getStatusBadge = (status: string) => {
+   257→    switch (status) {
+   258→      case "ACTIVE":
+   259→        return <StatusBadge status="active" />;
+   260→      case "COMPLETED":
+   261→        return <StatusBadge status="completed" />;
+   262→      case "CANCELLED":
+   263→        return <StatusBadge status="cancelled" />;
+   264→      case "DISPUTED":
+   265→        return <StatusBadge status="disputed" />;
+   266→      case "PENDING_ACCEPTANCE":
+   267→        return <StatusBadge status="pending" />;
+   268→      default:
+   269→        return <Badge variant="secondary">{status}</Badge>;
+   270→    }
+   271→  };
+   272→
+   273→  const getPaymentTypeLabel = (type: string) => {
+   274→    switch (type) {
+   275→      case "ACTIVATION":
+   276→        return "Ativação";
+   277→      case "TOKEN_PURCHASE":
+   278→        return "Compra de Tokens";
+   279→      case "CONTRACT_FEE":
+   280→        return "Taxa de Contrato";
+   281→      case "SERVICE_PAYMENT":
+   282→        return "Pagamento de Serviço";
+   283→      case "REDEMPTION":
+   284→        return "Resgate";
+   285→      default:
+   286→        return type;
+   287→    }
+   288→  };
+   289→
+   290→  const getPaymentStatusBadge = (status: string) => {
+   291→    switch (status) {
+   292→      case "COMPLETED":
+   293→        return <StatusBadge status="completed" />;
+   294→      case "PENDING":
+   295→        return <StatusBadge status="pending" />;
+   296→      case "PROCESSING":
+   297→        return <StatusBadge status="processing" />;
+   298→      case "FAILED":
+   299→        return <StatusBadge status="failed" />;
+   300→      case "REFUNDED":
+   301→        return <StatusBadge status="refunded" />;
+   302→      default:
+   303→        return <Badge variant="secondary">{status}</Badge>;
+   304→    }
+   305→  };
+   306→
+   307→  if (loading) {
+   308→    return (
+   309→      <div className="flex items-center justify-center min-h-[400px]">
+   310→        <IconLoader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+   311→      </div>
+   312→    );
+   313→  }
+   314→
+   315→  if (!data || !data.contract) {
+   316→    return (
+   317→      <div className="text-center py-12">
+   318→        <p className="text-muted-foreground">Contrato não encontrado</p>
+   319→      </div>
+   320→    );
+   321→  }
+   322→
+   323→  const { contract, acceptance, payments, escrow, reviews } = data;
+   324→
+   325→  // Timeline events
+   326→  const timeline = [
+   327→    { date: contract.createdAt, event: "Contrato criado", icon: IconFile },
+   328→    ...(acceptance?.familyAcceptedAt
+   329→      ? [
+   330→          {
+   331→            date: acceptance.familyAcceptedAt,
+   332→            event: "Família aceitou",
+   333→            icon: IconCheck,
+   334→          },
+   335→        ]
+   336→      : []),
+   337→    ...(acceptance?.caregiverAcceptedAt
+   338→      ? [
+   339→          {
+   340→            date: acceptance.caregiverAcceptedAt,
+   341→            event: "Profissional aceitou",
+   342→            icon: IconCheck,
+   343→          },
+   344→        ]
+   345→      : []),
+   346→    ...(contract.cancelledAt
+   347→      ? [
+   348→          {
+   349→            date: contract.cancelledAt,
+   350→            event: "Contrato cancelado",
+   351→            icon: IconX,
+   352→          },
+   353→        ]
+   354→      : []),
+   355→  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+   356→
+   357→  return (
+   358→    <div className="space-y-6">
+   359→      <PageHeader
+   360→        title={contract.title}
+   361→        description={`ID: ${contract.id}`}
+   362→        breadcrumbs={[
+   363→          { label: "Contratos", href: "/admin/contracts" },
+   364→          { label: contract.title?.slice(0, 20) || "Contrato" },
+   365→        ]}
+   366→        actions={
+   367→          <div className="flex items-center gap-2">
+   368→            {getStatusBadge(contract.status)}
+   369→            <Link href="/admin/contracts">
+   370→              <Button variant="outline">Voltar</Button>
+   371→            </Link>
+   372→          </div>
+   373→        }
+   374→      />
+   375→
+   376→      {/* Stats */}
+   377→      <div className="grid gap-4 md:grid-cols-4">
+   378→        <StatsCard
+   379→          title="Valor Total"
+   380→          value={formatCurrency(contract.totalEurCents)}
+   381→          icon={<IconEuro className="h-5 w-5" />}
+   382→        />
+   383→        <StatsCard
+   384→          title="Tokens"
+   385→          value={contract.totalTokens || 0}
+   386→          icon={<IconCoins className="h-5 w-5" />}
+   387→        />
+   388→        <StatsCard
+   389→          title="Taxa Plataforma"
+   390→          value={formatCurrency(contract.platformFeeCents)}
+   391→          description="10%"
+   392→          icon={<IconShield className="h-5 w-5" />}
+   393→        />
+   394→        <StatsCard
+   395→          title="Valor Profissional"
+   396→          value={formatCurrency(contract.caregiverAmountCents)}
+   397→          description="90%"
+   398→          icon={<IconUsers className="h-5 w-5" />}
+   399→        />
+   400→      </div>
+   401→
+   402→      <Tabs defaultValue={defaultTab} className="space-y-6">
+   403→        <TabsList>
+   404→          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+   405→          <TabsTrigger value="parties">Partes</TabsTrigger>
+   406→          <TabsTrigger value="payments">Pagamentos</TabsTrigger>
+   407→          {contract.status === "DISPUTED" && (
+   408→            <TabsTrigger value="dispute" className="text-destructive">
+   409→              <IconAlertCircle className="h-4 w-4 mr-2" />
+   410→              Disputa
+   411→            </TabsTrigger>
+   412→          )}
+   413→          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+   414→        </TabsList>
+   415→
+   416→        {/* Overview Tab */}
+   417→        <TabsContent value="overview" className="space-y-6">
+   418→          <div className="grid gap-6 lg:grid-cols-2">
+   419→            {/* Contract Details */}
+   420→            <Card>
+   421→              <CardHeader>
+   422→                <CardTitle className="flex items-center gap-2">
+   423→                  <IconFile className="h-5 w-5" />
+   424→                  Detalhes do Contrato
+   425→                </CardTitle>
+   426→              </CardHeader>
+   427→              <CardContent className="space-y-4">
+   428→                <div>
+   429→                  <p className="text-sm font-medium text-muted-foreground">
+   430→                    Descrição
+   431→                  </p>
+   432→                  <p className="mt-1">
+   433→                    {contract.description || "Sem descrição"}
+   434→                  </p>
+   435→                </div>
+   436→
+   437→                <Separator />
+   438→
+   439→                <div className="grid grid-cols-2 gap-4">
+   440→                  <div>
+   441→                    <p className="text-sm text-muted-foreground">Início</p>
+   442→                    <p className="font-medium">
+   443→                      {formatDate(contract.startDate)}
+   444→                    </p>
+   445→                  </div>
+   446→                  <div>
+   447→                    <p className="text-sm text-muted-foreground">Término</p>
+   448→                    <p className="font-medium">
+   449→                      {formatDate(contract.endDate)}
+   450→                    </p>
+   451→                  </div>
+   452→                  <div>
+   453→                    <p className="text-sm text-muted-foreground">
+   454→                      Horas/Semana
+   455→                    </p>
+   456→                    <p className="font-medium">
+   457→                      {contract.hoursPerWeek || "-"}h
+   458→                    </p>
+   459→                  </div>
+   460→                  <div>
+   461→                    <p className="text-sm text-muted-foreground">Criado em</p>
+   462→                    <p className="font-medium">
+   463→                      {formatDate(contract.createdAt)}
+   464→                    </p>
+   465→                  </div>
+   466→                </div>
+   467→
+   468→                {(contract.serviceAddress || contract.serviceCity) && (
+   469→                  <>
+   470→                    <Separator />
+   471→                    <div>
+   472→                      <p className="text-sm font-medium text-muted-foreground mb-2">
+   473→                        Local do Serviço
+   474→                      </p>
+   475→                      <div className="flex items-start gap-2">
+   476→                        <IconMapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+   477→                        <div>
+   478→                          <p>{contract.serviceAddress}</p>
+   479→                          <p className="text-sm text-muted-foreground">
+   480→                            {contract.serviceCity}
+   481→                          </p>
+   482→                        </div>
+   483→                      </div>
+   484→                    </div>
+   485→                  </>
+   486→                )}
+   487→
+   488→                {contract.notes && (
+   489→                  <>
+   490→                    <Separator />
+   491→                    <div>
+   492→                      <p className="text-sm font-medium text-muted-foreground mb-1">
+   493→                        Notas
+   494→                      </p>
+   495→                      <p className="text-sm">{contract.notes}</p>
+   496→                    </div>
+   497→                  </>
+   498→                )}
+   499→
+   500→                {contract.cancellationReason && (
+   501→                  <>
+   502→                    <Separator />
+   503→                    <div className="bg-destructive/10 p-3 rounded-md">
+   504→                      <p className="text-sm font-medium text-destructive">
+   505→                        Motivo do Cancelamento
+   506→                      </p>
+   507→                      <p className="text-sm mt-1">
+   508→                        {contract.cancellationReason}
+   509→                      </p>
+   510→                    </div>
+   511→                  </>
+   512→                )}
+   513→              </CardContent>
+   514→            </Card>
+   515→
+   516→            {/* Payment Breakdown */}
+   517→            <Card>
+   518→              <CardHeader>
+   519→                <CardTitle className="flex items-center gap-2">
+   520→                  <IconCreditCard className="h-5 w-5" />
+   521→                  Detalhamento Financeiro
+   522→                </CardTitle>
+   523→              </CardHeader>
+   524→              <CardContent className="space-y-4">
+   525→                <div className="flex justify-between items-center">
+   526→                  <span>Valor Bruto</span>
+   527→                  <span className="font-medium">
+   528→                    {formatCurrency(contract.totalEurCents)}
+   529→                  </span>
+   530→                </div>
+   531→
+   532→                <Separator />
+   533→
+   534→                <div className="flex justify-between items-center text-sm">
+   535→                  <span className="text-muted-foreground">
+   536→                    Taxa da Plataforma (10%)
+   537→                  </span>
+   538→                  <span className="text-destructive">
+   539→                    -{formatCurrency(contract.platformFeeCents)}
+   540→                  </span>
+   541→                </div>
+   542→
+   543→                <div className="flex justify-between items-center font-medium text-lg">
+   544→                  <span>Valor Líquido (Profissional)</span>
+   545→                  <span className="text-success">
+   546→                    {formatCurrency(contract.caregiverAmountCents)}
+   547→                  </span>
+   548→                </div>
+   549→
+   550→                {escrow && (
+   551→                  <>
+   552→                    <Separator />
+   553→                    <div className="bg-muted p-3 rounded-md">
+   554→                      <p className="text-sm font-medium mb-2">Escrow</p>
+   555→                      <div className="flex justify-between text-sm">
+   556→                        <span>Status</span>
+   557→                        <StatusBadge
+   558→                          status={escrow.status.toLowerCase() as any}
+   559→                        />
+   560→                      </div>
+   561→                      <div className="flex justify-between text-sm mt-2">
+   562→                        <span>Valor Retido</span>
+   563→                        <span>{formatCurrency(escrow.amountHeldCents)}</span>
+   564→                      </div>
+   565→                      {escrow.amountReleasedCents && (
+   566→                        <div className="flex justify-between text-sm mt-1">
+   567→                          <span>Valor Liberado</span>
+   568→                          <span>
+   569→                            {formatCurrency(escrow.amountReleasedCents)}
+   570→                          </span>
+   571→                        </div>
+   572→                      )}
+   573→                    </div>
+   574→                  </>
+   575→                )}
+   576→
+   577→                {/* Actions */}
+   578→                {(contract.status === "ACTIVE" ||
+   579→                  contract.status === "PENDING_ACCEPTANCE") && (
+   580→                  <>
+   581→                    <Separator />
+   582→                    <div className="space-y-3">
+   583→                      <p className="text-sm font-medium">
+   584→                        Ações Administrativas
+   585→                      </p>
+   586→                      <div className="space-y-2">
+   587→                        <Textarea
+   588→                          placeholder="Motivo do cancelamento..."
+   589→                          value={cancelReason}
+   590→                          onChange={(e) => setCancelReason(e.target.value)}
+   591→                          rows={2}
+   592→                        />
+   593→                        <Button
+   594→                          variant="destructive"
+   595→                          className="w-full"
+   596→                          onClick={handleCancel}
+   597→                          disabled={actionLoading || !cancelReason.trim()}
+   598→                        >
+   599→                          {actionLoading ? (
+   600→                            <IconLoader2 className="h-4 w-4 animate-spin mr-2" />
+   601→                          ) : (
+   602→                            <IconX className="h-4 w-4 mr-2" />
+   603→                          )}
+   604→                          Cancelar Contrato
+   605→                        </Button>
+   606→                      </div>
+   607→                    </div>
+   608→                  </>
+   609→                )}
+   610→              </CardContent>
+   611→            </Card>
+   612→          </div>
+   613→        </TabsContent>
+   614→
+   615→        {/* Parties Tab */}
+   616→        <TabsContent value="parties" className="space-y-6">
+   617→          <div className="grid gap-6 md:grid-cols-2">
+   618→            {/* Family */}
+   619→            <Card>
+   620→              <CardHeader>
+   621→                <CardTitle className="flex items-center gap-2">
+   622→                  <IconUsers className="h-5 w-5" />
+   623→                  Família
+   624→                </CardTitle>
+   625→              </CardHeader>
+   626→              <CardContent className="space-y-4">
+   627→                <div className="flex items-center gap-4">
+   628→                  <Avatar className="h-14 w-14">
+   629→                    <AvatarImage
+   630→                      src={`https://api.dicebear.com/7.x/initials/svg?seed=${contract.familyName}`}
+   631→                    />
+   632→                    <AvatarFallback>
+   633→                      {contract.familyName?.charAt(0)}
+   634→                    </AvatarFallback>
+   635→                  </Avatar>
+   636→                  <div>
+   637→                    <p className="font-medium text-lg">{contract.familyName}</p>
+   638→                    <p className="text-sm text-muted-foreground">Contratante</p>
+   639→                  </div>
+   640→                </div>
+   641→
+   642→                <Separator />
+   643→
+   644→                <div className="space-y-3">
+   645→                  <div className="flex items-center gap-2 text-sm">
+   646→                    <IconMail className="h-4 w-4 text-muted-foreground" />
+   647→                    <span>{contract.familyEmail}</span>
+   648→                  </div>
+   649→                  {contract.familyPhone && (
+   650→                    <div className="flex items-center gap-2 text-sm">
+   651→                      <IconPhone className="h-4 w-4 text-muted-foreground" />
+   652→                      <span>{contract.familyPhone}</span>
+   653→                    </div>
+   654→                  )}
+   655→                </div>
+   656→
+   657→                <Link href={`/admin/users/${contract.familyUserId}`}>
+   658→                  <Button variant="outline" className="w-full mt-2">
+   659→                    <IconEye className="h-4 w-4 mr-2" />
+   660→                    Ver Perfil Completo
+   661→                  </Button>
+   662→                </Link>
+   663→              </CardContent>
+   664→            </Card>
+   665→
+   666→            {/* Caregiver */}
+   667→            <Card>
+   668→              <CardHeader>
+   669→                <CardTitle className="flex items-center gap-2">
+   670→                  <IconUsers className="h-5 w-5" />
+   671→                  Profissional
+   672→                </CardTitle>
+   673→              </CardHeader>
+   674→              <CardContent className="space-y-4">
+   675→                <div className="flex items-center gap-4">
+   676→                  <Avatar className="h-14 w-14">
+   677→                    <AvatarImage
+   678→                      src={`https://api.dicebear.com/7.x/initials/svg?seed=${contract.caregiverName}`}
+   679→                    />
+   680→                    <AvatarFallback>
+   681→                      {contract.caregiverName?.charAt(0)}
+   682→                    </AvatarFallback>
+   683→                  </Avatar>
+   684→                  <div>
+   685→                    <p className="font-medium text-lg">
+   686→                      {contract.caregiverName}
+   687→                    </p>
+   688→                    <p className="text-sm text-muted-foreground">Prestador</p>
+   689→                  </div>
+   690→                </div>
+   691→
+   692→                <Separator />
+   693→
+   694→                <div className="space-y-3">
+   695→                  <div className="flex items-center gap-2 text-sm">
+   696→                    <IconMail className="h-4 w-4 text-muted-foreground" />
+   697→                    <span>{contract.caregiverEmail}</span>
+   698→                  </div>
+   699→                  {contract.caregiverPhone && (
+   700→                    <div className="flex items-center gap-2 text-sm">
+   701→                      <IconPhone className="h-4 w-4 text-muted-foreground" />
+   702→                      <span>{contract.caregiverPhone}</span>
+   703→                    </div>
+   704→                  )}
+   705→                </div>
+   706→
+   707→                <Link href={`/admin/caregivers/${contract.caregiverUserId}`}>
+   708→                  <Button variant="outline" className="w-full mt-2">
+   709→                    <IconEye className="h-4 w-4 mr-2" />
+   710→                    Ver Perfil Completo
+   711→                  </Button>
+   712→                </Link>
+   713→              </CardContent>
+   714→            </Card>
+   715→          </div>
+   716→
+   717→          {/* Acceptance Logs */}
+   718→          {acceptance && (
+   719→            <Card>
+   720→              <CardHeader>
+   721→                <CardTitle className="flex items-center gap-2">
+   722→                  <IconCheck className="h-5 w-5" />
+   723→                  Registro de Aceite
+   724→                </CardTitle>
+   725→                <CardDescription>
+   726→                  Informações de aceite com endereço IP para conformidade legal
+   727→                </CardDescription>
+   728→              </CardHeader>
+   729→              <CardContent>
+   730→                <div className="grid gap-6 md:grid-cols-2">
+   731→                  {acceptance.familyAcceptedAt && (
+   732→                    <div className="space-y-2">
+   733→                      <p className="font-medium">Família</p>
+   734→                      <div className="text-sm space-y-1">
+   735→                        <p>
+   736→                          <span className="text-muted-foreground">
+   737→                            Aceito em:
+   738→                          </span>{" "}
+   739→                          {formatDate(acceptance.familyAcceptedAt)}
+   740→                        </p>
+   741→                        <p>
+   742→                          <span className="text-muted-foreground">IP:</span>{" "}
+   743→                          <code className="text-xs bg-muted px-1 rounded">
+   744→                            {acceptance.familyIpAddress || "-"}
+   745→                          </code>
+   746→                        </p>
+   747→                        <p>
+   748→                          <span className="text-muted-foreground">
+   749→                            User Agent:
+   750→                          </span>{" "}
+   751→                          <span className="text-xs">
+   752→                            {acceptance.familyUserAgent?.slice(0, 50) || "-"}
+   753→                          </span>
+   754→                        </p>
+   755→                      </div>
+   756→                    </div>
+   757→                  )}
+   758→                  {acceptance.caregiverAcceptedAt && (
+   759→                    <div className="space-y-2">
+   760→                      <p className="font-medium">Profissional</p>
+   761→                      <div className="text-sm space-y-1">
+   762→                        <p>
+   763→                          <span className="text-muted-foreground">
+   764→                            Aceito em:
+   765→                          </span>{" "}
+   766→                          {formatDate(acceptance.caregiverAcceptedAt)}
+   767→                        </p>
+   768→                        <p>
+   769→                          <span className="text-muted-foreground">IP:</span>{" "}
+   770→                          <code className="text-xs bg-muted px-1 rounded">
+   771→                            {acceptance.caregiverIpAddress || "-"}
+   772→                          </code>
+   773→                        </p>
+   774→                        <p>
+   775→                          <span className="text-muted-foreground">
+   776→                            User Agent:
+   777→                          </span>{" "}
+   778→                          <span className="text-xs">
+   779→                            {acceptance.caregiverUserAgent?.slice(0, 50) || "-"}
+   780→                          </span>
+   781→                        </p>
+   782→                      </div>
+   783→                    </div>
+   784→                  )}
+   785→                </div>
+   786→              </CardContent>
+   787→            </Card>
+   788→          )}
+   789→        </TabsContent>
+   790→
+   791→        {/* Payments Tab */}
+   792→        <TabsContent value="payments" className="space-y-6">
+   793→          <Card>
+   794→            <CardHeader>
+   795→              <CardTitle className="flex items-center gap-2">
+   796→                <IconCreditCard className="h-5 w-5" />
+   797→                Pagamentos Relacionados ({payments?.length || 0})
+   798→              </CardTitle>
+   799→            </CardHeader>
+   800→            <CardContent>
+   801→              {payments && payments.length > 0 ? (
+   802→                <div className="space-y-4">
+   803→                  {payments.map((payment) => (
+   804→                    <div
+   805→                      key={payment.id}
+   806→                      className="flex items-center justify-between p-4 border rounded-lg"
+   807→                    >
+   808→                      <div className="flex items-center gap-4">
+   809→                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+   810→                          <IconCreditCard className="h-5 w-5 text-muted-foreground" />
+   811→                        </div>
+   812→                        <div>
+   813→                          <p className="font-medium">
+   814→                            {getPaymentTypeLabel(payment.type)}
+   815→                          </p>
+   816→                          <p className="text-sm text-muted-foreground">
+   817→                            {payment.provider || "Interno"} •{" "}
+   818→                            {formatDate(payment.createdAt)}
+   819→                          </p>
+   820→                        </div>
+   821→                      </div>
+   822→                      <div className="text-right">
+   823→                        <p className="font-medium">
+   824→                          {formatCurrency(payment.amountEurCents)}
+   825→                        </p>
+   826→                        <div className="mt-1">
+   827→                          {getPaymentStatusBadge(payment.status)}
+   828→                        </div>
+   829→                      </div>
+   830→                    </div>
+   831→                  ))}
+   832→                </div>
+   833→              ) : (
+   834→                <p className="text-center text-muted-foreground py-8">
+   835→                  Nenhum pagamento encontrado
+   836→                </p>
+   837→              )}
+   838→            </CardContent>
+   839→          </Card>
+   840→
+   841→          {/* Reviews */}
+   842→          {reviews && reviews.length > 0 && (
+   843→            <Card>
+   844→              <CardHeader>
+   845→                <CardTitle>Avaliações ({reviews.length})</CardTitle>
+   846→              </CardHeader>
+   847→              <CardContent className="space-y-4">
+   848→                {reviews.map((review) => (
+   849→                  <div key={review.id} className="p-4 border rounded-lg">
+   850→                    <div className="flex items-center justify-between mb-2">
+   851→                      <p className="font-medium">
+   852→                        {review.fromUserName} → {review.toUserName}
+   853→                      </p>
+   854→                      <div className="flex items-center gap-1">
+   855→                        {Array.from({ length: 5 }).map((_, i) => (
+   856→                          <span
+   857→                            key={i}
+   858→                            className={
+   859→                              i < review.rating ? "text-warning" : "text-muted"
+   860→                            }
+   861→                          >
+   862→                            ★
+   863→                          </span>
+   864→                        ))}
+   865→                      </div>
+   866→                    </div>
+   867→                    {review.comment && (
+   868→                      <p className="text-sm text-muted-foreground">
+   869→                        {review.comment}
+   870→                      </p>
+   871→                    )}
+   872→                    <p className="text-xs text-muted-foreground mt-2">
+   873→                      {formatDate(review.createdAt)}
+   874→                    </p>
+   875→                  </div>
+   876→                ))}
+   877→              </CardContent>
+   878→            </Card>
+   879→          )}
+   880→        </TabsContent>
+   881→
+   882→        {/* Dispute Tab */}
+   883→        {contract.status === "DISPUTED" && (
+   884→          <TabsContent value="dispute" className="space-y-6">
+   885→            <Card className="border-destructive">
+   886→              <CardHeader>
+   887→                <CardTitle className="flex items-center gap-2 text-destructive">
+   888→                  <IconAlertCircle className="h-5 w-5" />
+   889→                  Resolução de Disputa
+   890→                </CardTitle>
+   891→                <CardDescription>
+   892→                  Este contrato está em disputa. Resolva a situação escolhendo
+   893→                  uma das opções abaixo.
+   894→                </CardDescription>
+   895→              </CardHeader>
+   896→              <CardContent className="space-y-6">
+   897→                <div className="bg-destructive/10 p-4 rounded-lg">
+   898→                  <p className="font-medium text-destructive">
+   899→                    Contrato em Disputa
+   900→                  </p>
+   901→                  <p className="text-sm text-muted-foreground mt-1">
+   902→                    Uma disputa foi aberta e requer intervenção administrativa
+   903→                    para resolução.
+   904→                  </p>
+   905→                </div>
+   906→
+   907→                <div className="space-y-2">
+   908→                  <label className="text-sm font-medium">
+   909→                    Detalhes da Resolução
+   910→                  </label>
+   911→                  <Textarea
+   912→                    placeholder="Descreva a resolução da disputa..."
+   913→                    value={disputeResolution}
+   914→                    onChange={(e) => setDisputeResolution(e.target.value)}
+   915→                    rows={4}
+   916→                  />
+   917→                </div>
+   918→
+   919→                <Separator />
+   920→
+   921→                <div className="space-y-3">
+   922→                  <p className="font-medium">Decisão</p>
+   923→                  <div className="grid gap-3 md:grid-cols-3">
+   924→                    <Button
+   925→                      variant="outline"
+   926→                      className="justify-start h-auto py-4"
+   927→                      onClick={() => handleResolveDispute("favor_family")}
+   928→                      disabled={actionLoading || !disputeResolution.trim()}
+   929→                    >
+   930→                      <div className="text-left">
+   931→                        <p className="font-medium">Favor da Família</p>
+   932→                        <p className="text-xs text-muted-foreground mt-1">
+   933→                          Reembolso total para a família
+   934→                        </p>
+   935→                      </div>
+   936→                    </Button>
+   937→                    <Button
+   938→                      variant="outline"
+   939→                      className="justify-start h-auto py-4"
+   940→                      onClick={() => handleResolveDispute("favor_caregiver")}
+   941→                      disabled={actionLoading || !disputeResolution.trim()}
+   942→                    >
+   943→                      <div className="text-left">
+   944→                        <p className="font-medium">Favor do Profissional</p>
+   945→                        <p className="text-xs text-muted-foreground mt-1">
+   946→                          Libera pagamento ao profissional
+   947→                        </p>
+   948→                      </div>
+   949→                    </Button>
+   950→                    <Button
+   951→                      variant="outline"
+   952→                      className="justify-start h-auto py-4"
+   953→                      onClick={() => handleResolveDispute("split")}
+   954→                      disabled={actionLoading || !disputeResolution.trim()}
+   955→                    >
+   956→                      <div className="text-left">
+   957→                        <p className="font-medium">Dividir</p>
+   958→                        <p className="text-xs text-muted-foreground mt-1">
+   959→                          50% para cada parte
+   960→                        </p>
+   961→                      </div>
+   962→                    </Button>
+   963→                  </div>
+   964→                </div>
+   965→              </CardContent>
+   966→            </Card>
+   967→          </TabsContent>
+   968→        )}
+   969→
+   970→        {/* Timeline Tab */}
+   971→        <TabsContent value="timeline" className="space-y-6">
+   972→          <Card>
+   973→            <CardHeader>
+   974→              <CardTitle className="flex items-center gap-2">
+   975→                <IconClock className="h-5 w-5" />
+   976→                Histórico de Eventos
+   977→              </CardTitle>
+   978→            </CardHeader>
+   979→            <CardContent>
+   980→              <div className="relative">
+   981→                {timeline.map((event, index) => (
+   982→                  <div key={index} className="flex gap-4 pb-6 last:pb-0">
+   983→                    <div className="relative">
+   984→                      <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+   985→                        <event.icon className="h-5 w-5 text-muted-foreground" />
+   986→                      </div>
+   987→                      {index < timeline.length - 1 && (
+   988→                        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-0.5 h-full bg-muted" />
+   989→                      )}
+   990→                    </div>
+   991→                    <div className="pt-2">
+   992→                      <p className="font-medium">{event.event}</p>
+   993→                      <p className="text-sm text-muted-foreground">
+   994→                        {formatDate(event.date)}
+   995→                      </p>
+   996→                    </div>
+   997→                  </div>
+   998→                ))}
+   999→              </div>
+  1000→            </CardContent>
+  1001→          </Card>
+  1002→        </TabsContent>
+  1003→      </Tabs>
+  1004→    </div>
+  1005→  );
+  1006→}
+  1007→

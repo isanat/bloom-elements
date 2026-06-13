@@ -1,0 +1,1004 @@
+     1→'use client';
+     2→
+     3→import React, { useState, useEffect, useRef, useCallback } from 'react';
+     4→import { useSession } from 'next-auth/react';
+     5→import { MessageCircle, X, Send, ArrowLeft, Loader2, WifiOff, Bell, BellOff, ChevronDown, ChevronUp, FileText, Video, ClipboardList } from 'lucide-react';
+     6→import { useRouter } from 'next/navigation';
+     7→import { apiFetch } from '@/lib/api-client';
+     8→import { useSocketChat, ConnectionStatus, SocketChatMessage, TypingInfo } from '@/hooks/useSocketChat';
+     9→import { onChatEvent, ChatOpenPayload } from '@/lib/chat-events';
+    10→import { ScheduleInterviewDialog } from '@/components/interviews/schedule-dialog';
+    11→import { cn } from '@/lib/utils';
+    12→
+    13→// ─── Types ───────────────────────────────────────────────────────────────────
+    14→interface Contact {
+    15→  id: string;
+    16→  name: string;
+    17→  profileImage?: string;
+    18→  lastMsg: string;
+    19→  time: string;
+    20→  unread: number;
+    21→  title?: string;
+    22→  participantId?: string;
+    23→  participantRole?: string;
+    24→}
+    25→
+    26→interface Message {
+    27→  type: 'sent' | 'received';
+    28→  text: string;
+    29→  time: string;
+    30→  senderId?: string;
+    31→  senderName?: string;
+    32→  id?: string;
+    33→}
+    34→
+    35→// ─── Helpers ─────────────────────────────────────────────────────────────────
+    36→function formatTime(iso: string): string {
+    37→  try {
+    38→    const d = new Date(iso);
+    39→    const today = new Date();
+    40→    if (d.toDateString() === today.toDateString()) {
+    41→      return d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+    42→    }
+    43→    const yesterday = new Date(today);
+    44→    yesterday.setDate(today.getDate() - 1);
+    45→    if (d.toDateString() === yesterday.toDateString()) return 'Ontem';
+    46→    return d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
+    47→  } catch {
+    48→    return '';
+    49→  }
+    50→}
+    51→
+    52→/**
+    53→ * Play a pleasant notification sound using Web Audio API.
+    54→ * Uses a two-tone chime instead of a harsh beep.
+    55→ */
+    56→function playNotificationSound() {
+    57→  try {
+    58→    const ctx = new AudioContext();
+    59→
+    60→    // First tone (higher)
+    61→    const osc1 = ctx.createOscillator();
+    62→    const gain1 = ctx.createGain();
+    63→    osc1.connect(gain1);
+    64→    gain1.connect(ctx.destination);
+    65→    osc1.frequency.value = 880;
+    66→    osc1.type = 'sine';
+    67→    gain1.gain.value = 0.15;
+    68→    osc1.start(ctx.currentTime);
+    69→    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    70→    osc1.stop(ctx.currentTime + 0.15);
+    71→
+    72→    // Second tone (lower, delayed)
+    73→    const osc2 = ctx.createOscillator();
+    74→    const gain2 = ctx.createGain();
+    75→    osc2.connect(gain2);
+    76→    gain2.connect(ctx.destination);
+    77→    osc2.frequency.value = 660;
+    78→    osc2.type = 'sine';
+    79→    gain2.gain.value = 0.12;
+    80→    osc2.start(ctx.currentTime + 0.12);
+    81→    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    82→    osc2.stop(ctx.currentTime + 0.35);
+    83→  } catch {
+    84→    // Audio not available
+    85→  }
+    86→}
+    87→
+    88→/**
+    89→ * Request browser notification permission.
+    90→ */
+    91→async function requestNotificationPermission(): Promise<boolean> {
+    92→  if (typeof window === 'undefined' || !('Notification' in window)) return false;
+    93→  if (Notification.permission === 'granted') return true;
+    94→  if (Notification.permission === 'denied') return false;
+    95→  const result = await Notification.requestPermission();
+    96→  return result === 'granted';
+    97→}
+    98→
+    99→/**
+   100→ * Show a browser notification for a new chat message.
+   101→ */
+   102→function showBrowserNotification(senderName: string, message: string) {
+   103→  if (typeof window === 'undefined' || !('Notification' in window)) return;
+   104→  if (Notification.permission !== 'granted') return;
+   105→  if (document.hasFocus()) return; // Don't show if tab is focused
+   106→
+   107→  try {
+   108→    const notification = new Notification(`${senderName} — Evyra`, {
+   109→      body: message.length > 100 ? message.substring(0, 100) + '…' : message,
+   110→      icon: '/favicon.ico',
+   111→      tag: 'evyra-chat',
+   112→      silent: false,
+   113→    });
+   114→
+   115→    notification.onclick = () => {
+   116→      window.focus();
+   117→      notification.close();
+   118→    };
+   119→
+   120→    // Auto-close after 5 seconds
+   121→    setTimeout(() => notification.close(), 5000);
+   122→  } catch {
+   123→    // Notification API not available
+   124→  }
+   125→}
+   126→
+   127→// ─── Typing Indicator ────────────────────────────────────────────────────────
+   128→function TypingIndicator({ userName }: { userName: string }) {
+   129→  return (
+   130→    <div className="flex items-start gap-2">
+   131→      <div className="bg-card border border-border rounded-tl-lg rounded-2xl px-3 py-2 shadow-sm">
+   132→        <div className="flex items-center gap-1.5">
+   133→          <span className="text-xs text-muted-foreground">{userName} a escrever</span>
+   134→          <div className="flex gap-0.5">
+   135→            <span className="w-1 h-1 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+   136→            <span className="w-1 h-1 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+   137→            <span className="w-1 h-1 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+   138→          </div>
+   139→        </div>
+   140→      </div>
+   141→    </div>
+   142→  );
+   143→}
+   144→
+   145→// ─── Main ChatWidget ─────────────────────────────────────────────────────────
+   146→export function ChatWidget() {
+   147→  const { data: session } = useSession();
+   148→  const {
+   149→    connectionStatus,
+   150→    sendMessage: socketSendMessage,
+   151→    joinRoom,
+   152→    leaveRoom,
+   153→    onMessage,
+   154→    onTyping,
+   155→    onStopTyping,
+   156→    emitTyping,
+   157→    emitStopTyping,
+   158→    isUsingWebSocket,
+   159→  } = useSocketChat();
+   160→
+   161→  const [isOpen, setIsOpen] = useState(false);
+   162→  const [contacts, setContacts] = useState<Contact[]>([]);
+   163→  const [messages, setMessages] = useState<Record<string, Message[]>>({});
+   164→  const [activeContact, setActiveContact] = useState<string | null>(null);
+   165→  const [messageInput, setMessageInput] = useState('');
+   166→  const [loading, setLoading] = useState(true);
+   167→  const [sending, setSending] = useState(false);
+   168→  const [typingUsers, setTypingUsers] = useState<Record<string, { userId: string; userName: string }>>({});
+   169→  const [hasNewMessage, setHasNewMessage] = useState(false);
+   170→  const [notificationToast, setNotificationToast] = useState<{ senderName: string; text: string } | null>(null);
+   171→  const [soundEnabled, setSoundEnabled] = useState(true);
+   172→  const [hasOpenModal, setHasOpenModal] = useState(false);
+   173→  const [nextStepsExpanded, setNextStepsExpanded] = useState(false);
+   174→  const [showScheduleInterview, setShowScheduleInterview] = useState(false);
+   175→  const router = useRouter();
+   176→
+   177→  const messagesEndRef = useRef<HTMLDivElement>(null);
+   178→  const inputRef = useRef<HTMLInputElement>(null);
+   179→  const panelRef = useRef<HTMLDivElement>(null);
+   180→  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+   181→  const prevUnreadRef = useRef(0);
+   182→
+   183→  const totalUnread = contacts.reduce((a, c) => a + c.unread, 0);
+   184→  const currentContact = contacts.find(c => c.id === activeContact);
+   185→
+   186→  // Get typing user info for current room
+   187→  const currentTypingUsers = Object.values(typingUsers);
+   188→  const typingUserName = currentTypingUsers.length > 0 ? currentTypingUsers[0].userName : null;
+   189→  const isSomeoneTyping = currentTypingUsers.length > 0;
+   190→
+   191→  // Whether to show the "Próximos Passos" panel
+   192→  const isFamilyUser = session?.user?.role === 'FAMILY';
+   193→  const isChattingWithCaregiver = currentContact?.participantRole === 'CAREGIVER';
+   194→  const showNextSteps = isFamilyUser && isChattingWithCaregiver && !!currentContact?.participantId;
+   195→
+   196→  // ─── Detect open modals/dialogs to hide chat widget ────────────────────────
+   197→  useEffect(() => {
+   198→    const checkForOpenModals = () => {
+   199→      // Look specifically for Radix Dialog content elements (have both data-state and role="dialog")
+   200→      // and Radix Dialog overlay elements, which indicate a modal is open.
+   201→      // The chat widget's own panel has role="dialog" but NOT data-state, so we use
+   202→      // [data-state="open"] combined with [role="dialog"] to avoid false positives.
+   203→      const radixDialogs = document.querySelectorAll('[data-state="open"][role="dialog"]');
+   204→      const radixOverlays = document.querySelectorAll('[data-state="open"][data-radix-overlay]');
+   205→      setHasOpenModal(radixDialogs.length > 0 || radixOverlays.length > 0);
+   206→    };
+   207→
+   208→    const observer = new MutationObserver(checkForOpenModals);
+   209→    observer.observe(document.body, {
+   210→      childList: true,
+   211→      subtree: true,
+   212→      attributes: true,
+   213→      attributeFilter: ['data-state'],
+   214→    });
+   215→
+   216→    // Initial check
+   217→    checkForOpenModals();
+   218→
+   219→    return () => observer.disconnect();
+   220→  }, []);
+   221→
+   222→  // ─── Request notification permission on mount ─────────────────────────────
+   223→  useEffect(() => {
+   224→    requestNotificationPermission();
+   225→  }, []);
+   226→
+   227→  // ─── Listen for open-chat events ──────────────────────────────────────────
+   228→  useEffect(() => {
+   229→    const unsubscribe = onChatEvent('open-chat', async (payload?: ChatOpenPayload) => {
+   230→      // Open the widget
+   231→      setIsOpen(true);
+   232→
+   233→      if (payload?.roomId) {
+   234→        // Open specific room
+   235→        await fetchRooms();
+   236→        selectContact(payload.roomId);
+   237→      } else if (payload?.userId) {
+   238→        // Create or find room with this user, then open it
+   239→        try {
+   240→          const res = await apiFetch('/api/chat/rooms', {
+   241→            method: 'POST',
+   242→            headers: { 'Content-Type': 'application/json' },
+   243→            body: JSON.stringify({ participantId: payload.userId }),
+   244→          });
+   245→          if (res.ok) {
+   246→            const data = await res.json();
+   247→            if (data.chatRoomId) {
+   248→              await fetchRooms();
+   249→              selectContact(data.chatRoomId);
+   250→            }
+   251→          }
+   252→        } catch {
+   253→          // Room creation failed, just open the widget
+   254→        }
+   255→      } else {
+   256→        // Just open to contact list
+   257→        fetchRooms();
+   258→      }
+   259→    });
+   260→
+   261→    return unsubscribe;
+   262→  }, []);
+   263→
+   264→  // ─── Fetch rooms ──────────────────────────────────────────────────────────
+   265→  const fetchRooms = useCallback(async () => {
+   266→    try {
+   267→      const res = await apiFetch('/api/chat/rooms');
+   268→      if (res.ok) {
+   269→        const data = await res.json();
+   270→        const rooms = (data.chatRooms || []).map((r: any) => ({
+   271→          id: r.id,
+   272→          name: r.participant?.name || 'Desconhecido',
+   273→          profileImage: r.participant?.profileImage || '',
+   274→          title: r.participant?.title,
+   275→          lastMsg: r.lastMessage?.content || '',
+   276→          time: r.lastMessage?.createdAt ? formatTime(r.lastMessage.createdAt) : '',
+   277→          unread: r.unreadCount || 0,
+   278→          participantId: r.participant?.id,
+   279→          participantRole: r.participant?.role,
+   280→        }));
+   281→        setContacts(rooms);
+   282→
+   283→        // Check for new unread messages (notification trigger)
+   284→        const newTotalUnread = rooms.reduce((a: number, c: any) => a + c.unread, 0);
+   285→        if (newTotalUnread > prevUnreadRef.current && prevUnreadRef.current >= 0) {
+   286→          // Find which contact has new unread messages
+   287→          const newUnreadContact = rooms.find((c: any) => c.unread > 0);
+   288→          if (newUnreadContact && (!isOpen || activeContact !== newUnreadContact.id)) {
+   289→            // Play notification sound
+   290→            if (soundEnabled) {
+   291→              playNotificationSound();
+   292→            }
+   293→
+   294→            // Show in-app toast notification
+   295→            setNotificationToast({
+   296→              senderName: newUnreadContact.name,
+   297→              text: newUnreadContact.lastMsg,
+   298→            });
+   299→            setTimeout(() => setNotificationToast(null), 4000);
+   300→
+   301→            // Show browser notification
+   302→            showBrowserNotification(newUnreadContact.name, newUnreadContact.lastMsg);
+   303→
+   304→            // Visual pulse
+   305→            setHasNewMessage(true);
+   306→            setTimeout(() => setHasNewMessage(false), 3000);
+   307→          }
+   308→        }
+   309→        prevUnreadRef.current = newTotalUnread;
+   310→      }
+   311→    } catch {}
+   312→  }, [isOpen, activeContact, soundEnabled]);
+   313→
+   314→  // ─── Initial room fetch ───────────────────────────────────────────────────
+   315→  useEffect(() => {
+   316→    fetchRooms().finally(() => setLoading(false));
+   317→  }, [fetchRooms]);
+   318→
+   319→  // ─── Periodic refresh for unread counts + new message detection ───────────
+   320→  useEffect(() => {
+   321→    const interval = setInterval(fetchRooms, 5000);
+   322→    return () => clearInterval(interval);
+   323→  }, [fetchRooms]);
+   324→
+   325→  // ─── Fallback polling when WebSocket is not available ─────────────────────
+   326→  useEffect(() => {
+   327→    if (!isUsingWebSocket && activeContact) {
+   328→      pollingIntervalRef.current = setInterval(async () => {
+   329→        if (!activeContact) return;
+   330→        try {
+   331→          const res = await apiFetch(`/api/chat/messages?chatRoomId=${activeContact}`);
+   332→          if (res.ok) {
+   333→            const data = await res.json();
+   334→            setMessages(prev => ({
+   335→              ...prev,
+   336→              [activeContact]: (data.messages || []).map((m: any) => ({
+   337→                type: m.senderId === session?.user?.id ? 'sent' : 'received',
+   338→                text: m.content,
+   339→                time: formatTime(m.createdAt),
+   340→                senderId: m.senderId,
+   341→                senderName: m.senderName,
+   342→                id: m.id,
+   343→              })),
+   344→            }));
+   345→          }
+   346→        } catch {}
+   347→      }, 3000);
+   348→    }
+   349→
+   350→    return () => {
+   351→      if (pollingIntervalRef.current) {
+   352→        clearInterval(pollingIntervalRef.current);
+   353→      }
+   354→    };
+   355→  }, [isUsingWebSocket, activeContact, session?.user?.id]);
+   356→
+   357→  // ─── Scroll to bottom on new messages ─────────────────────────────────────
+   358→  useEffect(() => {
+   359→    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+   360→  }, [messages, activeContact, typingUsers]);
+   361→
+   362→  // ─── Socket.io: handle incoming messages ──────────────────────────────────
+   363→  useEffect(() => {
+   364→    const unsubscribe = onMessage((message: SocketChatMessage) => {
+   365→      if (!message.chatRoomId) return;
+   366→
+   367→      // Skip messages from self
+   368→      if (message.senderId === session?.user?.id) return;
+   369→
+   370→      setMessages(prev => {
+   371→        const existing = prev[message.chatRoomId] || [];
+   372→        const isDuplicate = existing.some(
+   373→          m => m.id === message.id || (m.senderId === message.senderId && m.text === message.content && Math.abs(new Date(m.time).getTime() - new Date(message.createdAt).getTime()) < 5000)
+   374→        );
+   375→        if (isDuplicate) return prev;
+   376→
+   377→        return {
+   378→          ...prev,
+   379→          [message.chatRoomId]: [...existing, {
+   380→            type: 'received' as const,
+   381→            text: message.content,
+   382→            time: formatTime(message.createdAt),
+   383→            senderId: message.senderId,
+   384→            senderName: message.senderName,
+   385→            id: message.id,
+   386→          }],
+   387→        };
+   388→      });
+   389→
+   390→      // Clear typing for the sender
+   391→      setTypingUsers(prev => {
+   392→        const updated = { ...prev };
+   393→        if (updated[message.senderId]?.userId === message.senderId) {
+   394→          delete updated[message.senderId];
+   395→        }
+   396→        return updated;
+   397→      });
+   398→
+   399→      // Play notification sound and show visual indicator
+   400→      if (soundEnabled) {
+   401→        playNotificationSound();
+   402→      }
+   403→
+   404→      // Show in-app notification toast
+   405→      setNotificationToast({
+   406→        senderName: message.senderName || 'Alguém',
+   407→        text: message.content,
+   408→      });
+   409→      setTimeout(() => setNotificationToast(null), 4000);
+   410→
+   411→      // Show browser notification
+   412→      showBrowserNotification(message.senderName || 'Alguém', message.content);
+   413→
+   414→      // Visual pulse on FAB
+   415→      setHasNewMessage(true);
+   416→      setTimeout(() => setHasNewMessage(false), 3000);
+   417→
+   418→      // Refresh room list to update last message & unread
+   419→      fetchRooms();
+   420→    });
+   421→
+   422→    return unsubscribe;
+   423→  }, [onMessage, session?.user?.id, fetchRooms, soundEnabled]);
+   424→
+   425→  // ─── Socket.io: handle typing indicators ──────────────────────────────────
+   426→  useEffect(() => {
+   427→    const unsubTyping = onTyping((info: TypingInfo) => {
+   428→      if (info.userId === session?.user?.id) return;
+   429→      setTypingUsers(prev => ({ ...prev, [info.userId]: info }));
+   430→    });
+   431→
+   432→    const unsubStopTyping = onStopTyping((info: TypingInfo) => {
+   433→      setTypingUsers(prev => {
+   434→        const updated = { ...prev };
+   435→        delete updated[info.userId];
+   436→        return updated;
+   437→      });
+   438→    });
+   439→
+   440→    return () => {
+   441→      unsubTyping();
+   442→      unsubStopTyping();
+   443→    };
+   444→  }, [onTyping, onStopTyping, session?.user?.id]);
+   445→
+   446→  // ─── Join/leave rooms when active contact changes ─────────────────────────
+   447→  useEffect(() => {
+   448→    if (activeContact && isUsingWebSocket) {
+   449→      joinRoom(activeContact);
+   450→      return () => {
+   451→        leaveRoom(activeContact);
+   452→      };
+   453→    }
+   454→  }, [activeContact, isUsingWebSocket, joinRoom, leaveRoom]);
+   455→
+   456→  // ─── Select a contact and load messages ───────────────────────────────────
+   457→  const selectContact = useCallback(async (id: string) => {
+   458→    setActiveContact(id);
+   459→    setTypingUsers({});
+   460→    setNextStepsExpanded(false);
+   461→    try {
+   462→      const res = await apiFetch(`/api/chat/messages?chatRoomId=${id}`);
+   463→      if (res.ok) {
+   464→        const data = await res.json();
+   465→        setMessages(prev => ({
+   466→          ...prev,
+   467→          [id]: (data.messages || []).map((m: any) => ({
+   468→            type: m.senderId === session?.user?.id ? 'sent' : 'received',
+   469→            text: m.content,
+   470→            time: formatTime(m.createdAt),
+   471→            senderId: m.senderId,
+   472→            senderName: m.senderName,
+   473→            id: m.id,
+   474→          })),
+   475→        }));
+   476→      }
+   477→
+   478→      // Mark messages as read
+   479→      await apiFetch('/api/chat/messages/read', {
+   480→        method: 'POST',
+   481→        body: JSON.stringify({ chatRoomId: id }),
+   482→      }).catch(() => {});
+   483→
+   484→      // Refresh rooms to update unread count
+   485→      fetchRooms();
+   486→
+   487→      // Focus input after a short delay
+   488→      setTimeout(() => inputRef.current?.focus(), 100);
+   489→    } catch {}
+   490→  }, [session?.user?.id, fetchRooms]);
+   491→
+   492→  // ─── Go back to contact list ──────────────────────────────────────────────
+   493→  const goBackToContacts = () => {
+   494→    if (activeContact) {
+   495→      leaveRoom(activeContact);
+   496→    }
+   497→    setActiveContact(null);
+   498→    setMessageInput('');
+   499→    setTypingUsers({});
+   500→    setNextStepsExpanded(false);
+   501→  };
+   502→
+   503→  // ─── Send message ─────────────────────────────────────────────────────────
+   504→  const sendMessage = async (content: string) => {
+   505→    if (!content.trim() || !activeContact || sending) return;
+   506→    const text = content.trim();
+   507→    setMessageInput('');
+   508→    emitStopTyping(activeContact);
+   509→    setSending(true);
+   510→
+   511→    try {
+   512→      const res = await apiFetch('/api/chat/messages', {
+   513→        method: 'POST',
+   514→        headers: { 'Content-Type': 'application/json' },
+   515→        body: JSON.stringify({
+   516→          chatRoomId: activeContact,
+   517→          content: text,
+   518→        }),
+   519→      });
+   520→
+   521→      if (res.ok) {
+   522→        const data = await res.json();
+   523→        const msgData = data.message;
+   524→        const now = msgData?.createdAt ? formatTime(msgData.createdAt) : new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+   525→
+   526→        setMessages(prev => {
+   527→          const existing = prev[activeContact] || [];
+   528→          const isDuplicate = existing.some(m => m.id === msgData?.id);
+   529→          if (isDuplicate) return prev;
+   530→
+   531→          return {
+   532→            ...prev,
+   533→            [activeContact]: [...existing, {
+   534→              type: 'sent' as const,
+   535→              text,
+   536→              time: now,
+   537→              senderId: session?.user?.id,
+   538→              id: msgData?.id,
+   539→            }],
+   540→          };
+   541→        });
+   542→
+   543→        // Send via WebSocket for real-time delivery
+   544→        if (isUsingWebSocket) {
+   545→          socketSendMessage(activeContact, text, msgData?.id);
+   546→        }
+   547→
+   548→        // Refresh rooms to update last message
+   549→        fetchRooms();
+   550→      }
+   551→    } catch {} finally {
+   552→      setSending(false);
+   553→    }
+   554→  };
+   555→
+   556→  // ─── Handle input change with typing indicator ────────────────────────────
+   557→  const handleInputChange = (value: string) => {
+   558→    setMessageInput(value);
+   559→    if (activeContact && value.trim()) {
+   560→      emitTyping(activeContact);
+   561→    } else if (activeContact) {
+   562→      emitStopTyping(activeContact);
+   563→    }
+   564→  };
+   565→
+   566→  // ─── Toggle panel open/close ──────────────────────────────────────────────
+   567→  const togglePanel = () => {
+   568→    setIsOpen(prev => !prev);
+   569→    if (!isOpen) {
+   570→      // Opening panel: refresh rooms
+   571→      fetchRooms();
+   572→    } else {
+   573→      // Closing panel: if in a conversation, go back
+   574→      goBackToContacts();
+   575→    }
+   576→  };
+   577→
+   578→  // ─── Close panel ──────────────────────────────────────────────────────────
+   579→  const closePanel = () => {
+   580→    setIsOpen(false);
+   581→    goBackToContacts();
+   582→  };
+   583→
+   584→  // ─── Handle notification toast click ──────────────────────────────────────
+   585→  const handleNotificationClick = () => {
+   586→    setNotificationToast(null);
+   587→    setIsOpen(true);
+   588→    fetchRooms();
+   589→  };
+   590→
+   591→  return (
+   592→    <>
+   593→      {/* ─── In-App Notification Toast ──────────────────────────────────────── */}
+   594→      {notificationToast && !isOpen && !hasOpenModal && (
+   595→        <div
+   596→          onClick={handleNotificationClick}
+   597→          className={cn(
+   598→            "fixed z-[46] cursor-pointer",
+   599→            "bottom-[7rem] md:bottom-24 right-4 md:right-6",
+   600→            "max-w-[300px] w-[calc(100%-2rem)] md:w-auto",
+   601→            "bg-card border border-border rounded-2xl shadow-2xl p-3",
+   602→            "animate-in slide-in-from-right-5 fade-in-0 duration-300",
+   603→            "hover:shadow-xl hover:border-primary/30 transition-all",
+   604→            "flex items-center gap-3"
+   605→          )}
+   606→          role="alert"
+   607→        >
+   608→          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+   609→            <MessageCircle className="h-4 w-4 text-primary" />
+   610→          </div>
+   611→          <div className="flex-1 min-w-0">
+   612→            <p className="text-xs font-display font-bold text-foreground truncate">{notificationToast.senderName}</p>
+   613→            <p className="text-[11px] text-muted-foreground truncate">{notificationToast.text}</p>
+   614→          </div>
+   615→          <button
+   616→            onClick={(e) => {
+   617→              e.stopPropagation();
+   618→              setNotificationToast(null);
+   619→            }}
+   620→            className="p-1 hover:bg-accent rounded-lg transition-colors shrink-0"
+   621→            aria-label="Fechar notificação"
+   622→          >
+   623→            <X className="h-3 w-3 text-muted-foreground" />
+   624→          </button>
+   625→        </div>
+   626→      )}
+   627→
+   628→      {/* ─── Floating Bubble Button ──────────────────────────────────────────── */}
+   629→      {!hasOpenModal && (
+   630→        <button
+   631→          onClick={togglePanel}
+   632→          className={cn(
+   633→            "fixed z-[45] flex items-center justify-center",
+   634→            "w-14 h-14 rounded-full shadow-lg hover:shadow-xl",
+   635→            "bg-primary text-primary-foreground",
+   636→            "transition-all duration-300 hover:scale-105 active:scale-95",
+   637→            "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2",
+   638→            // Pulse animation when there are unread messages
+   639→            totalUnread > 0 && !isOpen && "animate-[pulse_2s_ease-in-out_infinite]",
+   640→            // Extra bounce when new message arrives
+   641→            hasNewMessage && !isOpen && "animate-[bounce_0.5s_ease-in-out]",
+   642→            // Desktop position
+   643→            "md:bottom-6 md:right-6",
+   644→            // Mobile: above bottom nav with safe area
+   645→            "bottom-[6.5rem] right-4",
+   646→            // iOS safe area inset
+   647→            "[padding-bottom:env(safe-area-inset-bottom)]"
+   648→          )}
+   649→          aria-label={isOpen ? 'Fechar chat' : 'Abrir chat'}
+   650→        >
+   651→          {isOpen ? (
+   652→            <X className="h-6 w-6" />
+   653→          ) : (
+   654→            <MessageCircle className="h-6 w-6" />
+   655→          )}
+   656→
+   657→          {/* Unread badge */}
+   658→          {totalUnread > 0 && !isOpen && (
+   659→            <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-destructive text-destructive-foreground text-xs font-display font-bold shadow-md">
+   660→              {totalUnread > 99 ? '99+' : totalUnread}
+   661→            </span>
+   662→          )}
+   663→        </button>
+   664→      )}
+   665→
+   666→      {/* ─── Chat Panel ─────────────────────────────────────────────────────── */}
+   667→      <div
+   668→        ref={panelRef}
+   669→        className={cn(
+   670→          "fixed z-[44] transition-all duration-300 ease-in-out",
+   671→          // Desktop: fixed width, anchored bottom-right
+   672→          "md:w-[380px] md:bottom-24 md:right-6",
+   673→          // Mobile: full width, anchored above bottom nav with safe area
+   674→          "w-[calc(100%-1.5rem)] bottom-[6.5rem] right-3 md:right-6",
+   675→          // iOS safe area bottom inset on mobile
+   676→          "md:[bottom:6rem] [padding-bottom:env(safe-area-inset-bottom)]",
+   677→          // Open/closed states
+   678→          isOpen && !hasOpenModal
+   679→            ? "opacity-100 translate-y-0 pointer-events-auto"
+   680→            : "opacity-0 translate-y-4 pointer-events-none",
+   681→          // Height
+   682→          "h-[70vh] md:h-[520px]",
+   683→          // Styling
+   684→          "bg-card border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+   685→        )}
+   686→        role="dialog"
+   687→        aria-label="Chat"
+   688→      >
+   689→        {/* ─── Panel Header ──────────────────────────────────────────────────── */}
+   690→        <div className="flex items-center justify-between p-4 border-b border-border bg-card shrink-0">
+   691→          <div className="flex items-center gap-3">
+   692→            {activeContact && (
+   693→              <button
+   694→                onClick={goBackToContacts}
+   695→                className="p-1.5 hover:bg-accent rounded-xl transition-colors text-muted-foreground hover:text-foreground"
+   696→                aria-label="Voltar às conversas"
+   697→              >
+   698→                <ArrowLeft className="h-4 w-4" />
+   699→              </button>
+   700→            )}
+   701→            <div>
+   702→              <h2 className="font-display font-bold text-sm text-foreground tracking-tight truncate" title={activeContact && currentContact ? currentContact.name : undefined}>
+   703→                {activeContact && currentContact ? currentContact.name : 'Mensagens'}
+   704→              </h2>
+   705→              {activeContact && currentContact?.title && (
+   706→                <p className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   707→                  {currentContact.title}
+   708→                </p>
+   709→              )}
+   710→              {!activeContact && totalUnread > 0 && (
+   711→                <p className="text-xs font-display text-primary font-bold">
+   712→                  {totalUnread} {totalUnread === 1 ? 'nova mensagem' : 'novas mensagens'}
+   713→                </p>
+   714→              )}
+   715→            </div>
+   716→          </div>
+   717→          <div className="flex items-center gap-1.5">
+   718→            {/* Sound toggle */}
+   719→            <button
+   720→              onClick={() => setSoundEnabled(prev => !prev)}
+   721→              className="p-1.5 hover:bg-accent rounded-xl transition-colors text-muted-foreground hover:text-foreground"
+   722→              aria-label={soundEnabled ? 'Desativar som' : 'Ativar som'}
+   723→              title={soundEnabled ? 'Som ativado' : 'Som desativado'}
+   724→            >
+   725→              {soundEnabled ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
+   726→            </button>
+   727→            {/* Connection indicator (compact) */}
+   728→            {connectionStatus === 'disconnected' && (
+   729→              <WifiOff className="h-3.5 w-3.5 text-red-400" />
+   730→            )}
+   731→            {connectionStatus === 'connecting' && (
+   732→              <Loader2 className="h-3.5 w-3.5 text-amber-500 animate-spin" />
+   733→            )}
+   734→            <button
+   735→              onClick={closePanel}
+   736→              className="p-1.5 hover:bg-accent rounded-xl transition-colors text-muted-foreground hover:text-foreground"
+   737→              aria-label="Fechar"
+   738→            >
+   739→              <X className="h-4 w-4" />
+   740→            </button>
+   741→          </div>
+   742→        </div>
+   743→
+   744→        {/* ─── Panel Body ────────────────────────────────────────────────────── */}
+   745→        <div className="flex-1 overflow-hidden relative">
+   746→          {/* ─── Contact List View ────────────────────────────────────────────── */}
+   747→          {!activeContact && (
+   748→            <div className="h-full overflow-y-auto">
+   749→              {loading ? (
+   750→                <div className="flex items-center justify-center h-32">
+   751→                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+   752→                </div>
+   753→              ) : contacts.length === 0 ? (
+   754→                <div className="flex flex-col items-center justify-center h-48 gap-2 px-6 text-center">
+   755→                  <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center mb-2">
+   756→                    <MessageCircle className="h-5 w-5 text-muted-foreground" />
+   757→                  </div>
+   758→                  <p className="text-sm font-display font-bold text-muted-foreground">Nenhuma conversa</p>
+   759→                  <p className="text-xs text-muted-foreground/70">As mensagens aparecem aqui</p>
+   760→                </div>
+   761→              ) : (
+   762→                <div className="py-1">
+   763→                  {contacts.map(contact => (
+   764→                    <button
+   765→                      key={contact.id}
+   766→                      onClick={() => selectContact(contact.id)}
+   767→                      className={cn(
+   768→                        "w-full p-3 flex gap-3 hover:bg-secondary transition-colors text-left group",
+   769→                        contact.unread > 0 && "bg-primary/5"
+   770→                      )}
+   771→                    >
+   772→                      {/* Avatar */}
+   773→                      <div className="w-10 h-10 rounded-2xl shrink-0 shadow-sm border-2 border-card flex items-center justify-center font-display font-black text-foreground overflow-hidden bg-secondary">
+   774→                        {contact.profileImage ? (
+   775→                          <img src={contact.profileImage} alt={contact.name} className="w-full h-full object-cover" />
+   776→                        ) : (
+   777→                          <span className="text-sm">{contact.name.charAt(0).toUpperCase()}</span>
+   778→                        )}
+   779→                      </div>
+   780→
+   781→                      {/* Info */}
+   782→                      <div className="flex-1 overflow-hidden min-w-0">
+   783→                        <div className="flex justify-between items-center mb-0.5">
+   784→                          <span className={cn(
+   785→                            "font-display text-sm truncate",
+   786→                            contact.unread > 0 ? "font-bold text-foreground" : "font-medium text-foreground/80"
+   787→                          )} title={contact.name}>{contact.name}</span>
+   788→                          <span className="text-xs font-medium text-muted-foreground/50 shrink-0 ml-2">{contact.time}</span>
+   789→                        </div>
+   790→                        <div className="flex items-center justify-between">
+   791→                          <p className={cn(
+   792→                            "text-xs truncate",
+   793→                            contact.unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"
+   794→                          )}>{contact.lastMsg}</p>
+   795→                          {contact.unread > 0 && (
+   796→                            <span className="ml-2 w-5 h-5 bg-primary text-primary-foreground rounded-full text-xs font-bold flex items-center justify-center shrink-0">
+   797→                              {contact.unread > 99 ? '99+' : contact.unread}
+   798→                            </span>
+   799→                          )}
+   800→                        </div>
+   801→                      </div>
+   802→                    </button>
+   803→                  ))}
+   804→                </div>
+   805→              )}
+   806→            </div>
+   807→          )}
+   808→
+   809→          {/* ─── Conversation View ────────────────────────────────────────────── */}
+   810→          {activeContact && currentContact && (
+   811→            <div className="flex flex-col h-full">
+   812→              {/* Messages */}
+   813→              <div className="flex-1 p-4 space-y-3 overflow-y-auto">
+   814→                {(messages[activeContact] || []).map((msg, i) => (
+   815→                  <div
+   816→                    key={msg.id || i}
+   817→                    className={cn(
+   818→                      "flex flex-col",
+   819→                      msg.type === 'sent' ? 'items-end' : 'items-start'
+   820→                    )}
+   821→                  >
+   822→                    <div
+   823→                      className={cn(
+   824→                        "max-w-[85%] p-2.5 rounded-2xl text-sm font-medium leading-relaxed shadow-sm",
+   825→                        msg.type === 'sent'
+   826→                          ? 'bg-primary text-primary-foreground rounded-tr-lg'
+   827→                          : 'bg-secondary text-foreground rounded-tl-lg border border-border'
+   828→                      )}
+   829→                    >
+   830→                      {msg.text}
+   831→                    </div>
+   832→                    <span className="text-xs font-display font-bold text-muted-foreground/50 mt-1 mx-1 tracking-wide">
+   833→                      {msg.time}
+   834→                    </span>
+   835→                  </div>
+   836→                ))}
+   837→
+   838→                {/* Typing indicator */}
+   839→                {isSomeoneTyping && typingUserName && (
+   840→                  <TypingIndicator userName={typingUserName} />
+   841→                )}
+   842→
+   843→                <div ref={messagesEndRef} />
+   844→              </div>
+   845→
+   846→              {/* ─── Próximos Passos Panel ─────────────────────────────── */}
+   847→              {showNextSteps && (
+   848→                <div className="px-3 pb-1 shrink-0">
+   849→                  {/* Toggle hint */}
+   850→                  <button
+   851→                    onClick={() => setNextStepsExpanded(prev => !prev)}
+   852→                    className={cn(
+   853→                      "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl transition-all",
+   854→                      "text-xs font-display font-bold text-primary hover:bg-primary/5"
+   855→                    )}
+   856→                  >
+   857→                    <span className="flex items-center gap-1.5">
+   858→                      <span>💡</span>
+   859→                      <span>Próximos passos</span>
+   860→                    </span>
+   861→                    {nextStepsExpanded ? (
+   862→                      <ChevronUp className="h-3.5 w-3.5" />
+   863→                    ) : (
+   864→                      <ChevronDown className="h-3.5 w-3.5" />
+   865→                    )}
+   866→                  </button>
+   867→
+   868→                  {/* Expanded action cards */}
+   869→                  {nextStepsExpanded && (
+   870→                    <div className="grid grid-cols-1 gap-2 mt-1 pb-1">
+   871→                      {/* Criar Demanda */}
+   872→                      <button
+   873→                        onClick={() => router.push('/app/family/demands/new')}
+   874→                        className={cn(
+   875→                          "flex items-center gap-3 w-full p-3 rounded-2xl border border-border bg-card",
+   876→                          "hover:shadow-md hover:border-primary/30 transition-all text-left group"
+   877→                        )}
+   878→                      >
+   879→                        <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+   880→                          <ClipboardList className="h-4 w-4 text-primary" />
+   881→                        </div>
+   882→                        <div className="flex-1 min-w-0">
+   883→                          <p className="text-xs font-display font-bold text-foreground">Criar Demanda</p>
+   884→                          <p className="text-[10px] text-muted-foreground leading-tight">Publique a sua necessidade e receba propostas</p>
+   885→                        </div>
+   886→                      </button>
+   887→
+   888→                      {/* Agendar Entrevista */}
+   889→                      <button
+   890→                        onClick={() => setShowScheduleInterview(true)}
+   891→                        className={cn(
+   892→                          "flex items-center gap-3 w-full p-3 rounded-2xl border border-border bg-card",
+   893→                          "hover:shadow-md hover:border-primary/30 transition-all text-left group"
+   894→                        )}
+   895→                      >
+   896→                        <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+   897→                          <Video className="h-4 w-4 text-primary" />
+   898→                        </div>
+   899→                        <div className="flex-1 min-w-0">
+   900→                          <p className="text-xs font-display font-bold text-foreground">Agendar Entrevista</p>
+   901→                          <p className="text-[10px] text-muted-foreground leading-tight">Conheça o profissional por vídeo</p>
+   902→                        </div>
+   903→                      </button>
+   904→
+   905→                      {/* Iniciar Contrato */}
+   906→                      <button
+   907→                        onClick={() => router.push(`/app/contracts/new?caregiverId=${currentContact!.participantId}`)}
+   908→                        className={cn(
+   909→                          "flex items-center gap-3 w-full p-3 rounded-2xl border border-border bg-card",
+   910→                          "hover:shadow-md hover:border-primary/30 transition-all text-left group"
+   911→                        )}
+   912→                      >
+   913→                        <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+   914→                          <FileText className="h-4 w-4 text-primary" />
+   915→                        </div>
+   916→                        <div className="flex-1 min-w-0">
+   917→                          <p className="text-xs font-display font-bold text-foreground">Iniciar Contrato</p>
+   918→                          <p className="text-[10px] text-muted-foreground leading-tight">Formalize o acordo com o profissional</p>
+   919→                        </div>
+   920→                      </button>
+   921→                    </div>
+   922→                  )}
+   923→                </div>
+   924→              )}
+   925→
+   926→              {/* Schedule Interview Dialog */}
+   927→              {showNextSteps && currentContact?.participantId && (
+   928→                <ScheduleInterviewDialog
+   929→                  caregiverUserId={currentContact.participantId}
+   930→                  caregiverName={currentContact.name}
+   931→                  open={showScheduleInterview}
+   932→                  onOpenChange={setShowScheduleInterview}
+   933→                />
+   934→              )}
+   935→
+   936→              {/* Message Input */}
+   937→              <div className="p-3 border-t border-border bg-card shrink-0">
+   938→                {/* Connection status (only when not connected) */}
+   939→                {connectionStatus !== 'connected' && connectionStatus !== 'rest-only' && (
+   940→                  <div className="flex items-center gap-1.5 mb-2 px-1">
+   941→                    {connectionStatus === 'connecting' ? (
+   942→                      <>
+   943→                        <Loader2 size={10} className="animate-spin text-amber-500" />
+   944→                        <span className="text-xs text-amber-600 font-medium">A ligar...</span>
+   945→                      </>
+   946→                    ) : (
+   947→                      <>
+   948→                        <WifiOff size={10} className="text-red-400" />
+   949→                        <span className="text-xs text-red-500 font-medium">Sem ligação em tempo real</span>
+   950→                      </>
+   951→                    )}
+   952→                  </div>
+   953→                )}
+   954→
+   955→                <div className="flex items-center gap-2 bg-secondary border-2 border-border rounded-2xl px-3 py-2 focus-within:border-primary focus-within:bg-card transition-all">
+   956→                  <input
+   957→                    ref={inputRef}
+   958→                    className="bg-transparent flex-1 outline-none text-sm font-medium text-foreground placeholder:text-muted-foreground min-w-0"
+   959→                    placeholder="Escreva aqui..."
+   960→                    value={messageInput}
+   961→                    onChange={e => handleInputChange(e.target.value)}
+   962→                    onKeyDown={e => {
+   963→                      if (e.key === 'Enter' && !e.shiftKey) {
+   964→                        e.preventDefault();
+   965→                        sendMessage(messageInput);
+   966→                      }
+   967→                    }}
+   968→                    disabled={sending}
+   969→                  />
+   970→                  <button
+   971→                    onClick={() => sendMessage(messageInput)}
+   972→                    disabled={sending || !messageInput.trim()}
+   973→                    className={cn(
+   974→                      "bg-primary text-primary-foreground p-2 rounded-xl shadow-md",
+   975→                      "hover:scale-105 active:scale-95 transition-all shrink-0",
+   976→                      "disabled:opacity-50 disabled:hover:scale-100"
+   977→                    )}
+   978→                    aria-label="Enviar mensagem"
+   979→                  >
+   980→                    {sending ? (
+   981→                      <Loader2 className="h-4 w-4 animate-spin" />
+   982→                    ) : (
+   983→                      <Send className="h-4 w-4" />
+   984→                    )}
+   985→                  </button>
+   986→                </div>
+   987→              </div>
+   988→            </div>
+   989→          )}
+   990→        </div>
+   991→      </div>
+   992→
+   993→      {/* ─── Backdrop (mobile only) ─────────────────────────────────────────── */}
+   994→      {isOpen && !hasOpenModal && (
+   995→        <div
+   996→          className="fixed inset-0 bg-black/20 z-[43] md:hidden"
+   997→          onClick={closePanel}
+   998→          aria-hidden="true"
+   999→        />
+  1000→      )}
+  1001→    </>
+  1002→  );
+  1003→}
+  1004→

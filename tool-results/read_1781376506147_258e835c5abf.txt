@@ -1,0 +1,1531 @@
+     1→"use client";
+     2→
+     3→import { useState, useEffect, use } from "react";
+     4→import { hasRole, UserRole } from "@/lib/roles";
+     5→import { useSession } from "next-auth/react";
+     6→import Link from "next/link";
+     7→import { useRouter } from "next/navigation";
+     8→import { apiFetch } from "@/lib/api-client";
+     9→import { ensureServiceTypesArray } from "@/lib/service-types";
+    10→import { toast } from "sonner";
+    11→import { Button } from "@/components/ui/button";
+    12→import { BloomBadge, BloomCard, BloomAlert, DocCard } from "@/components/bloom-custom";
+    13→import { Checkbox } from "@/components/ui/checkbox";
+    14→import { Input } from "@/components/ui/input";
+    15→import { Label } from "@/components/ui/label";
+    16→import { Textarea } from "@/components/ui/textarea";
+    17→import {
+    18→  Dialog,
+    19→  DialogContent,
+    20→  DialogHeader,
+    21→  DialogTitle,
+    22→  DialogDescription,
+    23→  DialogFooter,
+    24→} from "@/components/ui/dialog";
+    25→import {
+    26→  IconContract,
+    27→  IconUser,
+    28→  IconCalendar,
+    29→  IconClock,
+    30→  IconCheck,
+    31→  IconAlertCircle,
+    32→  IconShield,
+    33→  IconArrowLeft,
+    34→  IconLoader2,
+    35→  IconChat,
+    36→  IconPhone,
+    37→  IconQrCode,
+    38→} from "@/components/icons";
+    39→import { CONTRACT_STATUS, SERVICE_TYPES } from "@/lib/constants";
+    40→import { useI18n } from "@/lib/i18n";
+    41→import { openChat } from "@/lib/chat-events";
+    42→import { PaymentSection } from "@/components/contracts/payment-section";
+    43→import { ReviewSection } from "@/components/contracts/review-section";
+    44→import { WeeklyApprovalPanel } from "@/components/contracts/weekly-approval-panel";
+    45→import { QRGenerator, QRHistory } from "@/components/qr";
+    46→import { PageLayout } from "@/components/layout/PageLayout";
+    47→
+    48→interface ContractDetails {
+    49→  id: string;
+    50→  status: string;
+    51→  title: string;
+    52→  description: string;
+    53→  hourlyRateEur: number;
+    54→  totalHours: number;
+    55→  totalEurCents: number;
+    56→  startDate: string;
+    57→  endDate: string;
+    58→  createdAt: string;
+    59→  serviceTypes: string[];
+    60→  hoursPerWeek: number;
+    61→  caregiverId?: string;
+    62→  familyId?: string;
+    63→  weeklyPaymentEnabled?: boolean;
+    64→  otherParty: {
+    65→    id?: string;
+    66→    name: string;
+    67→    title?: string;
+    68→    city?: string;
+    69→    email?: string;
+    70→    phone?: string;
+    71→    profileImage?: string | null;
+    72→    elderName?: string;
+    73→    elderNeeds?: string;
+    74→  };
+    75→  family?: {
+    76→    name: string;
+    77→    email?: string;
+    78→    phone?: string;
+    79→    city?: string;
+    80→    elderName?: string;
+    81→    elderNeeds?: string;
+    82→  };
+    83→  acceptance?: {
+    84→    accepted: boolean;
+    85→    familyAccepted: boolean;
+    86→    familyAcceptedAt?: string;
+    87→    caregiverAccepted: boolean;
+    88→    caregiverAcceptedAt?: string;
+    89→  };
+    90→}
+    91→
+    92→const STATUS_CONFIG: Record<
+    93→  string,
+    94→  { color: string; bgColor: string; label: string }
+    95→> = {
+    96→  DRAFT: {
+    97→    color: "text-muted-foreground",
+    98→    bgColor: "bg-muted/10",
+    99→    label: "Rascunho",
+   100→  },
+   101→  PENDING_ACCEPTANCE: {
+   102→    color: "text-warning",
+   103→    bgColor: "bg-warning/10",
+   104→    label: "Aguardando Aceite",
+   105→  },
+   106→  PENDING_PAYMENT: {
+   107→    color: "text-info",
+   108→    bgColor: "bg-info/10",
+   109→    label: "Aguardando Pagamento",
+   110→  },
+   111→  ACTIVE: { color: "text-success", bgColor: "bg-success/10", label: "Ativo" },
+   112→  COMPLETED: {
+   113→    color: "text-primary",
+   114→    bgColor: "bg-primary/10",
+   115→    label: "Concluido",
+   116→  },
+   117→  CANCELLED: {
+   118→    color: "text-destructive",
+   119→    bgColor: "bg-destructive/10",
+   120→    label: "Cancelado",
+   121→  },
+   122→  DISPUTED: {
+   123→    color: "text-warning",
+   124→    bgColor: "bg-warning/10",
+   125→    label: "Em Disputa",
+   126→  },
+   127→  COUNTER_PROPOSED: {
+   128→    color: "text-info",
+   129→    bgColor: "bg-info/10",
+   130→    label: "Contraproposta",
+   131→  },
+   132→};
+   133→
+   134→// Map service type keys to readable labels
+   135→function getServiceLabel(key: string): string {
+   136→  return (SERVICE_TYPES as Record<string, string>)[key] || key;
+   137→}
+   138→
+   139→// Parse description that was built from questionnaire
+   140→function parseDescription(desc: string): { label: string; value: string }[] {
+   141→  if (!desc) return [];
+   142→  return desc
+   143→    .split("\n")
+   144→    .filter(Boolean)
+   145→    .map((line) => {
+   146→      const colonIdx = line.indexOf(":");
+   147→      if (colonIdx > 0) {
+   148→        return {
+   149→          label: line.slice(0, colonIdx).trim(),
+   150→          value: line.slice(colonIdx + 1).trim(),
+   151→        };
+   152→      }
+   153→      return { label: "", value: line.trim() };
+   154→    });
+   155→}
+   156→
+   157→// Parse care recipient health data (JSON string from questionnaire)
+   158→function parseCareRecipientData(dataStr: string): Record<string, any> | null {
+   159→  if (!dataStr) return null;
+   160→  try {
+   161→    // Check if it looks like JSON
+   162→    if (dataStr.trim().startsWith("{")) {
+   163→      return JSON.parse(dataStr);
+   164→    }
+   165→    return null;
+   166→  } catch {
+   167→    return null;
+   168→  }
+   169→}
+   170→
+   171→// Format care recipient data for display
+   172→function formatCareRecipientData(data: Record<string, any> | null) {
+   173→  if (!data) return [];
+   174→
+   175→  const items: Array<{ icon?: string; label: string; value: string }> = [];
+   176→
+   177→  // Mobility level
+   178→  if (data.mobilityLevel) {
+   179→    const mobilityLabel: Record<string, string> = {
+   180→      completa: "Mobilidade completa",
+   181→      parcial: "Mobilidade parcial",
+   182→      nenhuma: "Sem mobilidade",
+   183→    };
+   184→    items.push({
+   185→      label: "Mobilidade",
+   186→      value: mobilityLabel[data.mobilityLevel] || data.mobilityLevel,
+   187→    });
+   188→  }
+   189→
+   190→  // Medical conditions
+   191→  if (
+   192→    data.medicalConditions &&
+   193→    Array.isArray(data.medicalConditions) &&
+   194→    data.medicalConditions.length > 0
+   195→  ) {
+   196→    const medicalLabels: Record<string, string> = {
+   197→      diabetes: "Diabetes",
+   198→      hipertensao: "Hipertensão",
+   199→      cancer: "Câncer",
+   200→      artrite: "Artrite",
+   201→      avc: "AVC",
+   202→      parkinson: "Parkinson",
+   203→      alzheimer: "Alzheimer",
+   204→      demencia: "Demência",
+   205→    };
+   206→    const conditions = data.medicalConditions
+   207→      .map((c: string) => medicalLabels[c] || c)
+   208→      .join(", ");
+   209→    items.push({
+   210→      label: "Condições Médicas",
+   211→      value: conditions,
+   212→    });
+   213→  }
+   214→
+   215→  // Dietary restrictions
+   216→  if (
+   217→    data.dietaryRestrictions &&
+   218→    Array.isArray(data.dietaryRestrictions) &&
+   219→    data.dietaryRestrictions.length > 0
+   220→  ) {
+   221→    const dietaryLabels: Record<string, string> = {
+   222→      diabetes_diet: "Dieta para diabetes",
+   223→      sem_gluten: "Sem glúten",
+   224→      sem_lactose: "Sem lactose",
+   225→      vegetariana: "Vegetariana",
+   226→      vegana: "Vegana",
+   227→    };
+   228→    const restrictions = data.dietaryRestrictions
+   229→      .map((r: string) => dietaryLabels[r] || r)
+   230→      .join(", ");
+   231→    items.push({
+   232→      label: "Restrições Alimentares",
+   233→      value: restrictions,
+   234→    });
+   235→  }
+   236→
+   237→  // Additional notes
+   238→  if (
+   239→    data.additionalNotes &&
+   240→    typeof data.additionalNotes === "string" &&
+   241→    data.additionalNotes.trim()
+   242→  ) {
+   243→    items.push({
+   244→      label: "Observações",
+   245→      value: data.additionalNotes,
+   246→    });
+   247→  }
+   248→
+   249→  return items;
+   250→}
+   251→
+   252→export default function ContractDetailPage({
+   253→  params,
+   254→}: {
+   255→  params: Promise<{ id: string }>;
+   256→}) {
+   257→  const resolvedParams = use(params);
+   258→  const { data: session, status } = useSession();
+   259→  const { t } = useI18n();
+   260→  const router = useRouter();
+   261→
+   262→  const [contract, setContract] = useState<ContractDetails | null>(null);
+   263→  const [isLoading, setIsLoading] = useState(true);
+   264→  const [error, setError] = useState<string | null>(null);
+   265→  const [isAccepting, setIsAccepting] = useState(false);
+   266→  const [showAcceptDialog, setShowAcceptDialog] = useState(false);
+   267→  const [acceptTerms, setAcceptTerms] = useState(false);
+   268→  const [acceptLiability, setAcceptLiability] = useState(false);
+   269→  const [acceptNonCircumvention, setAcceptNonCircumvention] = useState(false);
+   270→  const [digitalSignature, setDigitalSignature] = useState<{
+   271→    hash: string;
+   272→    timestamp: string;
+   273→  } | null>(null);
+   274→  const [platformFeePercent, setPlatformFeePercent] = useState(10); // Default 10%
+   275→  const [showRejectDialog, setShowRejectDialog] = useState(false);
+   276→  const [rejectionReason, setRejectionReason] = useState("");
+   277→  const [isRejecting, setIsRejecting] = useState(false);
+   278→  const [showCounterDialog, setShowCounterDialog] = useState(false);
+   279→  const [counterHourlyRate, setCounterHourlyRate] = useState(0);
+   280→  const [counterHoursPerWeek, setCounterHoursPerWeek] = useState(0);
+   281→  const [counterMessage, setCounterMessage] = useState("");
+   282→  const [isCountering, setIsCountering] = useState(false);
+   283→
+   284→  useEffect(() => {
+   285→    if (status === "authenticated") {
+   286→      fetchContract();
+   287→      // Fetch dynamic platform fee percentage
+   288→      apiFetch("/api/settings")
+   289→        .then((res) => (res.ok ? res.json() : { platformFeePercent: 15 }))
+   290→        .then((data) => setPlatformFeePercent(data.platformFeePercent || 15))
+   291→        .catch(() => setPlatformFeePercent(15));
+   292→    }
+   293→  }, [status, resolvedParams.id]);
+   294→
+   295→  const fetchContract = async () => {
+   296→    setIsLoading(true);
+   297→    setError(null);
+   298→    try {
+   299→      const contractsResponse = await apiFetch("/api/contracts");
+   300→      if (!contractsResponse.ok) throw new Error("Erro ao carregar contratos");
+   301→
+   302→      const contractsData = await contractsResponse.json();
+   303→      const foundContract = contractsData.contracts?.find(
+   304→        (c: ContractDetails) => c.id === resolvedParams.id,
+   305→      );
+   306→
+   307→      if (!foundContract) throw new Error("Contrato nao encontrado");
+   308→
+   309→      try {
+   310→        const acceptanceResponse = await apiFetch(
+   311→          `/api/contracts/${resolvedParams.id}/accept`,
+   312→        );
+   313→        if (acceptanceResponse.ok) {
+   314→          const acceptanceData = await acceptanceResponse.json();
+   315→          foundContract.acceptance = acceptanceData;
+   316→        }
+   317→      } catch {
+   318→        // No acceptance data yet
+   319→      }
+   320→
+   321→      setContract(foundContract);
+   322→    } catch (err: any) {
+   323→      setError(err.message || "Erro");
+   324→    } finally {
+   325→      setIsLoading(false);
+   326→    }
+   327→  };
+   328→
+   329→  const handleAcceptContract = async () => {
+   330→    if (!contract) return;
+   331→    setIsAccepting(true);
+   332→    try {
+   333→      const response = await apiFetch(`/api/contracts/${contract.id}/accept`, {
+   334→        method: "POST",
+   335→        headers: { "Content-Type": "application/json" },
+   336→      });
+   337→      const resData = await response.json();
+   338→      if (!response.ok) {
+   339→        throw new Error(resData.error || "Erro");
+   340→      }
+   341→      if (resData.digitalSignature) {
+   342→        setDigitalSignature(resData.digitalSignature);
+   343→      }
+   344→      await fetchContract();
+   345→      setShowAcceptDialog(false);
+   346→    } catch (err: any) {
+   347→      setError(err.message || "Erro");
+   348→    } finally {
+   349→      setIsAccepting(false);
+   350→    }
+   351→  };
+   352→
+   353→  const handleRejectContract = async () => {
+   354→    if (!contract) return;
+   355→    setIsRejecting(true);
+   356→    try {
+   357→      const response = await apiFetch(`/api/contracts/${contract.id}/reject`, {
+   358→        method: "POST",
+   359→        headers: { "Content-Type": "application/json" },
+   360→        body: JSON.stringify({ rejectionReason }),
+   361→      });
+   362→      const resData = await response.json();
+   363→      if (!response.ok) throw new Error(resData.error || "Erro");
+   364→      toast.success("Proposta recusada");
+   365→      router.push("/app/contracts");
+   366→    } catch (err: any) {
+   367→      toast.error(err.message || "Erro ao recusar");
+   368→    } finally {
+   369→      setIsRejecting(false);
+   370→      setShowRejectDialog(false);
+   371→    }
+   372→  };
+   373→
+   374→  const handleCounterProposal = async () => {
+   375→    if (!contract) return;
+   376→    setIsCountering(true);
+   377→    try {
+   378→      const response = await apiFetch(`/api/contracts/${contract.id}/counter`, {
+   379→        method: "POST",
+   380→        headers: { "Content-Type": "application/json" },
+   381→        body: JSON.stringify({
+   382→          hourlyRateEur: counterHourlyRate * 100, // Convert euros to cents
+   383→          hoursPerWeek: counterHoursPerWeek,
+   384→          message: counterMessage,
+   385→        }),
+   386→      });
+   387→      const resData = await response.json();
+   388→      if (!response.ok) throw new Error(resData.error || "Erro");
+   389→      toast.success("Contraproposta enviada!");
+   390→      await fetchContract();
+   391→      setShowCounterDialog(false);
+   392→    } catch (err: any) {
+   393→      toast.error(err.message || "Erro ao enviar contraproposta");
+   394→    } finally {
+   395→      setIsCountering(false);
+   396→    }
+   397→  };
+   398→
+   399→  const isFamily = hasRole(session?.user, UserRole.FAMILY);
+   400→  const statusConfig = contract
+   401→    ? STATUS_CONFIG[contract.status] || {
+   402→        color: "bg-gray-500",
+   403→        label: contract.status,
+   404→      }
+   405→    : null;
+   406→  const canAccept =
+   407→    contract?.status === "PENDING_ACCEPTANCE" || contract?.status === "DRAFT";
+   408→  const userNeedsToAccept = isFamily
+   409→    ? !contract?.acceptance?.familyAccepted
+   410→    : !contract?.acceptance?.caregiverAccepted;
+   411→
+   412→  // Parse financial values
+   413→  const hourlyRate = contract ? Math.round(contract.hourlyRateEur) : 0;
+   414→  const totalEur = contract ? Math.round(contract.totalEurCents) : 0;
+   415→  const platformFee = Math.round((totalEur * platformFeePercent) / 100);
+   416→  const caregiverReceives = totalEur - platformFee;
+   417→
+   418→  // Parse description
+   419→  const descriptionParts = contract
+   420→    ? parseDescription(contract.description)
+   421→    : [];
+   422→
+   423→  return (
+   424→    <PageLayout spacing="normal" className="max-w-4xl">
+   425→        {/* Page Header - Title + Back Button */}
+   426→        <div className="flex items-center gap-4">
+   427→          <Button
+   428→            variant="ghost"
+   429→            size="sm"
+   430→            asChild
+   431→            className="rounded-xl -ml-2 h-10 px-2"
+   432→          >
+   433→            <Link href="/app/contracts">
+   434→              <IconArrowLeft className="h-5 w-5" />
+   435→            </Link>
+   436→          </Button>
+   437→          <h1 className="text-3xl sm:text-4xl font-display font-semibold mb-0">
+   438→            {contract?.title || "Contrato de Cuidado"}
+   439→          </h1>
+   440→          {statusConfig && (
+   441→            <BloomBadge
+   442→              className={`text-xs font-display font-bold rounded-lg tracking-wide px-2.5 py-1 ml-auto ${statusConfig.bgColor} ${statusConfig.color} border border-${statusConfig.color.replace("text-", "")}/30`}
+   443→            >
+   444→              {statusConfig.label}
+   445→            </BloomBadge>
+   446→          )}
+   447→        </div>
+   448→
+   449→        {/* Loading */}
+   450→        {isLoading && (
+   451→          <div className="space-y-6">
+   452→            <div className="animate-pulse h-32 bg-secondary rounded-3xl" />
+   453→            <div className="animate-pulse h-64 bg-secondary rounded-3xl" />
+   454→          </div>
+   455→        )}
+   456→
+   457→        {/* Error */}
+   458→        {error && !isLoading && (
+   459→          <BloomAlert
+   460→            variant="error"
+   461→            title="Erro"
+   462→            message={error}
+   463→            icon={<IconAlertCircle className="h-5 w-5" />}
+   464→          />
+   465→        )}
+   466→
+   467→        {contract && !isLoading && (
+   468→          <>
+   469→            {/* Contract Info Card */}
+   470→            <DocCard title="Informações do Contrato">
+   471→              <div className="flex items-start gap-4">
+   472→                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+   473→                  <IconContract className="h-5 w-5 text-primary" />
+   474→                </div>
+   475→                <div className="flex-1 min-w-0">
+   476→                  <p className="text-xs font-display font-bold text-muted-foreground tracking-wide mb-2">
+   477→                    Contrato #{contract.id.slice(-8)}
+   478→                  </p>
+   479→                  <p className="text-sm text-muted-foreground">
+   480→                    Criado em{" "}
+   481→                    {new Date(contract.createdAt).toLocaleDateString("pt-PT")}
+   482→                  </p>
+   483→                </div>
+   484→              </div>
+   485→            </DocCard>
+   486→
+   487→            {/* Other Party Info */}
+   488→            <DocCard title={isFamily ? "Profissional" : "Família"}>
+   489→                <div className="flex items-start gap-4 mb-5">
+   490→                  {contract.otherParty?.profileImage ? (
+   491→                    <img src={contract.otherParty.profileImage} alt={contract.otherParty?.name || ''} className="w-12 h-12 rounded-2xl object-cover flex-shrink-0" />
+   492→                  ) : (
+   493→                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-display font-bold text-sm flex-shrink-0">
+   494→                      {contract.otherParty?.name
+   495→                        ?.split(" ")
+   496→                        .map((n) => n[0])
+   497→                        .join("")
+   498→                        .slice(0, 2) || "?"}
+   499→                    </div>
+   500→                  )}
+   501→                  <div className="flex-1 min-w-0">
+   502→                    <p className="font-display font-semibold text-foreground text-sm">
+   503→                      {contract.otherParty?.name}
+   504→                    </p>
+   505→                    {contract.otherParty?.title && (
+   506→                      <p className="text-sm text-muted-foreground mt-1">
+   507→                        {contract.otherParty.title}
+   508→                      </p>
+   509→                    )}
+   510→                    {contract.otherParty?.city && (
+   511→                      <p className="text-xs text-muted-foreground mt-0.5">
+   512→                        {contract.otherParty.city}
+   513→                      </p>
+   514→                    )}
+   515→                  </div>
+   516→                  <Button
+   517→                    variant="outline"
+   518→                    size="sm"
+   519→                    className="rounded-xl h-9 w-9 p-0 flex-shrink-0"
+   520→                    onClick={() => openChat({ userId: contract.otherParty?.id || '' })}
+   521→                    title="Enviar mensagem"
+   522→                  >
+   523→                    <IconChat className="h-4 w-4" />
+   524→                  </Button>
+   525→                </div>
+   526→
+   527→                {/* Elder info (for caregiver view) */}
+   528→                {!isFamily && contract.family && (
+   529→                  <div className="pt-5 border-t border-border/50 space-y-3">
+   530→                    {contract.family.elderName && (
+   531→                      <div className="flex justify-between items-start py-3 border-b border-border/50">
+   532→                        <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   533→                          Pessoa a Cuidar
+   534→                        </span>
+   535→                        <span className="font-display font-black text-foreground text-sm">
+   536→                          {contract.family.elderName}
+   537→                        </span>
+   538→                      </div>
+   539→                    )}
+   540→
+   541→                    {/* Formatted health data */}
+   542→                    {contract.family.elderNeeds &&
+   543→                      (() => {
+   544→                        const elderData = parseCareRecipientData(
+   545→                          contract.family.elderNeeds,
+   546→                        );
+   547→                        const formattedData = formatCareRecipientData(elderData);
+   548→                        return formattedData.length > 0
+   549→                          ? formattedData.map((item, i) => (
+   550→                              <div
+   551→                                key={i}
+   552→                                className="flex justify-between items-start py-3 border-b border-border/50"
+   553→                              >
+   554→                                <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   555→                                  {item.label}
+   556→                                </span>
+   557→                                <span className="text-sm text-foreground text-right">
+   558→                                  {item.value}
+   559→                                </span>
+   560→                              </div>
+   561→                            ))
+   562→                          : null;
+   563→                      })()}
+   564→
+   565→                    {contract.family.phone && (
+   566→                      <div className="flex items-center gap-3 pt-3">
+   567→                        <IconPhone className="h-4 w-4 text-muted-foreground" />
+   568→                        <span className="text-sm font-medium text-foreground">
+   569→                          {contract.family.phone}
+   570→                        </span>
+   571→                      </div>
+   572→                    )}
+   573→                  </div>
+   574→                )}
+   575→            </DocCard>
+   576→
+   577→            {/* Service Details Card */}
+   578→            {contract.serviceTypes &&
+   579→              contract.serviceTypes.length > 0 &&
+   580→              contract.serviceTypes[0] !== "" && (
+   581→                <DocCard title="Serviços">
+   582→                  <div className="flex flex-wrap gap-2">
+   583→                    {ensureServiceTypesArray(contract.serviceTypes).map((service, i) => (
+   584→                      <span
+   585→                        key={i}
+   586→                        className="px-3 py-1 text-xs font-display font-bold rounded-lg tracking-wide bg-primary/10 text-primary"
+   587→                      >
+   588→                        {getServiceLabel(service)}
+   589→                      </span>
+   590→                    ))}
+   591→                  </div>
+   592→                </DocCard>
+   593→              )}
+   594→
+   595→            {/* Care Details Card */}
+   596→            {descriptionParts.length > 0 && (
+   597→              <DocCard title="Detalhes do Cuidado" className="space-y-4">
+   598→                {descriptionParts.map((part, i) => (
+   599→                  <div
+   600→                    key={i}
+   601→                    className={
+   602→                      i !== descriptionParts.length - 1
+   603→                        ? "pb-4 border-b border-border/50"
+   604→                        : ""
+   605→                    }
+   606→                  >
+   607→                    {part.label ? (
+   608→                      <div>
+   609→                        <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   610→                          {part.label}
+   611→                        </span>
+   612→                        <p className="text-sm text-foreground mt-2">
+   613→                          {part.value}
+   614→                        </p>
+   615→                      </div>
+   616→                    ) : (
+   617→                      <p className="text-sm text-foreground">{part.value}</p>
+   618→                    )}
+   619→                  </div>
+   620→                ))}
+   621→              </DocCard>
+   622→            )}
+   623→
+   624→            {/* Schedule Card */}
+   625→            <DocCard title="Horário">
+   626→              <div className="space-y-4">
+   627→                  {contract.hoursPerWeek > 0 && (
+   628→                    <div className="flex justify-between items-center py-4 border-b border-border/50">
+   629→                      <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   630→                        Horas/semana
+   631→                      </span>
+   632→                      <span className="text-lg sm:text-xl font-display font-black tracking-tighter text-foreground">
+   633→                        {contract.hoursPerWeek}h
+   634→                      </span>
+   635→                    </div>
+   636→                  )}
+   637→                  {contract.totalHours > 0 && (
+   638→                    <div className="flex justify-between items-center py-4 border-b border-border/50">
+   639→                      <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   640→                        Total mensal
+   641→                      </span>
+   642→                      <span className="text-lg sm:text-xl font-display font-black tracking-tighter text-foreground">
+   643→                        {contract.totalHours}h
+   644→                      </span>
+   645→                    </div>
+   646→                  )}
+   647→                  {contract.startDate && (
+   648→                    <div className="flex justify-between items-center py-4 border-b border-border/50">
+   649→                      <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   650→                        Início
+   651→                      </span>
+   652→                      <span className="font-medium text-foreground">
+   653→                        {new Date(contract.startDate).toLocaleDateString(
+   654→                          "pt-PT",
+   655→                        )}
+   656→                      </span>
+   657→                    </div>
+   658→                  )}
+   659→                  {contract.endDate && (
+   660→                    <div className="flex justify-between items-center py-4">
+   661→                      <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   662→                        Término
+   663→                      </span>
+   664→                      <span className="font-medium text-foreground">
+   665→                        {new Date(contract.endDate).toLocaleDateString("pt-PT")}
+   666→                      </span>
+   667→                    </div>
+   668→                  )}
+   669→              </div>
+   670→            </DocCard>
+   671→
+   672→            {/* Financial Card */}
+   673→            <DocCard title="Valores Financeiros">
+   674→                <div className="space-y-4">
+   675→                  <div className="flex justify-between items-center py-4 border-b border-border/50">
+   676→                    <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   677→                      Valor por hora
+   678→                    </span>
+   679→                    <span className="text-lg sm:text-xl font-display font-black tracking-tighter text-foreground">
+   680→                      €{hourlyRate}/h
+   681→                    </span>
+   682→                  </div>
+   683→                  <div className="flex justify-between items-center py-4 border-b border-border/50">
+   684→                    <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   685→                      Total mensal ({contract.totalHours}h)
+   686→                    </span>
+   687→                    <span className="text-lg sm:text-xl font-display font-black tracking-tighter text-foreground">
+   688→                      €{totalEur}
+   689→                    </span>
+   690→                  </div>
+   691→                  {!isFamily && (
+   692→                    <>
+   693→                      <div className="py-4 border-t-2 border-border/50">
+   694→                        <div className="flex justify-between items-center py-3 border-b border-border/50">
+   695→                          <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   696→                            Taxa plataforma ({platformFeePercent}%)
+   697→                          </span>
+   698→                          <span className="text-base font-display font-black tracking-tighter text-destructive">
+   699→                            -€{platformFee}
+   700→                          </span>
+   701→                        </div>
+   702→                        <div className="flex justify-between items-center py-4">
+   703→                          <span className="text-sm font-display font-bold text-foreground tracking-wide">
+   704→                            Recebe
+   705→                          </span>
+   706→                          <span className="text-lg sm:text-xl font-display font-black tracking-tighter text-success">
+   707→                            €{caregiverReceives}
+   708→                          </span>
+   709→                        </div>
+   710→                      </div>
+   711→                    </>
+   712→                  )}
+   713→                </div>
+   714→            </DocCard>
+   715→
+   716→            {/* Acceptance Status */}
+   717→            <DocCard title="Status de Aceite">
+   718→                <div className="space-y-3">
+   719→                  <div className="flex items-center justify-between py-4 border-b border-border/50">
+   720→                    <span className="text-sm font-display font-bold text-foreground tracking-wide">
+   721→                      Família
+   722→                    </span>
+   723→                    {contract.acceptance?.familyAccepted ? (
+   724→                      <BloomBadge className="text-xs font-display font-bold rounded-lg tracking-wide px-2.5 py-1 bg-success/10 text-success border border-success/30 flex items-center gap-1.5">
+   725→                        <IconCheck className="h-3 w-3" /> Aceito
+   726→                      </BloomBadge>
+   727→                    ) : (
+   728→                      <BloomBadge className="text-xs font-display font-bold rounded-lg tracking-wide px-2.5 py-1 bg-warning/10 text-warning border border-warning/30">
+   729→                        Pendente
+   730→                      </BloomBadge>
+   731→                    )}
+   732→                  </div>
+   733→                  <div className="flex items-center justify-between py-4">
+   734→                    <span className="text-sm font-display font-bold text-foreground tracking-wide">
+   735→                      Profissional
+   736→                    </span>
+   737→                    {contract.acceptance?.caregiverAccepted ? (
+   738→                      <BloomBadge className="text-xs font-display font-bold rounded-lg tracking-wide px-2.5 py-1 bg-success/10 text-success border border-success/30 flex items-center gap-1.5">
+   739→                        <IconCheck className="h-3 w-3" /> Aceito
+   740→                      </BloomBadge>
+   741→                    ) : (
+   742→                      <BloomBadge className="text-xs font-display font-bold rounded-lg tracking-wide px-2.5 py-1 bg-warning/10 text-warning border border-warning/30">
+   743→                        Pendente
+   744→                      </BloomBadge>
+   745→                    )}
+   746→                  </div>
+   747→                </div>
+   748→                {(contract.acceptance?.familyAcceptedAt ||
+   749→                  contract.acceptance?.caregiverAcceptedAt) && (
+   750→                  <div className="pt-4 border-t border-border/50 space-y-2">
+   751→                    {contract.acceptance?.familyAcceptedAt && (
+   752→                      <p className="text-xs text-muted-foreground">
+   753→                        Família aceitou em{" "}
+   754→                        {new Date(
+   755→                          contract.acceptance.familyAcceptedAt,
+   756→                        ).toLocaleString("pt-PT")}
+   757→                      </p>
+   758→                    )}
+   759→                    {contract.acceptance?.caregiverAcceptedAt && (
+   760→                      <p className="text-xs text-muted-foreground">
+   761→                        Profissional aceitou em{" "}
+   762→                        {new Date(
+   763→                          contract.acceptance.caregiverAcceptedAt,
+   764→                        ).toLocaleString("pt-PT")}
+   765→                      </p>
+   766→                    )}
+   767→                  </div>
+   768→                )}
+   769→            </DocCard>
+   770→
+   771→            {/* Digital Signature Confirmation */}
+   772→            {digitalSignature && (
+   773→              <section className="space-y-4">
+   774→                <BloomCard className="p-5 sm:p-7 border border-success/30">
+   775→                  <div className="flex items-start gap-4">
+   776→                    <div className="w-12 h-12 rounded-2xl bg-success/10 flex items-center justify-center flex-shrink-0">
+   777→                      <IconShield className="h-5 w-5 text-success" />
+   778→                    </div>
+   779→                    <div className="flex-1 min-w-0">
+   780→                      <h3 className="text-lg font-display font-semibold text-foreground">
+   781→                        Assinatura Digital Registrada
+   782→                      </h3>
+   783→                      <div className="mt-4 space-y-2">
+   784→                        <div className="flex justify-between items-start py-3 border-b border-border/50">
+   785→                          <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   786→                            Hash
+   787→                          </span>
+   788→                          <span className="text-sm font-mono text-foreground">
+   789→                            {digitalSignature.hash.slice(0, 16)}...
+   790→                            {digitalSignature.hash.slice(-8)}
+   791→                          </span>
+   792→                        </div>
+   793→                        <div className="flex justify-between items-start py-3">
+   794→                          <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   795→                            Data
+   796→                          </span>
+   797→                          <span className="text-sm text-foreground">
+   798→                            {new Date(
+   799→                              digitalSignature.timestamp,
+   800→                            ).toLocaleString("pt-PT")}
+   801→                          </span>
+   802→                        </div>
+   803→                      </div>
+   804→                    </div>
+   805→                  </div>
+   806→                </BloomCard>
+   807→              </section>
+   808→            )}
+   809→
+   810→            {/* Non-Circumvention Notice */}
+   811→            {contract.acceptance?.familyAccepted &&
+   812→              contract.acceptance?.caregiverAccepted && (
+   813→                <section className="space-y-4">
+   814→                  <BloomCard className="p-5 sm:p-7 border border-warning/30">
+   815→                    <div className="flex items-start gap-4">
+   816→                      <div className="w-12 h-12 rounded-2xl bg-warning/10 flex items-center justify-center flex-shrink-0">
+   817→                        <IconContract className="h-5 w-5 text-warning" />
+   818→                      </div>
+   819→                      <div className="flex-1 min-w-0">
+   820→                        <h3 className="text-lg font-display font-semibold text-foreground">
+   821→                          Cláusula de Não-Circunvenção Ativa
+   822→                        </h3>
+   823→                        <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+   824→                          Ambas as partes concordaram em manter a relação
+   825→                          profissional exclusivamente através da plataforma por
+   826→                          24 meses. Todos os pagamentos e comunicações devem ser
+   827→                          realizados pela plataforma.
+   828→                        </p>
+   829→                      </div>
+   830→                    </div>
+   831→                  </BloomCard>
+   832→                </section>
+   833→              )}
+   834→
+   835→            {/* Accept Action */}
+   836→            {canAccept && userNeedsToAccept && (
+   837→              <section className="space-y-6">
+   838→                {/* Main action card */}
+   839→                <BloomCard className="p-5 sm:p-7 border border-primary/30">
+   840→                  <div className="flex items-start gap-4 mb-6">
+   841→                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+   842→                      <IconContract className="h-5 w-5 text-primary" />
+   843→                    </div>
+   844→                    <div className="flex-1">
+   845→                      <h3 className="text-lg font-display font-semibold text-foreground">
+   846→                        Revisar & Aceitar Contrato
+   847→                      </h3>
+   848→                      <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+   849→                        Certifique-se de que todos os detalhes estão corretos
+   850→                        antes de confirmar. Seu aceite será registrado
+   851→                        digitalmente com data, hora e IP.
+   852→                      </p>
+   853→                    </div>
+   854→                  </div>
+   855→
+   856→                  {/* Summary of key contract details */}
+   857→                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 bg-secondary rounded-2xl mb-6 border border-border/50">
+   858→                    <div>
+   859→                      <p className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   860→                        Valor/Hora
+   861→                      </p>
+   862→                      <p className="text-lg font-display font-black text-foreground mt-2 tracking-tighter">
+   863→                        €{hourlyRate}/h
+   864→                      </p>
+   865→                    </div>
+   866→                    <div>
+   867→                      <p className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   868→                        Total Mensal
+   869→                      </p>
+   870→                      <p className="text-lg font-display font-black text-foreground mt-2 tracking-tighter">
+   871→                        €{totalEur}
+   872→                      </p>
+   873→                    </div>
+   874→                    {!isFamily && (
+   875→                      <>
+   876→                        <div>
+   877→                          <p className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   878→                            Recebe
+   879→                          </p>
+   880→                          <p className="text-lg font-display font-black text-success mt-2 tracking-tighter">
+   881→                            €{caregiverReceives}
+   882→                          </p>
+   883→                        </div>
+   884→                        <div>
+   885→                          <p className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   886→                            Taxa Plataforma
+   887→                          </p>
+   888→                          <p className="text-lg font-display font-black text-destructive mt-2 tracking-tighter">
+   889→                            €{platformFee}
+   890→                          </p>
+   891→                        </div>
+   892→                      </>
+   893→                    )}
+   894→                  </div>
+   895→
+   896→                  <div className="flex flex-col sm:flex-row gap-3">
+   897→                    <Button
+   898→                      size="lg"
+   899→                      className="flex-1 h-12 text-base font-semibold rounded-2xl"
+   900→                      onClick={() => setShowAcceptDialog(true)}
+   901→                      disabled={isAccepting}
+   902→                    >
+   903→                      <IconCheck className="h-5 w-5 mr-2" />
+   904→                      Aceitar Contrato
+   905→                    </Button>
+   906→                    <Button
+   907→                      size="lg"
+   908→                      variant="outline"
+   909→                      className="flex-1 h-12 text-base font-semibold rounded-2xl"
+   910→                      onClick={() => openChat({ userId: contract.otherParty?.id || '' })}
+   911→                    >
+   912→                      <IconChat className="h-5 w-5 mr-2" />
+   913→                      Fazer Pergunta
+   914→                    </Button>
+   915→                  </div>
+   916→                </BloomCard>
+   917→
+   918→                {/* Caregiver-specific actions */}
+   919→                {!isFamily && (
+   920→                  <div className="space-y-4">
+   921→                    <BloomCard className="p-5 sm:p-7 border border-info/30">
+   922→                      <div className="flex items-start gap-4 mb-4">
+   923→                        <div className="w-10 h-10 rounded-2xl bg-info/10 flex items-center justify-center flex-shrink-0">
+   924→                          <IconArrowLeft className="h-5 w-5 text-info" />
+   925→                        </div>
+   926→                        <div>
+   927→                          <h3 className="text-base font-display font-semibold text-foreground">Contraproposta</h3>
+   928→                          <p className="text-sm text-muted-foreground mt-1">Não concorda com algum valor? Proponha alterações.</p>
+   929→                        </div>
+   930→                      </div>
+   931→                      <Button
+   932→                        variant="outline"
+   933→                        size="lg"
+   934→                        className="w-full h-12 text-base font-semibold rounded-2xl border-info/30 text-info hover:bg-info/5"
+   935→                        onClick={() => {
+   936→                          setCounterHourlyRate(hourlyRate);
+   937→                          setCounterHoursPerWeek(contract?.hoursPerWeek || 0);
+   938→                          setCounterMessage("");
+   939→                          setShowCounterDialog(true);
+   940→                        }}
+   941→                      >
+   942→                        Fazer Contraproposta
+   943→                      </Button>
+   944→                    </BloomCard>
+   945→                    <div className="text-center">
+   946→                      <Button
+   947→                        variant="ghost"
+   948→                        className="text-destructive hover:text-destructive hover:bg-destructive/5 rounded-xl"
+   949→                        onClick={() => setShowRejectDialog(true)}
+   950→                      >
+   951→                        Recusar Proposta
+   952→                      </Button>
+   953→                    </div>
+   954→                  </div>
+   955→                )}
+   956→
+   957→                {/* Family decline option */}
+   958→                {isFamily && (
+   959→                  <div className="text-center">
+   960→                    <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/5 rounded-xl" asChild>
+   961→                      <Link href="/app/contracts">Não aceitar agora</Link>
+   962→                    </Button>
+   963→                  </div>
+   964→                )}
+   965→              </section>
+   966→            )}
+   967→
+   968→            {/* Counter-proposal handling */}
+   969→            {contract.status === "COUNTER_PROPOSED" && (
+   970→              <section className="space-y-4">
+   971→                <BloomCard className="p-5 sm:p-7 border border-info/30">
+   972→                  <div className="flex items-start gap-4 mb-6">
+   973→                    <div className="w-12 h-12 rounded-2xl bg-info/10 flex items-center justify-center flex-shrink-0">
+   974→                      <IconArrowLeft className="h-5 w-5 text-info" />
+   975→                    </div>
+   976→                    <div>
+   977→                      <h3 className="text-lg font-display font-semibold text-foreground">Contraproposta Recebida</h3>
+   978→                      <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+   979→                        {isFamily
+   980→                          ? "O profissional enviou uma contraproposta. Revise os novos valores abaixo."
+   981→                          : "A sua contraproposta foi enviada. Aguardando a resposta da família."}
+   982→                      </p>
+   983→                    </div>
+   984→                  </div>
+   985→
+   986→                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 bg-secondary rounded-2xl mb-6 border border-border/50">
+   987→                    <div>
+   988→                      <p className="text-xs font-display font-bold text-muted-foreground tracking-wide">Valor/Hora</p>
+   989→                      <p className="text-lg font-display font-black text-foreground mt-2 tracking-tighter">€{hourlyRate}/h</p>
+   990→                    </div>
+   991→                    <div>
+   992→                      <p className="text-xs font-display font-bold text-muted-foreground tracking-wide">Horas/Semana</p>
+   993→                      <p className="text-lg font-display font-black text-foreground mt-2 tracking-tighter">{contract.hoursPerWeek}h</p>
+   994→                    </div>
+   995→                    {!isFamily && (
+   996→                      <>
+   997→                        <div>
+   998→                          <p className="text-xs font-display font-bold text-muted-foreground tracking-wide">Recebe</p>
+   999→                          <p className="text-lg font-display font-black text-success mt-2 tracking-tighter">€{caregiverReceives}</p>
+  1000→                        </div>
+  1001→                        <div>
+  1002→                          <p className="text-xs font-display font-bold text-muted-foreground tracking-wide">Taxa Plataforma</p>
+  1003→                          <p className="text-lg font-display font-black text-destructive mt-2 tracking-tighter">€{platformFee}</p>
+  1004→                        </div>
+  1005→                      </>
+  1006→                    )}
+  1007→                  </div>
+  1008→
+  1009→                  {isFamily && (
+  1010→                    <div className="flex flex-col sm:flex-row gap-3">
+  1011→                      <Button
+  1012→                        size="lg"
+  1013→                        className="flex-1 h-12 text-base font-semibold rounded-2xl"
+  1014→                        onClick={() => setShowAcceptDialog(true)}
+  1015→                      >
+  1016→                        <IconCheck className="h-5 w-5 mr-2" />
+  1017→                        Aceitar Contraproposta
+  1018→                      </Button>
+  1019→                      <Button
+  1020→                        variant="destructive"
+  1021→                        size="lg"
+  1022→                        className="flex-1 h-12 text-base font-semibold rounded-2xl"
+  1023→                        onClick={() => setShowRejectDialog(true)}
+  1024→                      >
+  1025→                        Recusar Contraproposta
+  1026→                      </Button>
+  1027→                    </div>
+  1028→                  )}
+  1029→                </BloomCard>
+  1030→              </section>
+  1031→            )}
+  1032→
+  1033→            {/* Payment Section */}
+  1034→            {contract.status === "PENDING_PAYMENT" && isFamily && (
+  1035→              <PaymentSection
+  1036→                contractId={contract.id}
+  1037→                onPaymentSuccess={fetchContract}
+  1038→              />
+  1039→            )}
+  1040→
+  1041→            {/* Weekly Payment Approvals */}
+  1042→            {contract.status === "ACTIVE" && contract.weeklyPaymentEnabled && (
+  1043→              <DocCard title="Aprovações Semanais">
+  1044→                <WeeklyApprovalPanel
+  1045→                  contractId={contract.id}
+  1046→                  isFamily={isFamily}
+  1047→                />
+  1048→              </DocCard>
+  1049→            )}
+  1050→
+  1051→            {/* Active Contract: Payments & Receipts */}
+  1052→            {contract.status === "ACTIVE" &&
+  1053→              isFamily &&
+  1054→              !contract.weeklyPaymentEnabled && (
+  1055→                <ActiveContractActions contractId={contract.id} />
+  1056→              )}
+  1057→
+  1058→            {/* QR Presence Confirmation */}
+  1059→            {contract.status === "ACTIVE" && (
+  1060→              <DocCard title="Check-in de Presença">
+  1061→                <div className="space-y-6">
+  1062→                    {/* Section intro */}
+  1063→                    <div className="flex items-start gap-4">
+  1064→                      <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+  1065→                        <IconQrCode className="h-5 w-5 text-primary" />
+  1066→                      </div>
+  1067→                      <div className="flex-1">
+  1068→                        <p className="font-display font-semibold text-foreground text-sm">
+  1069→                          {isFamily
+  1070→                            ? "Gerir Códigos QR"
+  1071→                            : "Registar Check-in"}
+  1072→                        </p>
+  1073→                        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+  1074→                          {isFamily
+  1075→                            ? "Gera um código QR diário para o profissional registar o seu check-in no serviço."
+  1076→                            : "Escaneia o código QR fornecido pela família para registar o teu check-in."}
+  1077→                        </p>
+  1078→                      </div>
+  1079→                    </div>
+  1080→
+  1081→                    {/* Family: QR Generator + History */}
+  1082→                    {isFamily && (
+  1083→                      <div className="space-y-6">
+  1084→                        <QRGenerator
+  1085→                          contractId={contract.id}
+  1086→                          caregiverName={contract.otherParty?.name}
+  1087→                        />
+  1088→                        <QRHistory
+  1089→                          contractId={contract.id}
+  1090→                          caregiverName={contract.otherParty?.name}
+  1091→                        />
+  1092→                      </div>
+  1093→                    )}
+  1094→
+  1095→                    {/* Caregiver: Link to scanner + History */}
+  1096→                    {!isFamily && (
+  1097→                      <div className="space-y-6">
+  1098→                        <div className="flex flex-col sm:flex-row gap-3">
+  1099→                          <Button
+  1100→                            size="lg"
+  1101→                            className="flex-1 h-12 text-base font-semibold rounded-2xl"
+  1102→                            asChild
+  1103→                          >
+  1104→                            <Link href="/app/qr-scanner">
+  1105→                              <IconQrCode className="h-5 w-5 mr-2" />
+  1106→                              Escanear Código QR
+  1107→                            </Link>
+  1108→                          </Button>
+  1109→                        </div>
+  1110→                        <QRHistory
+  1111→                          contractId={contract.id}
+  1112→                          caregiverName={session?.user?.name}
+  1113→                        />
+  1114→                      </div>
+  1115→                    )}
+  1116→                </div>
+  1117→              </DocCard>
+  1118→            )}
+  1119→
+  1120→            {/* Review Section */}
+  1121→            {contract.status === "COMPLETED" &&
+  1122→              isFamily &&
+  1123→              session?.user?.id &&
+  1124→              contract.caregiverId && (
+  1125→                <ReviewSection
+  1126→                  contractId={contract.id}
+  1127→                  caregiverUserId={contract.caregiverId}
+  1128→                  currentUserId={session.user.id}
+  1129→                />
+  1130→              )}
+  1131→          </>
+  1132→        )}
+  1133→
+  1134→        {/* Accept Confirmation Dialog */}
+  1135→        <Dialog open={showAcceptDialog} onOpenChange={setShowAcceptDialog}>
+  1136→          <DialogContent className="sm:max-w-md rounded-3xl">
+  1137→            <DialogHeader>
+  1138→              <DialogTitle className="font-display font-semibold text-lg">Aceitar Contrato</DialogTitle>
+  1139→              <DialogDescription className="text-sm text-muted-foreground">
+  1140→                Leia e aceite os termos antes de confirmar.
+  1141→              </DialogDescription>
+  1142→            </DialogHeader>
+  1143→            <div className="space-y-4 py-4">
+  1144→              <div className="flex items-start gap-3">
+  1145→                <Checkbox id="terms" checked={acceptTerms} onCheckedChange={(checked) => setAcceptTerms(checked === true)} className="mt-0.5" />
+  1146→                <Label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
+  1147→                  Li e concordo com os <Link href="/termos" className="text-primary underline">Termos de Utilização</Link> e as condições deste contrato.
+  1148→                </Label>
+  1149→              </div>
+  1150→              <div className="flex items-start gap-3">
+  1151→                <Checkbox id="liability" checked={acceptLiability} onCheckedChange={(checked) => setAcceptLiability(checked === true)} className="mt-0.5" />
+  1152→                <Label htmlFor="liability" className="text-sm leading-relaxed cursor-pointer">
+  1153→                  Compreendo que a plataforma é intermediária e não se responsabiliza pela qualidade dos serviços prestados.
+  1154→                </Label>
+  1155→              </div>
+  1156→              <div className="flex items-start gap-3">
+  1157→                <Checkbox id="noncircumvention" checked={acceptNonCircumvention} onCheckedChange={(checked) => setAcceptNonCircumvention(checked === true)} className="mt-0.5" />
+  1158→                <Label htmlFor="noncircumvention" className="text-sm leading-relaxed cursor-pointer">
+  1159→                  Concordo com a cláusula de não-circunvenção por 24 meses — todos os pagamentos devem ser realizados pela plataforma.
+  1160→                </Label>
+  1161→              </div>
+  1162→            </div>
+  1163→            <DialogFooter className="gap-2">
+  1164→              <Button variant="outline" onClick={() => setShowAcceptDialog(false)} className="rounded-xl">Cancelar</Button>
+  1165→              <Button
+  1166→                onClick={handleAcceptContract}
+  1167→                disabled={isAccepting || !acceptTerms || !acceptLiability || !acceptNonCircumvention}
+  1168→                className="rounded-xl"
+  1169→              >
+  1170→                {isAccepting ? <IconLoader2 className="h-4 w-4 mr-2 animate-spin" /> : <IconCheck className="h-4 w-4 mr-2" />}
+  1171→                Confirmar Aceite
+  1172→              </Button>
+  1173→            </DialogFooter>
+  1174→          </DialogContent>
+  1175→        </Dialog>
+  1176→
+  1177→        {/* Reject Dialog */}
+  1178→        <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+  1179→          <DialogContent className="sm:max-w-md rounded-3xl">
+  1180→            <DialogHeader>
+  1181→              <DialogTitle className="font-display font-semibold text-lg text-destructive">Recusar Proposta</DialogTitle>
+  1182→              <DialogDescription className="text-sm text-muted-foreground">
+  1183→                Tem certeza que deseja recusar esta proposta de contrato? Esta ação não pode ser desfeita.
+  1184→              </DialogDescription>
+  1185→            </DialogHeader>
+  1186→            <div className="space-y-4 py-4">
+  1187→              <div className="space-y-2">
+  1188→                <Label className="text-xs font-display font-bold text-foreground tracking-wide">Motivo (opcional)</Label>
+  1189→                <Textarea
+  1190→                  value={rejectionReason}
+  1191→                  onChange={(e) => setRejectionReason(e.target.value)}
+  1192→                  placeholder="Ex: Horário incompatível, valor abaixo do esperado..."
+  1193→                  rows={3}
+  1194→                />
+  1195→              </div>
+  1196→            </div>
+  1197→            <DialogFooter className="gap-2">
+  1198→              <Button variant="outline" onClick={() => setShowRejectDialog(false)} className="rounded-xl">Cancelar</Button>
+  1199→              <Button variant="destructive" onClick={handleRejectContract} disabled={isRejecting} className="rounded-xl">
+  1200→                {isRejecting ? <IconLoader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+  1201→                Confirmar Recusa
+  1202→              </Button>
+  1203→            </DialogFooter>
+  1204→          </DialogContent>
+  1205→        </Dialog>
+  1206→
+  1207→        {/* Counter-Propose Dialog */}
+  1208→        <Dialog open={showCounterDialog} onOpenChange={setShowCounterDialog}>
+  1209→          <DialogContent className="sm:max-w-lg rounded-3xl">
+  1210→            <DialogHeader>
+  1211→              <DialogTitle className="font-display font-semibold text-lg text-info">Contraproposta</DialogTitle>
+  1212→              <DialogDescription className="text-sm text-muted-foreground">
+  1213→                Proponha novos valores para o contrato. A família revisará a sua contraproposta.
+  1214→              </DialogDescription>
+  1215→            </DialogHeader>
+  1216→            <div className="space-y-6 py-4">
+  1217→              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  1218→                <div className="space-y-2">
+  1219→                  <Label className="text-xs font-display font-bold text-foreground tracking-wide">Valor por hora (€)</Label>
+  1220→                  <Input
+  1221→                    type="number"
+  1222→                    value={counterHourlyRate}
+  1223→                    onChange={(e) => setCounterHourlyRate(Number(e.target.value) || 0)}
+  1224→                    min={5}
+  1225→                    max={100}
+  1226→                    step={0.5}
+  1227→                  />
+  1228→                </div>
+  1229→                <div className="space-y-2">
+  1230→                  <Label className="text-xs font-display font-bold text-foreground tracking-wide">Horas/semana</Label>
+  1231→                  <Input
+  1232→                    type="number"
+  1233→                    value={counterHoursPerWeek}
+  1234→                    onChange={(e) => setCounterHoursPerWeek(Number(e.target.value) || 0)}
+  1235→                    min={1}
+  1236→                    max={60}
+  1237→                  />
+  1238→                </div>
+  1239→              </div>
+  1240→              <div className="bg-secondary rounded-2xl p-4 space-y-2">
+  1241→                <div className="flex justify-between text-sm">
+  1242→                  <span className="text-muted-foreground">Valor proposto</span>
+  1243→                  <span className="font-display font-black text-foreground">€{counterHourlyRate.toFixed(2)}/h</span>
+  1244→                </div>
+  1245→                <div className="flex justify-between text-sm">
+  1246→                  <span className="text-muted-foreground">Horas/semana</span>
+  1247→                  <span className="font-display font-black text-foreground">{counterHoursPerWeek}h</span>
+  1248→                </div>
+  1249→              </div>
+  1250→              <div className="space-y-2">
+  1251→                <Label className="text-xs font-display font-bold text-foreground tracking-wide">Mensagem (opcional)</Label>
+  1252→                <Textarea
+  1253→                  value={counterMessage}
+  1254→                  onChange={(e) => setCounterMessage(e.target.value)}
+  1255→                  placeholder="Explique o motivo da contraproposta..."
+  1256→                  rows={3}
+  1257→                />
+  1258→              </div>
+  1259→            </div>
+  1260→            <DialogFooter className="gap-2">
+  1261→              <Button variant="outline" onClick={() => setShowCounterDialog(false)} className="rounded-xl">Cancelar</Button>
+  1262→              <Button onClick={handleCounterProposal} disabled={isCountering} className="rounded-xl">
+  1263→                {isCountering ? <IconLoader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+  1264→                Enviar Contraproposta
+  1265→              </Button>
+  1266→            </DialogFooter>
+  1267→          </DialogContent>
+  1268→        </Dialog>
+  1269→    </PageLayout>
+  1270→  );
+  1271→}
+  1272→
+  1273→// Sub-component for active contract actions (receipts + recurring payments)
+  1274→function ActiveContractActions({ contractId }: { contractId: string }) {
+  1275→  const [receipts, setReceipts] = useState<
+  1276→    Array<{
+  1277→      id: string;
+  1278→      receiptNumber: string;
+  1279→      periodStart: string;
+  1280→      periodEnd: string;
+  1281→      hoursWorked: number;
+  1282→      totalAmountCents: number;
+  1283→      createdAt: string;
+  1284→    }>
+  1285→  >([]);
+  1286→  const [recurringPayment, setRecurringPayment] = useState<{
+  1287→    id: string;
+  1288→    status: string;
+  1289→    nextPaymentAt: string;
+  1290→    amountCents: number;
+  1291→  } | null>(null);
+  1292→  const [isLoadingReceipts, setIsLoadingReceipts] = useState(true);
+  1293→  const [isSettingUp, setIsSettingUp] = useState(false);
+  1294→  const [isGenerating, setIsGenerating] = useState(false);
+  1295→  const [hoursWorked, setHoursWorked] = useState(0);
+  1296→
+  1297→  useEffect(() => {
+  1298→    async function load() {
+  1299→      try {
+  1300→        const [receiptRes, rpRes] = await Promise.all([
+  1301→          apiFetch(`/api/contracts/${contractId}/receipt`),
+  1302→          apiFetch(`/api/payments/recurring?contractId=${contractId}`),
+  1303→        ]);
+  1304→        if (receiptRes.ok) {
+  1305→          const data = await receiptRes.json();
+  1306→          setReceipts(data.receipts || []);
+  1307→        }
+  1308→        if (rpRes.ok) {
+  1309→          const data = await rpRes.json();
+  1310→          setRecurringPayment(data.recurringPayment);
+  1311→        }
+  1312→      } catch {
+  1313→        // silent
+  1314→      } finally {
+  1315→        setIsLoadingReceipts(false);
+  1316→      }
+  1317→    }
+  1318→    load();
+  1319→  }, [contractId]);
+  1320→
+  1321→  const handleSetupRecurring = async () => {
+  1322→    setIsSettingUp(true);
+  1323→    try {
+  1324→      const res = await apiFetch("/api/payments/recurring", {
+  1325→        method: "POST",
+  1326→        headers: { "Content-Type": "application/json" },
+  1327→        body: JSON.stringify({ contractId, billingDay: 1 }),
+  1328→      });
+  1329→      if (res.ok) {
+  1330→        const data = await res.json();
+  1331→        setRecurringPayment({
+  1332→          id: data.id,
+  1333→          status: "ACTIVE",
+  1334→          nextPaymentAt: data.nextPaymentAt,
+  1335→          amountCents: data.amountCents,
+  1336→        });
+  1337→      }
+  1338→    } catch {
+  1339→      // silent
+  1340→    } finally {
+  1341→      setIsSettingUp(false);
+  1342→    }
+  1343→  };
+  1344→
+  1345→  const handleGenerateReceipt = async () => {
+  1346→    if (hoursWorked <= 0) return;
+  1347→    setIsGenerating(true);
+  1348→    try {
+  1349→      const now = new Date();
+  1350→      const periodStart = new Date(
+  1351→        now.getFullYear(),
+  1352→        now.getMonth(),
+  1353→        1,
+  1354→      ).toISOString();
+  1355→      const periodEnd = new Date(
+  1356→        now.getFullYear(),
+  1357→        now.getMonth() + 1,
+  1358→        0,
+  1359→      ).toISOString();
+  1360→
+  1361→      const res = await apiFetch(`/api/contracts/${contractId}/receipt`, {
+  1362→        method: "POST",
+  1363→        headers: { "Content-Type": "application/json" },
+  1364→        body: JSON.stringify({ periodStart, periodEnd, hoursWorked }),
+  1365→      });
+  1366→      if (res.ok) {
+  1367→        // Refresh receipts
+  1368→        const refreshRes = await apiFetch(
+  1369→          `/api/contracts/${contractId}/receipt`,
+  1370→        );
+  1371→        if (refreshRes.ok) {
+  1372→          const data = await refreshRes.json();
+  1373→          setReceipts(data.receipts || []);
+  1374→        }
+  1375→        setHoursWorked(0);
+  1376→      }
+  1377→    } catch {
+  1378→      // silent
+  1379→    } finally {
+  1380→      setIsGenerating(false);
+  1381→    }
+  1382→  };
+  1383→
+  1384→  if (isLoadingReceipts) return null;
+  1385→
+  1386→  return (
+  1387→    <>
+  1388→      {/* Recurring Payment */}
+  1389→      <DocCard title="Pagamento Recorrente">
+  1390→          {recurringPayment ? (
+  1391→            <div className="space-y-4">
+  1392→              <div className="flex items-center justify-between py-4 border-b border-border/50">
+  1393→                <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+  1394→                  Status
+  1395→                </span>
+  1396→                <BloomBadge
+  1397→                  className={
+  1398→                    recurringPayment.status === "ACTIVE"
+  1399→                      ? "bg-success/10 text-success border border-success/30"
+  1400→                      : "bg-muted text-muted-foreground border border-border"
+  1401→                  }
+  1402→                >
+  1403→                  {recurringPayment.status === "ACTIVE"
+  1404→                    ? "Ativo"
+  1405→                    : recurringPayment.status}
+  1406→                </BloomBadge>
+  1407→              </div>
+  1408→              <div className="flex items-center justify-between py-4 border-b border-border/50">
+  1409→                <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+  1410→                  Valor mensal
+  1411→                </span>
+  1412→                <span className="text-lg sm:text-xl font-display font-black tracking-tighter text-foreground">
+  1413→                  €{Math.round(recurringPayment.amountCents / 100)}
+  1414→                </span>
+  1415→              </div>
+  1416→              {recurringPayment.nextPaymentAt && (
+  1417→                <div className="flex items-center justify-between py-4">
+  1418→                  <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+  1419→                    Próximo pagamento
+  1420→                  </span>
+  1421→                  <span className="font-medium text-foreground">
+  1422→                    {new Date(
+  1423→                      recurringPayment.nextPaymentAt,
+  1424→                    ).toLocaleDateString("pt-PT")}
+  1425→                  </span>
+  1426→                </div>
+  1427→              )}
+  1428→              <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
+  1429→                O pagamento é processado automaticamente pela plataforma,
+  1430→                garantindo segurança para ambas as partes.
+  1431→              </p>
+  1432→            </div>
+  1433→          ) : (
+  1434→            <div className="text-center space-y-4">
+  1435→              <p className="text-sm text-muted-foreground">
+  1436→                Configure o pagamento mensal automático para garantir que o
+  1437→                profissional receba pontualmente e a plataforma possa fornecer
+  1438→                proteção contínua.
+  1439→              </p>
+  1440→              <Button
+  1441→                onClick={handleSetupRecurring}
+  1442→                disabled={isSettingUp}
+  1443→                className="w-full h-12 rounded-2xl font-semibold"
+  1444→              >
+  1445→                {isSettingUp ? (
+  1446→                  <IconLoader2 className="h-4 w-4 mr-2 animate-spin" />
+  1447→                ) : (
+  1448→                  <IconCalendar className="h-4 w-4 mr-2" />
+  1449→                )}
+  1450→                Ativar Pagamento Mensal
+  1451→              </Button>
+  1452→            </div>
+  1453→          )}
+  1454→      </DocCard>
+  1455→
+  1456→      {/* Receipts */}
+  1457→      <DocCard title="Recibos Fiscais">
+  1458→          {/* Generate receipt */}
+  1459→          <div className="flex flex-col sm:flex-row items-end gap-3 mb-6 pb-6 border-b border-border/50">
+  1460→            <div className="flex-1 w-full">
+  1461→              <Label className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+  1462→                Horas trabalhadas este mês
+  1463→              </Label>
+  1464→              <Input
+  1465→                type="number"
+  1466→                min={0}
+  1467→                max={200}
+  1468→                value={hoursWorked || ""}
+  1469→                onChange={(e) => setHoursWorked(Number(e.target.value) || 0)}
+  1470→                placeholder="0"
+  1471→                className="h-11 rounded-2xl text-sm mt-2 bg-secondary border-border"
+  1472→              />
+  1473→            </div>
+  1474→            <Button
+  1475→              onClick={handleGenerateReceipt}
+  1476→              disabled={isGenerating || hoursWorked <= 0}
+  1477→              className="w-full sm:w-auto h-11 rounded-2xl font-semibold"
+  1478→            >
+  1479→              {isGenerating ? (
+  1480→                <IconLoader2 className="h-4 w-4 animate-spin mr-2" />
+  1481→              ) : (
+  1482→                "Gerar Recibo"
+  1483→              )}
+  1484→            </Button>
+  1485→          </div>
+  1486→
+  1487→          {receipts.length > 0 ? (
+  1488→            <div className="space-y-3">
+  1489→              {receipts.map((receipt) => (
+  1490→                <div
+  1491→                  key={receipt.id}
+  1492→                  className="flex items-center justify-between p-4 bg-secondary rounded-2xl border border-border/50"
+  1493→                >
+  1494→                  <div>
+  1495→                    <p className="text-sm font-display font-bold text-foreground">
+  1496→                      {receipt.receiptNumber}
+  1497→                    </p>
+  1498→                    <p className="text-xs text-muted-foreground mt-1">
+  1499→                      {new Date(receipt.periodStart).toLocaleDateString(
+  1500→                        "pt-PT",
+  1501→                      )}{" "}
+  1502→                      —{" "}
+  1503→                      {new Date(receipt.periodEnd).toLocaleDateString("pt-PT")}
+  1504→                    </p>
+  1505→                  </div>
+  1506→                  <div className="text-right">
+  1507→                    <p className="text-lg font-display font-black text-foreground tracking-tighter">
+  1508→                      €{Math.round(receipt.totalAmountCents / 100)}
+  1509→                    </p>
+  1510→                    <p className="text-xs text-muted-foreground mt-1">
+  1511→                      {receipt.hoursWorked}h
+  1512→                    </p>
+  1513→                  </div>
+  1514→                </div>
+  1515→              ))}
+  1516→            </div>
+  1517→          ) : (
+  1518→            <p className="text-xs text-muted-foreground text-center py-6">
+  1519→              Nenhum recibo gerado ainda. Gere recibos mensalmente para fins
+  1520→              fiscais.
+  1521→            </p>
+  1522→          )}
+  1523→          <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+  1524→            Recibos gerados pela plataforma são válidos para declaração de
+  1525→            IRS/Segurança Social.
+  1526→          </p>
+  1527→      </DocCard>
+  1528→    </>
+  1529→  );
+  1530→}
+  1531→

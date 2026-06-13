@@ -1,0 +1,1404 @@
+     1→"use client";
+     2→
+     3→import { useSession } from "next-auth/react";
+     4→import { hasRole, UserRole } from "@/lib/roles";
+     5→import { useRouter } from "next/navigation";
+     6→import { useState, useEffect, useRef } from "react";
+     7→import Link from "next/link";
+     8→import { Button } from "@/components/ui/button";
+     9→import { Textarea } from "@/components/ui/textarea";
+    10→import { Label } from "@/components/ui/label";
+    11→import { Checkbox } from "@/components/ui/checkbox";
+    12→import { VideoRoom } from "@/components/video/video-room";
+    13→import { BloomBadge, BloomCard, BloomAlert } from "@/components/bloom-custom";
+    14→import {
+    15→  IconVideo,
+    16→  IconClock,
+    17→  IconCheck,
+    18→  IconX,
+    19→  IconLoader2,
+    20→  IconStar,
+    21→  IconAlertCircle,
+    22→  IconExternalLink,
+    23→  IconContract,
+    24→  IconChat,
+    25→  IconArrowLeft,
+    26→} from "@/components/icons";
+    27→import { useI18n } from "@/lib/i18n";
+    28→import { apiFetch } from "@/lib/api-client";
+    29→import { openChat } from "@/lib/chat-events";
+    30→import { PageLayout } from "@/components/layout/PageLayout";
+    31→
+    32→interface Interview {
+    33→  id: string;
+    34→  status: string;
+    35→  scheduledAt: string;
+    36→  durationMinutes: number;
+    37→  videoRoomUrl: string;
+    38→  familyName: string;
+    39→  caregiverName: string;
+    40→  familyUserId: string;
+    41→  caregiverUserId: string;
+    42→  questionnaire: {
+    43→    communicationRating?: number;
+    44→    experienceRating?: number;
+    45→    punctualityRating?: number;
+    46→    wouldRecommend?: boolean;
+    47→    proceedWithContract?: boolean;
+    48→    notes?: string;
+    49→  } | null;
+    50→  caregiverQuestionnaire: {
+    51→    familyRating?: number;
+    52→    clarityRating?: number;
+    53→    notes?: string;
+    54→    platformLiabilityAck?: boolean;
+    55→  } | null;
+    56→  familyCompletedAt?: string;
+    57→  caregiverCompletedAt?: string;
+    58→}
+    59→
+    60→export default function InterviewPage({
+    61→  params,
+    62→}: {
+    63→  params: Promise<{ id: string }>;
+    64→}) {
+    65→  const { data: session, status } = useSession();
+    66→  const router = useRouter();
+    67→  const { t } = useI18n();
+    68→  const [interview, setInterview] = useState<Interview | null>(null);
+    69→  const [isLoading, setIsLoading] = useState(true);
+    70→  const [isSubmitting, setIsSubmitting] = useState(false);
+    71→  const [error, setError] = useState("");
+    72→
+    73→  // Questionnaire state
+    74→  const [communicationRating, setCommunicationRating] = useState(3);
+    75→  const [experienceRating, setExperienceRating] = useState(3);
+    76→  const [punctualityRating, setPunctualityRating] = useState(3);
+    77→  const [wouldRecommend, setWouldRecommend] = useState(true);
+    78→  const [proceedWithContract, setProceedWithContract] = useState(false);
+    79→  const [notes, setNotes] = useState("");
+    80→
+    81→  // Legal acknowledgement fields
+    82→  const [interviewConducted, setInterviewConducted] = useState(false);
+    83→  const [agreedExpectations, setAgreedExpectations] = useState(false);
+    84→  const [noMisrepresentation, setNoMisrepresentation] = useState(false);
+    85→  const [platformLiabilityAck, setPlatformLiabilityAck] = useState(false);
+    86→
+    87→  // Caregiver questionnaire state
+    88→  const [cgFamilyRating, setCgFamilyRating] = useState(3);
+    89→  const [cgClarityRating, setCgClarityRating] = useState(3);
+    90→  const [cgNotes, setCgNotes] = useState("");
+    91→  const [cgInterviewConducted, setCgInterviewConducted] = useState(false);
+    92→  const [cgPlatformAck, setCgPlatformAck] = useState(false);
+    93→  const [cgNoMisrepresentation, setCgNoMisrepresentation] = useState(false);
+    94→  const [userLeftMeeting, setUserLeftMeeting] = useState(false);
+    95→
+    96→  const paramsRef = useRef(params);
+    97→
+    98→  useEffect(() => {
+    99→    const loadInterview = async () => {
+   100→      const resolvedParams = await paramsRef.current;
+   101→      try {
+   102→        const response = await apiFetch(`/api/interviews/${resolvedParams.id}`);
+   103→        if (response.ok) {
+   104→          const data = await response.json();
+   105→          console.log("Interview loaded:", {
+   106→            id: data.interview.id,
+   107→            status: data.interview.status,
+   108→            videoRoomUrl: data.interview.videoRoomUrl,
+   109→          });
+   110→          setInterview(data.interview);
+   111→          if (data.interview.questionnaire) {
+   112→            setCommunicationRating(
+   113→              data.interview.questionnaire.communicationRating || 3,
+   114→            );
+   115→            setExperienceRating(
+   116→              data.interview.questionnaire.experienceRating || 3,
+   117→            );
+   118→            setPunctualityRating(
+   119→              data.interview.questionnaire.punctualityRating || 3,
+   120→            );
+   121→            setWouldRecommend(
+   122→              data.interview.questionnaire.wouldRecommend ?? true,
+   123→            );
+   124→            setProceedWithContract(
+   125→              data.interview.questionnaire.proceedWithContract ?? false,
+   126→            );
+   127→            setNotes(data.interview.questionnaire.notes || "");
+   128→          }
+   129→        } else {
+   130→          setError("Entrevista nao encontrada");
+   131→        }
+   132→      } catch {
+   133→        setError("Falha ao carregar entrevista");
+   134→      } finally {
+   135→        setIsLoading(false);
+   136→      }
+   137→    };
+   138→    if (status === "authenticated") loadInterview();
+   139→  }, [status]);
+   140→
+   141→  const handleStartInterview = async () => {
+   142→    if (!interview) return;
+   143→    try {
+   144→      await apiFetch(`/api/interviews/${interview.id}`, {
+   145→        method: "PATCH",
+   146→        headers: { "Content-Type": "application/json" },
+   147→        body: JSON.stringify({ status: "IN_PROGRESS" }),
+   148→      });
+   149→      setInterview({ ...interview, status: "IN_PROGRESS" });
+   150→    } catch {
+   151→      setError("Falha ao iniciar entrevista");
+   152→    }
+   153→  };
+   154→
+   155→  const handleCompleteInterview = async () => {
+   156→    if (!interview) return;
+   157→    try {
+   158→      await apiFetch(`/api/interviews/${interview.id}`, {
+   159→        method: "PATCH",
+   160→        headers: { "Content-Type": "application/json" },
+   161→        body: JSON.stringify({ status: "COMPLETED" }),
+   162→      });
+   163→      setInterview({ ...interview, status: "COMPLETED" });
+   164→    } catch {
+   165→      setError("Falha ao finalizar entrevista");
+   166→    }
+   167→  };
+   168→
+   169→  const handleSubmitQuestionnaire = async () => {
+   170→    if (!interview) return;
+   171→    setIsSubmitting(true);
+   172→    try {
+   173→      const response = await apiFetch(`/api/interviews/${interview.id}`, {
+   174→        method: "PATCH",
+   175→        headers: { "Content-Type": "application/json" },
+   176→        body: JSON.stringify({
+   177→          questionnaire: {
+   178→            communicationRating,
+   179→            experienceRating,
+   180→            punctualityRating,
+   181→            wouldRecommend,
+   182→            proceedWithContract,
+   183→            notes,
+   184→            interviewConductedProperly: interviewConducted,
+   185→            agreedCareExpectations: agreedExpectations,
+   186→            noMisrepresentation,
+   187→            platformLiabilityAck,
+   188→          },
+   189→        }),
+   190→      });
+   191→      if (response.ok) {
+   192→        const data = await response.json();
+   193→        if (proceedWithContract && data.contractId) {
+   194→          router.push(
+   195→            `/app/contracts/new?caregiverId=${interview.caregiverUserId}`,
+   196→          );
+   197→        } else {
+   198→          router.push("/app/dashboard?interview=completed");
+   199→        }
+   200→      } else {
+   201→        setError("Falha ao enviar questionario");
+   202→      }
+   203→    } catch {
+   204→      setError("Falha ao enviar questionario");
+   205→    } finally {
+   206→      setIsSubmitting(false);
+   207→    }
+   208→  };
+   209→
+   210→  const handleSubmitCaregiverQuestionnaire = async () => {
+   211→    if (!interview) return;
+   212→    setIsSubmitting(true);
+   213→    try {
+   214→      const response = await apiFetch(`/api/interviews/${interview.id}`, {
+   215→        method: "PATCH",
+   216→        headers: { "Content-Type": "application/json" },
+   217→        body: JSON.stringify({
+   218→          questionnaire: {
+   219→            familyRating: cgFamilyRating,
+   220→            clarityRating: cgClarityRating,
+   221→            notes: cgNotes,
+   222→            interviewConductedProperly: cgInterviewConducted,
+   223→            noMisrepresentation: cgNoMisrepresentation,
+   224→            platformLiabilityAck: cgPlatformAck,
+   225→          },
+   226→        }),
+   227→      });
+   228→      if (response.ok) {
+   229→        router.push("/app/dashboard?interview=completed");
+   230→      } else {
+   231→        setError("Falha ao enviar feedback");
+   232→      }
+   233→    } catch {
+   234→      setError("Falha ao enviar feedback");
+   235→    } finally {
+   236→      setIsSubmitting(false);
+   237→    }
+   238→  };
+   239→
+   240→  const handleLeaveMeeting = async () => {
+   241→    // Don't automatically complete interview when user leaves Jitsi
+   242→    // User must click "Finalizar" button to confirm interview is complete
+   243→    setUserLeftMeeting(true);
+   244→    console.log("User left Jitsi meeting, waiting for explicit completion");
+   245→  };
+   246→
+   247→  const getRoomName = (url: string): string => {
+   248→    try {
+   249→      const roomName = new URL(url).pathname.replace("/", "");
+   250→      console.log("Extracted room name from URL:", url, "->", roomName);
+   251→      return roomName;
+   252→    } catch (e) {
+   253→      console.error("Failed to parse URL for room name:", url, e);
+   254→      return url;
+   255→    }
+   256→  };
+   257→
+   258→  // Star rating component
+   259→  const StarRating = ({
+   260→    value,
+   261→    onChange,
+   262→    label,
+   263→  }: {
+   264→    value: number;
+   265→    onChange: (v: number) => void;
+   266→    label: string;
+   267→  }) => (
+   268→    <div className="flex items-center justify-between py-2">
+   269→      <span className="text-xs sm:text-sm leading-relaxed text-foreground">
+   270→        {label}
+   271→      </span>
+   272→      <div className="flex gap-1">
+   273→        {[1, 2, 3, 4, 5].map((i) => (
+   274→          <button
+   275→            key={i}
+   276→            onClick={() => onChange(i)}
+   277→            className="p-0.5 touch-manipulation"
+   278→          >
+   279→            <IconStar
+   280→              className={`h-6 w-6 transition-colors ${
+   281→                i <= value ? "fill-info text-info" : "text-muted-foreground/20"
+   282→              }`}
+   283→            />
+   284→          </button>
+   285→        ))}
+   286→      </div>
+   287→    </div>
+   288→  );
+   289→
+   290→  if (isLoading) {
+   291→    return (
+   292→      <PageLayout spacing="normal">
+   293→        <div className="animate-pulse space-y-5 max-w-4xl mx-auto">
+   294→          <div className="h-28 bg-muted rounded-3xl" />
+   295→          <div className="h-[60vh] bg-muted rounded-3xl" />
+   296→        </div>
+   297→      </PageLayout>
+   298→    );
+   299→  }
+   300→
+   301→  if (!interview) {
+   302→    return (
+   303→      <PageLayout spacing="normal">
+   304→        <div className="space-y-4 max-w-md mx-auto">
+   305→          <BloomAlert
+   306→            variant="error"
+   307→            title="Erro"
+   308→            message={error || "Entrevista não encontrada"}
+   309→          />
+   310→          <Button
+   311→            className="rounded-xl h-12 w-full"
+   312→            onClick={() => router.push("/app/dashboard")}
+   313→          >
+   314→            Voltar ao Dashboard
+   315→          </Button>
+   316→        </div>
+   317→      </PageLayout>
+   318→    );
+   319→  }
+   320→
+   321→  const isFamily = hasRole(session?.user, UserRole.FAMILY);
+   322→  const otherPartyName = isFamily
+   323→    ? interview.caregiverName
+   324→    : interview.familyName;
+   325→  const roomName = getRoomName(interview.videoRoomUrl);
+   326→
+   327→  const getStatusBadge = () => {
+   328→    const statusMap: Record<string, { label: string; variant: "warning" | "success" | "primary" | "destructive" }> = {
+   329→      SCHEDULED: { label: "Agendada", variant: "warning" },
+   330→      IN_PROGRESS: { label: "Em Andamento", variant: "success" },
+   331→      COMPLETED: { label: "Concluida", variant: "primary" },
+   332→      CANCELLED: { label: "Cancelada", variant: "destructive" },
+   333→    };
+   334→
+   335→    const status = statusMap[interview.status];
+   336→    if (!status) return null;
+   337→
+   338→    return <BloomBadge variant={status.variant}>{status.label}</BloomBadge>;
+   339→  };
+   340→
+   341→  const allLegalChecked =
+   342→    interviewConducted && noMisrepresentation && platformLiabilityAck;
+   343→
+   344→  return (
+   345→    <PageLayout spacing="normal">
+   346→      <div className="space-y-6 max-w-4xl mx-auto pb-6 px-4 md:px-6 lg:px-8">
+   347→        {/* Header - Bloom Elements */}
+   348→        <BloomCard className="overflow-clip">
+   349→          <div className="h-1 -mx-5 sm:-mx-7 -mt-5 sm:-mt-7 mb-6 bg-primary" />
+   350→          <div className="flex items-center justify-between gap-4 mb-4">
+   351→            <div className="flex items-center gap-3">
+   352→              <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center flex-shrink-0 text-primary">
+   353→                <IconVideo className="h-5 w-5" />
+   354→              </div>
+   355→              <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   356→                Entrevista em Video
+   357→              </span>
+   358→            </div>
+   359→            {getStatusBadge()}
+   360→          </div>
+   361→          <h1 className="text-xl sm:text-2xl font-display font-semibold text-foreground tracking-tight">
+   362→            {isFamily ? "Entrevista com" : "Entrevista da"} {otherPartyName}
+   363→          </h1>
+   364→          {interview.status === "SCHEDULED" && (
+   365→            <div className="flex items-center gap-2 mt-4 text-xs sm:text-sm text-muted-foreground">
+   366→              <IconClock className="h-4 w-4" />
+   367→              <span>
+   368→                {new Date(interview.scheduledAt).toLocaleDateString("pt-PT", {
+   369→                  weekday: "short",
+   370→                  day: "numeric",
+   371→                  month: "short",
+   372→                })}{" "}
+   373→                às{" "}
+   374→                {new Date(interview.scheduledAt).toLocaleTimeString("pt-PT", {
+   375→                  hour: "2-digit",
+   376→                  minute: "2-digit",
+   377→                })}{" "}
+   378→                ({interview.durationMinutes} min)
+   379→              </span>
+   380→            </div>
+   381→          )}
+   382→        </BloomCard>
+   383→
+   384→        {/* Error - Bloom Elements */}
+   385→        {error && (
+   386→          <BloomAlert
+   387→            variant="error"
+   388→            title="Erro"
+   389→            message={error}
+   390→          />
+   391→        )}
+   392→
+   393→        {/* ====== SCHEDULED ====== */}
+   394→        {interview.status === "SCHEDULED" && (
+   395→          <div className="space-y-5">
+   396→            <BloomCard>
+   397→              <h3 className="text-xl sm:text-2xl font-display font-semibold mb-6 text-foreground flex items-center gap-3">
+   398→                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center flex-shrink-0 text-primary">
+   399→                  <IconVideo className="h-5 w-5" />
+   400→                </div>
+   401→                Preparação
+   402→              </h3>
+   403→              <div className="space-y-3">
+   404→                {[
+   405→                  {
+   406→                    icon: "\uD83C\uDFA5",
+   407→                    text: "Verifique se a sua câmara e microfone funcionam",
+   408→                  },
+   409→                  {
+   410→                    icon: "\uD83D\uDD07",
+   411→                    text: "Escolha um local silencioso e bem iluminado",
+   412→                  },
+   413→                  {
+   414→                    icon: "\uD83D\uDCDD",
+   415→                    text: "Tenha suas perguntas anotadas",
+   416→                  },
+   417→                  {
+   418→                    icon: "\uD83D\uDD12",
+   419→                    text: "A entrevista é privada e segura",
+   420→                  },
+   421→                ].map((tip, i) => (
+   422→                  <div
+   423→                    key={i}
+   424→                    className="flex items-start gap-3 text-sm leading-relaxed text-muted-foreground"
+   425→                  >
+   426→                    <span className="text-lg flex-shrink-0 mt-0.5">
+   427→                      {tip.icon}
+   428→                    </span>
+   429→                    <span>{tip.text}</span>
+   430→                  </div>
+   431→                ))}
+   432→              </div>
+   433→            </BloomCard>
+   434→            <div className="flex flex-col sm:flex-row gap-3">
+   435→              <Button
+   436→                onClick={handleStartInterview}
+   437→                size="lg"
+   438→                className="flex-1 h-14 text-base font-display font-bold tracking-wide"
+   439→              >
+   440→                <IconVideo className="h-5 w-5 mr-2" />
+   441→                Entrar na Sala de Entrevista
+   442→              </Button>
+   443→              <Button
+   444→                variant="outline"
+   445→                onClick={() => router.push("/app/interviews")}
+   446→                size="lg"
+   447→                className="flex-1 h-12"
+   448→              >
+   449→                <IconArrowLeft className="h-4 w-4 mr-2" />
+   450→                Voltar às Entrevistas
+   451→              </Button>
+   452→            </div>
+   453→          </div>
+   454→        )}
+   455→
+   456→        {/* ====== IN PROGRESS ====== */}
+   457→        {interview.status === "IN_PROGRESS" && (
+   458→          <div className="space-y-5">
+   459→            <VideoRoom
+   460→              roomName={roomName}
+   461→              displayName={session?.user?.name || "Usuario"}
+   462→              onLeave={handleLeaveMeeting}
+   463→              enablePrejoinPage={true}
+   464→              className="h-[calc(100vh-220px)] min-h-[400px]"
+   465→            />
+   466→
+   467→            {/* Warning when user left meeting - Bloom Elements */}
+   468→            {userLeftMeeting && (
+   469→              <BloomAlert
+   470→                variant="warning"
+   471→                title="Saiu da reunião"
+   472→                message="Para finalizar a entrevista e ir para feedback, clique em 'Finalizar' abaixo."
+   473→              />
+   474→            )}
+   475→
+   476→            <div className="flex flex-col sm:flex-row gap-3">
+   477→              <Button
+   478→                variant="outline"
+   479→                size="lg"
+   480→                onClick={() => window.open(interview.videoRoomUrl, "_blank")}
+   481→                className="flex-1 h-12"
+   482→              >
+   483→                <IconExternalLink className="h-4 w-4 mr-2" />
+   484→                Nova Aba
+   485→              </Button>
+   486→              <Button
+   487→                variant="destructive"
+   488→                size="lg"
+   489→                onClick={handleCompleteInterview}
+   490→                className="flex-1 h-12"
+   491→              >
+   492→                <IconCheck className="h-4 w-4 mr-2" />
+   493→                Finalizar
+   494→              </Button>
+   495→            </div>
+   496→            <Button
+   497→              variant="ghost"
+   498→              size="sm"
+   499→              onClick={() => router.push("/app/interviews")}
+   500→              className="w-full text-muted-foreground hover:text-foreground"
+   501→            >
+   502→              <IconArrowLeft className="h-4 w-4 mr-2" />
+   503→              Voltar às Entrevistas
+   504→            </Button>
+   505→          </div>
+   506→        )}
+   507→
+   508→        {/* ====== COMPLETED - Questionnaire (Family) - Bloom Elements ====== */}
+   509→        {interview.status === "COMPLETED" &&
+   510→          isFamily &&
+   511→          !interview.familyCompletedAt && (
+   512→            <div className="space-y-6 max-w-lg mx-auto">
+   513→              <div className="space-y-2">
+   514→                <h2 className="text-xl sm:text-2xl font-display font-black text-foreground tracking-tight mb-6">
+   515→                  Feedback da Entrevista
+   516→                </h2>
+   517→                <p className="text-sm leading-relaxed text-muted-foreground">
+   518→                  Avalie a entrevista com {interview.caregiverName}. Este
+   519→                  registro protege ambas as partes.
+   520→                </p>
+   521→              </div>
+   522→
+   523→              {/* Section 1: About the interview itself */}
+   524→              <section className="space-y-4">
+   525→                <h4 className="text-xs font-display font-bold text-foreground tracking-wide">
+   526→                  Avaliação da Entrevista
+   527→                </h4>
+   528→                <BloomCard className="space-y-4">
+   529→                  <StarRating
+   530→                    label="Comunicação"
+   531→                    value={communicationRating}
+   532→                    onChange={setCommunicationRating}
+   533→                  />
+   534→                  <StarRating
+   535→                    label="Experiência demonstrada"
+   536→                    value={experienceRating}
+   537→                    onChange={setExperienceRating}
+   538→                  />
+   539→                  <StarRating
+   540→                    label="Pontualidade"
+   541→                    value={punctualityRating}
+   542→                    onChange={setPunctualityRating}
+   543→                  />
+   544→                </BloomCard>
+   545→              </section>
+   546→
+   547→              {/* Section 2: Recommendation */}
+   548→              <section className="space-y-4">
+   549→                <h4 className="text-xs font-display font-bold text-foreground tracking-wide">
+   550→                  Recomendação
+   551→                </h4>
+   552→                <BloomCard className="space-y-4">
+   553→                  <div className="flex gap-3">
+   554→                    <button
+   555→                      onClick={() => setWouldRecommend(true)}
+   556→                      className={`flex-1 p-4 rounded-2xl border transition-all ${
+   557→                        wouldRecommend
+   558→                          ? "border-success/40 bg-success/10 text-success"
+   559→                          : "border-border/30 text-muted-foreground"
+   560→                      }`}
+   561→                    >
+   562→                      <span className="text-2xl block mb-2">
+   563→                        {"\uD83D\uDC4D"}
+   564→                      </span>
+   565→                      <span className="text-sm font-display font-bold">
+   566→                        Recomendo
+   567→                      </span>
+   568→                    </button>
+   569→                    <button
+   570→                      onClick={() => setWouldRecommend(false)}
+   571→                      className={`flex-1 p-4 rounded-2xl border transition-all ${
+   572→                        !wouldRecommend
+   573→                          ? "border-destructive/40 bg-destructive/10 text-destructive"
+   574→                          : "border-border/30 text-muted-foreground"
+   575→                      }`}
+   576→                    >
+   577→                      <span className="text-2xl block mb-2">
+   578→                        {"\uD83D\uDC4E"}
+   579→                      </span>
+   580→                      <span className="text-sm font-display font-bold">
+   581→                        Não recomendo
+   582→                      </span>
+   583→                    </button>
+   584→                  </div>
+   585→                </BloomCard>
+   586→              </section>
+   587→
+   588→              {/* Section 3: Legal acknowledgements */}
+   589→              <section className="space-y-4">
+   590→                <h4 className="text-xs font-display font-bold text-foreground tracking-wide">
+   591→                  Confirmações Importantes
+   592→                </h4>
+   593→                <BloomCard className="space-y-4">
+   594→                  <label className="flex items-start gap-3 cursor-pointer">
+   595→                    <Checkbox
+   596→                      checked={interviewConducted}
+   597→                      onCheckedChange={(c) => setInterviewConducted(c === true)}
+   598→                      className="mt-0.5"
+   599→                    />
+   600→                    <span className="text-sm leading-relaxed">
+   601→                      Confirmo que a entrevista em video foi realizada e que
+   602→                      ambas as partes participaram de forma voluntaria.
+   603→                    </span>
+   604→                  </label>
+   605→
+   606→                  <label className="flex items-start gap-3 cursor-pointer">
+   607→                    <Checkbox
+   608→                      checked={agreedExpectations}
+   609→                      onCheckedChange={(c) => setAgreedExpectations(c === true)}
+   610→                      className="mt-0.5"
+   611→                    />
+   612→                    <span className="text-sm leading-relaxed">
+   613→                      Discutimos as expectativas de cuidado, horarios e
+   614→                      responsabilidades durante a entrevista.
+   615→                    </span>
+   616→                  </label>
+   617→
+   618→                  <label className="flex items-start gap-3 cursor-pointer">
+   619→                    <Checkbox
+   620→                      checked={noMisrepresentation}
+   621→                      onCheckedChange={(c) =>
+   622→                        setNoMisrepresentation(c === true)
+   623→                      }
+   624→                      className="mt-0.5"
+   625→                    />
+   626→                    <span className="text-sm leading-relaxed">
+   627→                      Declaro que as informacoes que forneci sao verdadeiras e
+   628→                      que nao houve distorcao de informacoes por qualquer parte.
+   629→                    </span>
+   630→                  </label>
+   631→
+   632→                  <label className="flex items-start gap-3 cursor-pointer">
+   633→                    <Checkbox
+   634→                      checked={platformLiabilityAck}
+   635→                      onCheckedChange={(c) =>
+   636→                        setPlatformLiabilityAck(c === true)
+   637→                      }
+   638→                      className="mt-0.5"
+   639→                    />
+   640→                    <span className="text-sm leading-relaxed">
+   641→                      Entendo que a plataforma atua apenas como intermediaria
+   642→                      para conectar famílias e profissionais de saúde, nao sendo responsavel
+   643→                      pela qualidade ou resultado dos servicos prestados.
+   644→                    </span>
+   645→                  </label>
+   646→                </BloomCard>
+   647→              </section>
+   648→
+   649→              {/* Section 4: Proceed with contract? */}
+   650→              <section className="space-y-4">
+   651→                <h4 className="text-xs font-display font-bold text-foreground tracking-wide">
+   652→                  Proximo Passo
+   653→                </h4>
+   654→                <BloomCard className="space-y-3">
+   655→                  <div className="flex flex-col sm:flex-row gap-3">
+   656→                    <button
+   657→                      onClick={() => setProceedWithContract(true)}
+   658→                      className={`flex-1 p-4 rounded-2xl border transition-all ${
+   659→                        proceedWithContract
+   660→                          ? "border-primary bg-primary/10"
+   661→                          : "border-border hover:border-primary/30"
+   662→                      }`}
+   663→                    >
+   664→                      <IconContract
+   665→                        className={`h-6 w-6 mx-auto mb-1 ${proceedWithContract ? "text-primary" : "text-muted-foreground"}`}
+   666→                      />
+   667→                      <span
+   668→                        className={`text-sm font-display font-bold block ${proceedWithContract ? "text-primary" : "text-foreground"}`}
+   669→                      >
+   670→                        Criar Contrato
+   671→                      </span>
+   672→                      <span className="text-xs text-muted-foreground">
+   673→                        Prosseguir com este profissional
+   674→                      </span>
+   675→                    </button>
+   676→                    <button
+   677→                      onClick={() => setProceedWithContract(false)}
+   678→                      className={`flex-1 p-4 rounded-2xl border transition-all ${
+   679→                        !proceedWithContract
+   680→                          ? "border-muted-foreground/30 bg-muted/30"
+   681→                          : "border-border hover:border-muted-foreground/30"
+   682→                      }`}
+   683→                    >
+   684→                      <IconClock
+   685→                        className={`h-6 w-6 mx-auto mb-1 ${!proceedWithContract ? "text-muted-foreground" : "text-muted-foreground/50"}`}
+   686→                      />
+   687→                      <span
+   688→                        className={`text-sm font-display font-bold block ${!proceedWithContract ? "text-foreground" : "text-muted-foreground"}`}
+   689→                      >
+   690→                        Ainda nao
+   691→                      </span>
+   692→                      <span className="text-xs text-muted-foreground">
+   693→                        Salvar para depois
+   694→                      </span>
+   695→                    </button>
+   696→                  </div>
+   697→                </BloomCard>
+   698→              </section>
+   699→
+   700→              {/* Notes */}
+   701→              <section className="space-y-4">
+   702→                <h4 className="text-xs font-display font-bold text-foreground tracking-wide">
+   703→                  Observacoes sobre a entrevista (opcional)
+   704→                </h4>
+   705→                <BloomCard className="space-y-2">
+   706→                  <Textarea
+   707→                    value={notes}
+   708→                    onChange={(e) => setNotes(e.target.value)}
+   709→                    placeholder="O que foi discutido, acordos verbais, impressoes gerais..."
+   710→                    rows={3}
+   711→                    className="rounded-2xl text-base resize-none"
+   712→                  />
+   713→                  <p className="text-xs text-muted-foreground">
+   714→                    Estas notas ficam registradas para sua referencia e
+   715→                    seguranca.
+   716→                  </p>
+   717→                </BloomCard>
+   718→              </section>
+   719→
+   720→              {/* Submit */}
+   721→              <Button
+   722→                onClick={handleSubmitQuestionnaire}
+   723→                disabled={isSubmitting || !allLegalChecked}
+   724→                size="lg"
+   725→                className="w-full h-14 text-base font-semibold rounded-xl shadow-lg shadow-primary/25"
+   726→              >
+   727→                {isSubmitting ? (
+   728→                  <>
+   729→                    <IconLoader2 className="h-5 w-5 mr-2 animate-spin" />
+   730→                    Enviando...
+   731→                  </>
+   732→                ) : (
+   733→                  <>
+   734→                    <IconCheck className="h-5 w-5 mr-2" />
+   735→                    {proceedWithContract
+   736→                      ? "Enviar e Criar Contrato"
+   737→                      : "Enviar Feedback"}
+   738→                  </>
+   739→                )}
+   740→              </Button>
+   741→
+   742→              {!allLegalChecked && (
+   743→                <p className="text-xs text-center text-muted-foreground">
+   744→                  Marque todas as confirmacoes para continuar.
+   745→                </p>
+   746→              )}
+   747→            </div>
+   748→          )}
+   749→
+   750→        {/* ====== Already Completed (Family) ====== */}
+   751→        {interview.familyCompletedAt && isFamily && (
+   752→          <div className="space-y-6 max-w-3xl mx-auto">
+   753→            {/* Interview Summary */}
+   754→            <BloomCard className="bg-success/5 border-success/20">
+   755→              <div className="flex items-start justify-between mb-4">
+   756→                <div>
+   757→                  <h2 className="text-lg sm:text-xl font-display font-semibold text-success mb-2">
+   758→                    Entrevista Concluída
+   759→                  </h2>
+   760→                  <p className="text-sm leading-relaxed text-muted-foreground">
+   761→                    Feedback enviado e registrado
+   762→                  </p>
+   763→                </div>
+   764→                <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center flex-shrink-0">
+   765→                  <IconCheck className="h-7 w-7 text-success" />
+   766→                </div>
+   767→              </div>
+   768→
+   769→              {/* Interview Details */}
+   770→              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-success/20">
+   771→                <div>
+   772→                  <p className="text-xs font-display font-bold text-muted-foreground tracking-wide mb-1">
+   773→                    Data
+   774→                  </p>
+   775→                  <p className="text-lg sm:text-xl font-display font-black text-foreground tracking-tighter">
+   776→                    {new Date(interview.scheduledAt).toLocaleDateString(
+   777→                      "pt-PT",
+   778→                      {
+   779→                        weekday: "short",
+   780→                        day: "2-digit",
+   781→                        month: "2-digit",
+   782→                        year: "numeric",
+   783→                      },
+   784→                    )}{" "}
+   785→                    às{" "}
+   786→                    {new Date(interview.scheduledAt).toLocaleTimeString(
+   787→                      "pt-PT",
+   788→                      {
+   789→                        hour: "2-digit",
+   790→                        minute: "2-digit",
+   791→                      },
+   792→                    )}
+   793→                  </p>
+   794→                </div>
+   795→                <div>
+   796→                  <p className="text-xs font-display font-bold text-muted-foreground tracking-wide mb-1">
+   797→                    Duração
+   798→                  </p>
+   799→                  <p className="text-lg sm:text-xl font-display font-black text-foreground tracking-tighter">
+   800→                    {interview.durationMinutes} minutos
+   801→                  </p>
+   802→                </div>
+   803→              </div>
+   804→            </BloomCard>
+   805→
+   806→            {/* Your Feedback */}
+   807→            {interview.questionnaire && (
+   808→              <BloomCard className="space-y-4">
+   809→                <h3 className="text-xs font-display font-bold text-foreground tracking-wide flex items-center gap-3">
+   810→                  <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center flex-shrink-0">
+   811→                    <IconStar className="h-5 w-5 text-info" />
+   812→                  </div>
+   813→                  Seu Feedback
+   814→                </h3>
+   815→
+   816→                {interview.questionnaire.communicationRating && (
+   817→                  <div className="space-y-2">
+   818→                    <div className="flex justify-between items-center">
+   819→                      <span className="text-sm text-muted-foreground">
+   820→                        Comunicação
+   821→                      </span>
+   822→                      <div className="flex gap-0.5">
+   823→                        {[1, 2, 3, 4, 5].map((i) => (
+   824→                          <IconStar
+   825→                            key={i}
+   826→                            className={`h-4 w-4 ${
+   827→                              i <=
+   828→                              (interview.questionnaire?.communicationRating ||
+   829→                                0)
+   830→                                ? "fill-amber-400 text-amber-400"
+   831→                                : "text-muted-foreground/20"
+   832→                            }`}
+   833→                          />
+   834→                        ))}
+   835→                      </div>
+   836→                    </div>
+   837→                  </div>
+   838→                )}
+   839→
+   840→                {interview.questionnaire.experienceRating && (
+   841→                  <div className="space-y-2">
+   842→                    <div className="flex justify-between items-center">
+   843→                      <span className="text-sm text-muted-foreground">
+   844→                        Experiência Demonstrada
+   845→                      </span>
+   846→                      <div className="flex gap-0.5">
+   847→                        {[1, 2, 3, 4, 5].map((i) => (
+   848→                          <IconStar
+   849→                            key={i}
+   850→                            className={`h-4 w-4 ${
+   851→                              i <=
+   852→                              (interview.questionnaire?.experienceRating || 0)
+   853→                                ? "fill-amber-400 text-amber-400"
+   854→                                : "text-muted-foreground/20"
+   855→                            }`}
+   856→                          />
+   857→                        ))}
+   858→                      </div>
+   859→                    </div>
+   860→                  </div>
+   861→                )}
+   862→
+   863→                {interview.questionnaire.wouldRecommend !== undefined && (
+   864→                  <div className="flex items-center gap-2 pt-2 border-t border-border/50">
+   865→                    <span className="text-sm text-muted-foreground">
+   866→                      Recomendação:
+   867→                    </span>
+   868→                    <BloomBadge
+   869→                      variant={
+   870→                        interview.questionnaire.wouldRecommend
+   871→                          ? "success"
+   872→                          : "destructive"
+   873→                      }
+   874→                    >
+   875→                      {interview.questionnaire.wouldRecommend
+   876→                        ? "Recomenda"
+   877→                        : "Não Recomenda"}
+   878→                    </BloomBadge>
+   879→                  </div>
+   880→                )}
+   881→
+   882→                {interview.questionnaire.notes && (
+   883→                  <div className="pt-2 border-t border-border/50">
+   884→                    <p className="text-xs text-muted-foreground mb-1">
+   885→                      Observações
+   886→                    </p>
+   887→                    <p className="text-sm text-foreground">
+   888→                      {interview.questionnaire.notes}
+   889→                    </p>
+   890→                  </div>
+   891→                )}
+   892→              </BloomCard>
+   893→            )}
+   894→
+   895→            {/* Caregiver Feedback */}
+   896→            {interview.caregiverQuestionnaire && (
+   897→              <BloomCard className="space-y-4">
+   898→                <h3 className="text-xs font-display font-bold text-foreground tracking-wide flex items-center gap-3">
+   899→                  <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center flex-shrink-0">
+   900→                    <IconStar className="h-5 w-5 text-warning" />
+   901→                  </div>
+   902→                  Feedback de {interview.caregiverName}
+   903→                </h3>
+   904→
+   905→                {interview.caregiverQuestionnaire.familyRating && (
+   906→                  <div className="space-y-2">
+   907→                    <div className="flex justify-between items-center">
+   908→                      <span className="text-sm text-muted-foreground">
+   909→                        Respeito e Cordialidade
+   910→                      </span>
+   911→                      <div className="flex gap-0.5">
+   912→                        {[1, 2, 3, 4, 5].map((i) => (
+   913→                          <IconStar
+   914→                            key={i}
+   915→                            className={`h-4 w-4 ${
+   916→                              i <=
+   917→                              (interview.caregiverQuestionnaire?.familyRating ||
+   918→                                0)
+   919→                                ? "fill-amber-400 text-amber-400"
+   920→                                : "text-muted-foreground/20"
+   921→                            }`}
+   922→                          />
+   923→                        ))}
+   924→                      </div>
+   925→                    </div>
+   926→                  </div>
+   927→                )}
+   928→
+   929→                {interview.caregiverQuestionnaire.clarityRating && (
+   930→                  <div className="space-y-2">
+   931→                    <div className="flex justify-between items-center">
+   932→                      <span className="text-sm text-muted-foreground">
+   933→                        Clareza nas Expectativas
+   934→                      </span>
+   935→                      <div className="flex gap-0.5">
+   936→                        {[1, 2, 3, 4, 5].map((i) => (
+   937→                          <IconStar
+   938→                            key={i}
+   939→                            className={`h-4 w-4 ${
+   940→                              i <=
+   941→                              (interview.caregiverQuestionnaire
+   942→                                ?.clarityRating || 0)
+   943→                                ? "fill-amber-400 text-amber-400"
+   944→                                : "text-muted-foreground/20"
+   945→                            }`}
+   946→                          />
+   947→                        ))}
+   948→                      </div>
+   949→                    </div>
+   950→                  </div>
+   951→                )}
+   952→
+   953→                {interview.caregiverQuestionnaire.notes && (
+   954→                  <div className="pt-2 border-t border-border/50">
+   955→                    <p className="text-xs text-muted-foreground mb-1">
+   956→                      Observações
+   957→                    </p>
+   958→                    <p className="text-sm text-foreground">
+   959→                      {interview.caregiverQuestionnaire.notes}
+   960→                    </p>
+   961→                  </div>
+   962→                )}
+   963→              </BloomCard>
+   964→            )}
+   965→
+   966→            {/* Next Steps */}
+   967→            <BloomCard>
+   968→              <h3 className="text-xs font-display font-bold text-foreground tracking-wide mb-4 flex items-center gap-3">
+   969→                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center flex-shrink-0">
+   970→                  <IconCheck className="h-5 w-5 text-success" />
+   971→                </div>
+   972→                Próximos Passos
+   973→              </h3>
+   974→              {interview.questionnaire?.proceedWithContract ? (
+   975→                <div className="space-y-2">
+   976→                  <p className="text-sm text-muted-foreground">
+   977→                    Decidiu prosseguir com o contrato. O passo seguinte é
+   978→                    formalizar o acordo.
+   979→                  </p>
+   980→                  <Button asChild className="w-full h-12 rounded-xl mt-3">
+   981→                    <Link
+   982→                      href={`/app/contracts/new?caregiverId=${interview.caregiverUserId}`}
+   983→                    >
+   984→                      <IconContract className="h-4 w-4 mr-2" />
+   985→                      Criar Contrato
+   986→                    </Link>
+   987→                  </Button>
+   988→                </div>
+   989→              ) : (
+   990→                <p className="text-sm text-muted-foreground">
+   991→                  Decidiu não prosseguir no momento. Pode entrar em contacto
+   992→                  com {interview.caregiverName} para discussões futuras.
+   993→                </p>
+   994→              )}
+   995→            </BloomCard>
+   996→
+   997→            {/* Quick actions to contact caregiver */}
+   998→            <BloomCard>
+   999→              <h3 className="text-xs font-display font-bold text-foreground tracking-wide mb-4">
+  1000→                Contato Direto
+  1001→              </h3>
+  1002→              <div className="flex flex-col sm:flex-row gap-3">
+  1003→                <Button
+  1004→                  variant="outline"
+  1005→                  className="flex-1 h-12 rounded-xl"
+  1006→                  onClick={() => openChat({ userId: interview.caregiverUserId })}
+  1007→                >
+  1008→                  <IconChat className="h-4 w-4 mr-2" />
+  1009→                  Enviar Mensagem
+  1010→                </Button>
+  1011→              </div>
+  1012→            </BloomCard>
+  1013→
+  1014→            <div className="flex flex-col sm:flex-row gap-3">
+  1015→              <Button
+  1016→                variant="outline"
+  1017→                className="flex-1 h-12 rounded-xl"
+  1018→                onClick={() => router.push("/app/dashboard")}
+  1019→              >
+  1020→                Voltar ao Dashboard
+  1021→              </Button>
+  1022→            </div>
+  1023→          </div>
+  1024→        )}
+  1025→
+  1026→        {/* ====== COMPLETED - Caregiver Questionnaire ====== */}
+  1027→        {interview.status === "COMPLETED" &&
+  1028→          !isFamily &&
+  1029→          !interview.caregiverCompletedAt && (
+  1030→            <div className="space-y-6 max-w-lg mx-auto">
+  1031→              <div className="space-y-2">
+  1032→                <h2 className="text-xl sm:text-2xl font-display font-black text-foreground tracking-tight mb-6">
+  1033→                  Feedback da Entrevista
+  1034→                </h2>
+  1035→                <p className="text-sm leading-relaxed text-muted-foreground">
+  1036→                  Avalie a entrevista com a familia {interview.familyName}. Este
+  1037→                  registo protege ambas as partes.
+  1038→                </p>
+  1039→              </div>
+  1040→
+  1041→              {/* Ratings */}
+  1042→              <section className="space-y-4">
+  1043→                <h4 className="text-xs font-display font-bold text-foreground tracking-wide">
+  1044→                  Avaliacao da Familia
+  1045→                </h4>
+  1046→                <BloomCard className="space-y-4">
+  1047→                  <StarRating
+  1048→                    label="Respeito e cordialidade"
+  1049→                    value={cgFamilyRating}
+  1050→                    onChange={setCgFamilyRating}
+  1051→                  />
+  1052→                  <StarRating
+  1053→                    label="Clareza nas expectativas"
+  1054→                    value={cgClarityRating}
+  1055→                    onChange={setCgClarityRating}
+  1056→                  />
+  1057→                </BloomCard>
+  1058→              </section>
+  1059→
+  1060→              {/* Legal confirmations */}
+  1061→              <section className="space-y-4">
+  1062→                <h4 className="text-xs font-display font-bold text-foreground tracking-wide">
+  1063→                  Confirmacoes Importantes
+  1064→                </h4>
+  1065→                <BloomCard className="space-y-4">
+  1066→                  <label className="flex items-start gap-3 cursor-pointer">
+  1067→                    <Checkbox
+  1068→                      checked={cgInterviewConducted}
+  1069→                      onCheckedChange={(c) =>
+  1070→                        setCgInterviewConducted(c === true)
+  1071→                      }
+  1072→                      className="mt-0.5"
+  1073→                    />
+  1074→                    <span className="text-sm leading-relaxed">
+  1075→                      Confirmo que a entrevista em video foi realizada e que
+  1076→                      ambas as partes participaram de forma voluntaria.
+  1077→                    </span>
+  1078→                  </label>
+  1079→
+  1080→                  <label className="flex items-start gap-3 cursor-pointer">
+  1081→                    <Checkbox
+  1082→                      checked={cgNoMisrepresentation}
+  1083→                      onCheckedChange={(c) =>
+  1084→                        setCgNoMisrepresentation(c === true)
+  1085→                      }
+  1086→                      className="mt-0.5"
+  1087→                    />
+  1088→                    <span className="text-sm leading-relaxed">
+  1089→                      Declaro que as informacoes que forneci sobre minhas
+  1090→                      qualificacoes e experiencia sao verdadeiras.
+  1091→                    </span>
+  1092→                  </label>
+  1093→
+  1094→                  <label className="flex items-start gap-3 cursor-pointer">
+  1095→                    <Checkbox
+  1096→                      checked={cgPlatformAck}
+  1097→                      onCheckedChange={(c) => setCgPlatformAck(c === true)}
+  1098→                      className="mt-0.5"
+  1099→                    />
+  1100→                    <span className="text-sm leading-relaxed">
+  1101→                      Entendo que a plataforma atua apenas como intermediaria
+  1102→                      para conectar famílias e profissionais de saúde, nao sendo responsavel
+  1103→                      pela qualidade ou resultado dos servicos prestados.
+  1104→                    </span>
+  1105→                  </label>
+  1106→                </BloomCard>
+  1107→              </section>
+  1108→
+  1109→              {/* Notes */}
+  1110→              <section className="space-y-4">
+  1111→                <h4 className="text-xs font-display font-bold text-foreground tracking-wide">
+  1112→                  Observacoes sobre a entrevista (opcional)
+  1113→                </h4>
+  1114→                <BloomCard className="space-y-2">
+  1115→                  <Textarea
+  1116→                    value={cgNotes}
+  1117→                    onChange={(e) => setCgNotes(e.target.value)}
+  1118→                    placeholder="Impressoes sobre a familia, o que foi discutido, acordos verbais..."
+  1119→                    rows={3}
+  1120→                    className="rounded-2xl text-base resize-none"
+  1121→                  />
+  1122→                </BloomCard>
+  1123→              </section>
+  1124→
+  1125→              {/* Submit */}
+  1126→              <Button
+  1127→                onClick={handleSubmitCaregiverQuestionnaire}
+  1128→                disabled={
+  1129→                  isSubmitting ||
+  1130→                  !cgInterviewConducted ||
+  1131→                  !cgNoMisrepresentation ||
+  1132→                  !cgPlatformAck
+  1133→                }
+  1134→                size="lg"
+  1135→                className="w-full h-14 text-base font-semibold rounded-xl shadow-lg shadow-primary/25"
+  1136→              >
+  1137→                {isSubmitting ? (
+  1138→                  <>
+  1139→                    <IconLoader2 className="h-5 w-5 mr-2 animate-spin" />
+  1140→                    Enviando...
+  1141→                  </>
+  1142→                ) : (
+  1143→                  <>
+  1144→                    <IconCheck className="h-5 w-5 mr-2" />
+  1145→                    Enviar Feedback
+  1146→                  </>
+  1147→                )}
+  1148→              </Button>
+  1149→
+  1150→              {(!cgInterviewConducted ||
+  1151→                !cgNoMisrepresentation ||
+  1152→                !cgPlatformAck) && (
+  1153→                <p className="text-xs text-center text-muted-foreground">
+  1154→                  Marque todas as confirmacoes para continuar.
+  1155→                </p>
+  1156→              )}
+  1157→            </div>
+  1158→          )}
+  1159→
+  1160→        {/* ====== Caregiver - Already submitted questionnaire ====== */}
+  1161→        {interview.status === "COMPLETED" &&
+  1162→          !isFamily &&
+  1163→          interview.caregiverCompletedAt && (
+  1164→            <div className="space-y-6 max-w-3xl mx-auto">
+  1165→              {/* Interview Summary */}
+  1166→              <BloomCard className="bg-success/5 border-success/20">
+  1167→                <div className="flex items-start justify-between mb-4">
+  1168→                  <div>
+  1169→                    <h2 className="text-lg sm:text-xl font-display font-semibold text-success mb-2">
+  1170→                      Entrevista Concluída
+  1171→                    </h2>
+  1172→                    <p className="text-sm leading-relaxed text-muted-foreground">
+  1173→                      {interview.familyCompletedAt
+  1174→                        ? "Ambas as partes enviaram feedback"
+  1175→                        : "Enviou feedback, aguardando resposta da família"}
+  1176→                    </p>
+  1177→                  </div>
+  1178→                  <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center flex-shrink-0">
+  1179→                    <IconCheck className="h-7 w-7 text-success" />
+  1180→                  </div>
+  1181→                </div>
+  1182→
+  1183→                {/* Interview Details */}
+  1184→                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-success/20">
+  1185→                  <div>
+  1186→                    <p className="text-xs font-display font-bold text-muted-foreground tracking-wide mb-1">
+  1187→                      Data
+  1188→                    </p>
+  1189→                    <p className="text-lg sm:text-xl font-display font-black text-foreground tracking-tighter">
+  1190→                      {new Date(interview.scheduledAt).toLocaleDateString(
+  1191→                        "pt-PT",
+  1192→                        {
+  1193→                          weekday: "short",
+  1194→                          day: "2-digit",
+  1195→                          month: "2-digit",
+  1196→                          year: "numeric",
+  1197→                        },
+  1198→                      )}{" "}
+  1199→                      às{" "}
+  1200→                      {new Date(interview.scheduledAt).toLocaleTimeString(
+  1201→                        "pt-PT",
+  1202→                        {
+  1203→                          hour: "2-digit",
+  1204→                          minute: "2-digit",
+  1205→                        },
+  1206→                      )}
+  1207→                    </p>
+  1208→                  </div>
+  1209→                  <div>
+  1210→                    <p className="text-xs font-display font-bold text-muted-foreground tracking-wide mb-1">
+  1211→                      Duração
+  1212→                    </p>
+  1213→                    <p className="text-lg sm:text-xl font-display font-black text-foreground tracking-tighter">
+  1214→                      {interview.durationMinutes} minutos
+  1215→                    </p>
+  1216→                  </div>
+  1217→                </div>
+  1218→              </BloomCard>
+  1219→
+  1220→              {/* Your Feedback */}
+  1221→              {interview.caregiverQuestionnaire && (
+  1222→                <BloomCard className="space-y-4">
+  1223→                  <h3 className="text-xs font-display font-bold text-foreground tracking-wide flex items-center gap-3">
+  1224→                    <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center flex-shrink-0">
+  1225→                      <IconStar className="h-5 w-5 text-info" />
+  1226→                    </div>
+  1227→                    Seu Feedback
+  1228→                  </h3>
+  1229→
+  1230→                  {interview.caregiverQuestionnaire.familyRating && (
+  1231→                    <div className="space-y-2">
+  1232→                      <div className="flex justify-between items-center">
+  1233→                        <span className="text-sm text-muted-foreground">
+  1234→                          Respeito e Cordialidade
+  1235→                        </span>
+  1236→                        <div className="flex gap-0.5">
+  1237→                          {[1, 2, 3, 4, 5].map((i) => (
+  1238→                            <IconStar
+  1239→                              key={i}
+  1240→                              className={`h-4 w-4 ${
+  1241→                                i <=
+  1242→                                (interview.caregiverQuestionnaire
+  1243→                                  ?.familyRating || 0)
+  1244→                                  ? "fill-amber-400 text-amber-400"
+  1245→                                  : "text-muted-foreground/20"
+  1246→                              }`}
+  1247→                            />
+  1248→                          ))}
+  1249→                        </div>
+  1250→                      </div>
+  1251→                    </div>
+  1252→                  )}
+  1253→
+  1254→                  {interview.caregiverQuestionnaire.clarityRating && (
+  1255→                    <div className="space-y-2">
+  1256→                      <div className="flex justify-between items-center">
+  1257→                        <span className="text-sm text-muted-foreground">
+  1258→                          Clareza nas Expectativas
+  1259→                        </span>
+  1260→                        <div className="flex gap-0.5">
+  1261→                          {[1, 2, 3, 4, 5].map((i) => (
+  1262→                            <IconStar
+  1263→                              key={i}
+  1264→                              className={`h-4 w-4 ${
+  1265→                                i <=
+  1266→                                (interview.caregiverQuestionnaire
+  1267→                                  ?.clarityRating || 0)
+  1268→                                  ? "fill-amber-400 text-amber-400"
+  1269→                                  : "text-muted-foreground/20"
+  1270→                              }`}
+  1271→                            />
+  1272→                          ))}
+  1273→                        </div>
+  1274→                      </div>
+  1275→                    </div>
+  1276→                  )}
+  1277→
+  1278→                  {interview.caregiverQuestionnaire.notes && (
+  1279→                    <div className="pt-2 border-t border-border/50">
+  1280→                      <p className="text-xs text-muted-foreground mb-1">
+  1281→                        Observações
+  1282→                      </p>
+  1283→                      <p className="text-sm text-foreground">
+  1284→                        {interview.caregiverQuestionnaire.notes}
+  1285→                      </p>
+  1286→                    </div>
+  1287→                  )}
+  1288→                </BloomCard>
+  1289→              )}
+  1290→
+  1291→              {/* Family Feedback */}
+  1292→              {interview.familyCompletedAt && interview.questionnaire && (
+  1293→                <BloomCard className="space-y-4">
+  1294→                  <h3 className="text-xs font-display font-bold text-foreground tracking-wide flex items-center gap-3">
+  1295→                    <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center flex-shrink-0">
+  1296→                      <IconStar className="h-5 w-5 text-warning" />
+  1297→                    </div>
+  1298→                    Feedback de {interview.familyName}
+  1299→                  </h3>
+  1300→
+  1301→                  {interview.questionnaire.communicationRating && (
+  1302→                    <div className="space-y-2">
+  1303→                      <div className="flex justify-between items-center">
+  1304→                        <span className="text-sm text-muted-foreground">
+  1305→                          Comunicação
+  1306→                        </span>
+  1307→                        <div className="flex gap-0.5">
+  1308→                          {[1, 2, 3, 4, 5].map((i) => (
+  1309→                            <IconStar
+  1310→                              key={i}
+  1311→                              className={`h-4 w-4 ${
+  1312→                                i <=
+  1313→                                (interview.questionnaire?.communicationRating ||
+  1314→                                  0)
+  1315→                                  ? "fill-amber-400 text-amber-400"
+  1316→                                  : "text-muted-foreground/20"
+  1317→                              }`}
+  1318→                            />
+  1319→                          ))}
+  1320→                        </div>
+  1321→                      </div>
+  1322→                    </div>
+  1323→                  )}
+  1324→
+  1325→                  {interview.questionnaire.experienceRating && (
+  1326→                    <div className="space-y-2">
+  1327→                      <div className="flex justify-between items-center">
+  1328→                        <span className="text-sm text-muted-foreground">
+  1329→                          Experiência Demonstrada
+  1330→                        </span>
+  1331→                        <div className="flex gap-0.5">
+  1332→                          {[1, 2, 3, 4, 5].map((i) => (
+  1333→                            <IconStar
+  1334→                              key={i}
+  1335→                              className={`h-4 w-4 ${
+  1336→                                i <=
+  1337→                                (interview.questionnaire?.experienceRating || 0)
+  1338→                                  ? "fill-amber-400 text-amber-400"
+  1339→                                  : "text-muted-foreground/20"
+  1340→                              }`}
+  1341→                            />
+  1342→                          ))}
+  1343→                        </div>
+  1344→                      </div>
+  1345→                    </div>
+  1346→                  )}
+  1347→
+  1348→                  {interview.questionnaire.wouldRecommend !== undefined && (
+  1349→                    <div className="flex items-center gap-2 pt-2 border-t border-border/50">
+  1350→                      <span className="text-sm text-muted-foreground">
+  1351→                        Recomendação:
+  1352→                      </span>
+  1353→                      <BloomBadge
+  1354→                        variant={
+  1355→                          interview.questionnaire.wouldRecommend
+  1356→                            ? "success"
+  1357→                            : "destructive"
+  1358→                        }
+  1359→                      >
+  1360→                        {interview.questionnaire.wouldRecommend
+  1361→                          ? "Recomenda"
+  1362→                          : "Não Recomenda"}
+  1363→                      </BloomBadge>
+  1364→                    </div>
+  1365→                  )}
+  1366→
+  1367→                  {interview.questionnaire.notes && (
+  1368→                    <div className="pt-2 border-t border-border/50">
+  1369→                      <p className="text-xs text-muted-foreground mb-1">
+  1370→                        Observações
+  1371→                      </p>
+  1372→                      <p className="text-sm text-foreground">
+  1373→                        {interview.questionnaire.notes}
+  1374→                      </p>
+  1375→                    </div>
+  1376→                  )}
+  1377→                </BloomCard>
+  1378→              )}
+  1379→
+  1380→              {/* Status Summary */}
+  1381→              {!interview.familyCompletedAt && (
+  1382→                <BloomAlert
+  1383→                  variant="warning"
+  1384→                  title="Aguardando avaliação"
+  1385→                  message="A família ainda está avaliando a entrevista. Será notificado quando houver novidades."
+  1386→                />
+  1387→              )}
+  1388→
+  1389→              <div className="flex flex-col sm:flex-row gap-3">
+  1390→                <Button
+  1391→                  variant="outline"
+  1392→                  className="flex-1 h-12 rounded-xl"
+  1393→                  onClick={() => router.push("/app/dashboard")}
+  1394→                >
+  1395→                  Voltar ao Dashboard
+  1396→                </Button>
+  1397→              </div>
+  1398→            </div>
+  1399→          )}
+  1400→      </div>
+  1401→    </PageLayout>
+  1402→  );
+  1403→}
+  1404→

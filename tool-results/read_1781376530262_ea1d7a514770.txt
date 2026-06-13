@@ -1,0 +1,1048 @@
+     1→"use client";
+     2→
+     3→import { useState, useCallback, useEffect } from "react";
+     4→import { PageLayout, PageHeader, PageSection } from "@/components/layout/PageLayout";
+     5→import { Badge } from "@/components/ui-kit/badge";
+     6→import { Button } from "@/components/ui-kit/button";
+     7→import { Textarea } from "@/components/ui-kit/input";
+     8→import {
+     9→  BloomCard,
+    10→  BloomEmpty,
+    11→  BloomAlert,
+    12→  BloomDialog,
+    13→} from "@/components/bloom-custom";
+    14→import {
+    15→  PillTabs,
+    16→  PillTabsList,
+    17→  PillTabsTrigger,
+    18→} from "@/components/ui-kit/tabs";
+    19→import {
+    20→  IconPhone,
+    21→  IconAlertTriangle,
+    22→  IconHeart,
+    23→  IconClock,
+    24→  IconMapPin,
+    25→  IconPlus,
+    26→  IconCopy,
+    27→  IconSend,
+    28→  IconShare,
+    29→  IconPill,
+    30→  IconActivity,
+    31→  IconUser,
+    32→  IconBuilding,
+    33→  IconCheck,
+    34→} from "@/components/icons";
+    35→import { apiFetch } from "@/lib/api-client";
+    36→import { showBloomToast } from "@/components/bloom-custom/BloomToast";
+    37→
+    38→// =============================================================================
+    39→// Types
+    40→// =============================================================================
+    41→
+    42→interface QuickContact {
+    43→  id: string;
+    44→  name: string;
+    45→  phone: string;
+    46→  icon: "emergency" | "doctor" | "caregiver" | "pharmacy" | "family";
+    47→  label: string;
+    48→  configured: boolean;
+    49→}
+    50→
+    51→interface MedicalInfo {
+    52→  bloodType: string;
+    53→  allergies: string[];
+    54→  criticalMedications: string[];
+    55→  responsibleDoctor: string;
+    56→  healthNumber: string;
+    57→  medicalConditions: string[];
+    58→}
+    59→
+    60→interface FamilyContact {
+    61→  name: string;
+    62→  email: string;
+    63→  phone: string;
+    64→}
+    65→
+    66→interface Incident {
+    67→  id: string;
+    68→  date: string;
+    69→  type: "Queda" | "Medicamento esquecido" | "SOS" | "Outro";
+    70→  resolution: "Resolvido" | "Em acompanhamento" | "Encaminhado para hospital";
+    71→  notes: string;
+    72→  reportedBy?: string | null;
+    73→}
+    74→
+    75→// =============================================================================
+    76→// Helpers
+    77→// =============================================================================
+    78→
+    79→function parseMedicalConditions(value: string | string[] | null | undefined): string[] {
+    80→  if (!value) return [];
+    81→  if (Array.isArray(value)) return value;
+    82→  try {
+    83→    const parsed = JSON.parse(value);
+    84→    if (Array.isArray(parsed)) return parsed;
+    85→    return [String(parsed)];
+    86→  } catch {
+    87→    return value.split(',').map(s => s.trim()).filter(Boolean);
+    88→  }
+    89→}
+    90→
+    91→function sanitizeDateValue(value: string | null | undefined): string {
+    92→  if (!value) return '';
+    93→  const trimmed = value.trim();
+    94→  if (trimmed === '0' || trimmed === '0/0/0' || trimmed === 'NaN') return '';
+    95→  return trimmed;
+    96→}
+    97→
+    98→function isEmptyValue(value: any): boolean {
+    99→  if (!value) return true;
+   100→  if (value === '{}') return true;
+   101→  if (typeof value === 'object' && Object.keys(value).length === 0) return true;
+   102→  return false;
+   103→}
+   104→
+   105→// =============================================================================
+   106→// Helper: Format date in PT-PT
+   107→// =============================================================================
+   108→
+   109→function formatDatePT(dateStr: string): string {
+   110→  const date = new Date(dateStr);
+   111→  return date.toLocaleDateString("pt-PT", {
+   112→    day: "2-digit",
+   113→    month: "2-digit",
+   114→    year: "numeric",
+   115→  });
+   116→}
+   117→
+   118→function formatTimePT(dateStr: string): string {
+   119→  const date = new Date(dateStr);
+   120→  return date.toLocaleTimeString("pt-PT", {
+   121→    hour: "2-digit",
+   122→    minute: "2-digit",
+   123→  });
+   124→}
+   125→
+   126→// =============================================================================
+   127→// Sub-components
+   128→// =============================================================================
+   129→
+   130→function ContactIcon({ type }: { type: QuickContact["icon"] }) {
+   131→  switch (type) {
+   132→    case "emergency":
+   133→      return (
+   134→        <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center flex-shrink-0">
+   135→          <IconPhone className="h-5 w-5 text-success" />
+   136→        </div>
+   137→      );
+   138→    case "doctor":
+   139→      return (
+   140→        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+   141→          <IconHeart className="h-5 w-5 text-primary" />
+   142→        </div>
+   143→      );
+   144→    case "family":
+   145→      return (
+   146→        <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center flex-shrink-0">
+   147→          <IconUser className="h-5 w-5 text-info" />
+   148→        </div>
+   149→      );
+   150→    case "caregiver":
+   151→      return (
+   152→        <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center flex-shrink-0">
+   153→          <IconUser className="h-5 w-5 text-info" />
+   154→        </div>
+   155→      );
+   156→    case "pharmacy":
+   157→      return (
+   158→        <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center flex-shrink-0">
+   159→          <IconBuilding className="h-5 w-5 text-warning" />
+   160→        </div>
+   161→      );
+   162→  }
+   163→}
+   164→
+   165→function IncidentTypeBadge({ type }: { type: Incident["type"] }) {
+   166→  const variantMap: Record<Incident["type"], "error" | "warning" | "info" | "secondary"> = {
+   167→    SOS: "error",
+   168→    Queda: "warning",
+   169→    "Medicamento esquecido": "info",
+   170→    Outro: "secondary",
+   171→  };
+   172→  return <Badge variant={variantMap[type]} size="sm">{type}</Badge>;
+   173→}
+   174→
+   175→function ResolutionBadge({ resolution }: { resolution: Incident["resolution"] }) {
+   176→  const variantMap: Record<Incident["resolution"], "success" | "warning" | "error"> = {
+   177→    Resolvido: "success",
+   178→    "Em acompanhamento": "warning",
+   179→    "Encaminhado para hospital": "error",
+   180→  };
+   181→  return <Badge variant={variantMap[resolution]} size="sm">{resolution}</Badge>;
+   182→}
+   183→
+   184→// Medical data row component
+   185→function MedicalDataRow({
+   186→  icon,
+   187→  label,
+   188→  value,
+   189→  configured,
+   190→}: {
+   191→  icon: React.ReactNode;
+   192→  label: string;
+   193→  value: React.ReactNode;
+   194→  configured: boolean;
+   195→}) {
+   196→  return (
+   197→    <div className="flex items-center justify-between gap-4 py-3 border-b border-border last:border-0 last:pb-0">
+   198→      <div className="flex items-center gap-3 min-w-0">
+   199→        <span className="text-muted-foreground flex-shrink-0">{icon}</span>
+   200→        <span className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   201→          {label}
+   202→        </span>
+   203→      </div>
+   204→      {configured ? (
+   205→        <span className="text-sm font-medium text-foreground">{value}</span>
+   206→      ) : (
+   207→        <span className="text-xs text-muted-foreground italic">
+   208→          Não configurado
+   209→        </span>
+   210→      )}
+   211→    </div>
+   212→  );
+   213→}
+   214→
+   215→// =============================================================================
+   216→// Main Page Component
+   217→// =============================================================================
+   218→
+   219→export default function CaregiverEmergenciaPage() {
+   220→  const [showRegisterDialog, setShowRegisterDialog] = useState(false);
+   221→  const [incidents, setIncidents] = useState<Incident[]>([]);
+   222→  const [quickContacts, setQuickContacts] = useState<QuickContact[]>([]);
+   223→  const [dateFilter, setDateFilter] = useState<"all" | "30d" | "7d">("all");
+   224→  const [newIncidentType, setNewIncidentType] = useState<Incident["type"]>("Queda");
+   225→  const [newIncidentNotes, setNewIncidentNotes] = useState("");
+   226→  const [newIncidentResolution, setNewIncidentResolution] = useState<Incident["resolution"]>("Em acompanhamento");
+   227→  const [registeringIncident, setRegisteringIncident] = useState(false);
+   228→  const [loading, setLoading] = useState(true);
+   229→  const [hasActiveContract, setHasActiveContract] = useState(true);
+   230→
+   231→  // Medical info loaded from API
+   232→  const [medicalInfo, setMedicalInfo] = useState<MedicalInfo>({
+   233→    bloodType: "",
+   234→    allergies: [],
+   235→    criticalMedications: [],
+   236→    responsibleDoctor: "",
+   237→    healthNumber: "",
+   238→    medicalConditions: [],
+   239→  });
+   240→  const [locationInfo, setLocationInfo] = useState({
+   241→    address: "",
+   242→    postalCode: "",
+   243→  });
+   244→  const [familyContact, setFamilyContact] = useState<FamilyContact>({
+   245→    name: "",
+   246→    email: "",
+   247→    phone: "",
+   248→  });
+   249→
+   250→  // ─── Load data on mount ────────────────────────────────────────
+   251→  useEffect(() => {
+   252→    const loadData = async () => {
+   253→      try {
+   254→        setLoading(true);
+   255→
+   256→        // Load caregiver-specific data
+   257→        const caregiverDataRes = await apiFetch("/api/emergency/caregiver-data");
+   258→        if (caregiverDataRes.ok) {
+   259→          const data = await caregiverDataRes.json();
+   260→
+   261→          if (!data.hasActiveContract) {
+   262→            setHasActiveContract(false);
+   263→            return;
+   264→          }
+   265→
+   266→          // Set contacts
+   267→          if (data.contacts) {
+   268→            setQuickContacts(data.contacts);
+   269→          }
+   270→
+   271→          // Set medical info (defensively parse JSON strings from API)
+   272→          if (data.medicalInfo) {
+   273→            const mi = data.medicalInfo;
+   274→            setMedicalInfo({
+   275→              bloodType: mi.bloodType || "",
+   276→              allergies: parseMedicalConditions(mi.allergies),
+   277→              criticalMedications: parseMedicalConditions(mi.criticalMedications),
+   278→              responsibleDoctor: mi.responsibleDoctor || "",
+   279→              healthNumber: mi.healthNumber || "",
+   280→              medicalConditions: parseMedicalConditions(mi.medicalConditions),
+   281→            });
+   282→          }
+   283→
+   284→          // Set location
+   285→          if (data.location) {
+   286→            setLocationInfo(data.location);
+   287→          }
+   288→
+   289→          // Set family contact
+   290→          if (data.familyContact) {
+   291→            setFamilyContact(data.familyContact);
+   292→          }
+   293→        }
+   294→
+   295→        // Load incident history (API now supports CAREGIVER role)
+   296→        const incidentRes = await apiFetch("/api/emergency/incidents");
+   297→        if (incidentRes.ok) {
+   298→          const incidentData = await incidentRes.json();
+   299→          if (incidentData.incidents?.length) {
+   300→            setIncidents(incidentData.incidents);
+   301→          }
+   302→        }
+   303→      } catch {
+   304→        // Keep empty states
+   305→      } finally {
+   306→        setLoading(false);
+   307→      }
+   308→    };
+   309→    loadData();
+   310→  }, []);
+   311→
+   312→  // Contact call handler
+   313→  const handleCall = useCallback(
+   314→    (contact: QuickContact) => {
+   315→      if (!contact.configured || !contact.phone) {
+   316→        showBloomToast({
+   317→          variant: "info",
+   318→          message: "Contacto não configurado",
+   319→          description: `O número de ${contact.name} não está disponível.`,
+   320→        });
+   321→        return;
+   322→      }
+   323→      showBloomToast({
+   324→        variant: "info",
+   325→        message: `A ligar para ${contact.name}`,
+   326→        description: `${contact.label}: ${contact.phone}`,
+   327→      });
+   328→      window.open(`tel:${contact.phone}`, "_self");
+   329→    },
+   330→    [],
+   331→  );
+   332→
+   333→  // Call 112 directly
+   334→  const handleCall112 = useCallback(() => {
+   335→    showBloomToast({
+   336→      variant: "warning",
+   337→      message: "A ligar para o 112",
+   338→      description: "Emergência Nacional — A ligar agora",
+   339→    });
+   340→    window.open("tel:112", "_self");
+   341→  }, []);
+   342→
+   343→  // Incident registration
+   344→  const handleRegisterIncident = useCallback(async () => {
+   345→    if (!newIncidentNotes.trim()) {
+   346→      showBloomToast({
+   347→        variant: "error",
+   348→        message: "Preencha as notas",
+   349→        description: "Adicione uma descrição do incidente.",
+   350→      });
+   351→      return;
+   352→    }
+   353→
+   354→    const newIncident = {
+   355→      id: Date.now().toString(),
+   356→      date: new Date().toISOString(),
+   357→      type: newIncidentType,
+   358→      resolution: newIncidentResolution,
+   359→      notes: newIncidentNotes,
+   360→    };
+   361→
+   362→    setIncidents((prev) => [newIncident as Incident, ...prev]);
+   363→    setShowRegisterDialog(false);
+   364→    setNewIncidentNotes("");
+   365→    setNewIncidentType("Queda");
+   366→    setNewIncidentResolution("Em acompanhamento");
+   367→
+   368→    setRegisteringIncident(true);
+   369→    try {
+   370→      await apiFetch("/api/emergency/incidents", {
+   371→        method: "POST",
+   372→        body: JSON.stringify(newIncident),
+   373→      });
+   374→      showBloomToast({
+   375→        variant: "success",
+   376→        message: "Incidente reportado",
+   377→        description: "O familiar será notificado sobre este incidente.",
+   378→      });
+   379→    } catch {
+   380→      showBloomToast({
+   381→        variant: "info",
+   382→        message: "Incidente registado localmente",
+   383→        description: "O incidente será sincronizado mais tarde.",
+   384→      });
+   385→    } finally {
+   386→      setRegisteringIncident(false);
+   387→    }
+   388→  }, [newIncidentNotes, newIncidentType, newIncidentResolution]);
+   389→
+   390→  // Update incident resolution
+   391→  const handleUpdateResolution = useCallback(
+   392→    (incidentId: string, newResolution: Incident["resolution"]) => {
+   393→      setIncidents((prev) =>
+   394→        prev.map((inc) =>
+   395→          inc.id === incidentId ? { ...inc, resolution: newResolution } : inc
+   396→        )
+   397→      );
+   398→      showBloomToast({
+   399→        variant: "success",
+   400→        message: "Estado atualizado",
+   401→        description: `Incidente marcado como: ${newResolution}`,
+   402→      });
+   403→    },
+   404→    [],
+   405→  );
+   406→
+   407→  // Check if any medical data is configured
+   408→  const hasMedicalData =
+   409→    medicalInfo.bloodType ||
+   410→    medicalInfo.allergies.length > 0 ||
+   411→    medicalInfo.criticalMedications.length > 0 ||
+   412→    medicalInfo.responsibleDoctor ||
+   413→    medicalInfo.healthNumber ||
+   414→    medicalInfo.medicalConditions.length > 0;
+   415→
+   416→  // Share medical info
+   417→  const handleShareMedicalInfo = useCallback(() => {
+   418→    const text = `FICHA DE EMERGÊNCIA — DADOS MÉDICOS
+   419→
+   420→Grupo Sanguíneo: ${medicalInfo.bloodType || "Não configurado"}
+   421→Alergias: ${medicalInfo.allergies.length > 0 ? medicalInfo.allergies.join(", ") : "Não configurado"}
+   422→Medicamentos Críticos: ${medicalInfo.criticalMedications.length > 0 ? medicalInfo.criticalMedications.join(", ") : "Não configurado"}
+   423→Condições Médicas: ${medicalInfo.medicalConditions.length > 0 ? medicalInfo.medicalConditions.join(", ") : "Não configurado"}
+   424→Médico Responsável: ${medicalInfo.responsibleDoctor || "Não configurado"}
+   425→N.º Utente: ${medicalInfo.healthNumber || "Não configurado"}
+   426→
+   427→Partilhado via Evyra CareApp`;
+   428→
+   429→    if (typeof navigator !== "undefined" && navigator.share) {
+   430→      navigator.share({
+   431→        title: "Ficha de Emergência — Dados Médicos",
+   432→        text,
+   433→      });
+   434→    } else {
+   435→      navigator.clipboard.writeText(text).then(() => {
+   436→        showBloomToast({
+   437→          variant: "success",
+   438→          message: "Dados copiados",
+   439→          description: "Informação médica copiada para a área de transferência.",
+   440→        });
+   441→      });
+   442→    }
+   443→  }, [medicalInfo]);
+   444→
+   445→  // Share location
+   446→  const handleShareLocation = useCallback(() => {
+   447→    if (!locationInfo.address) {
+   448→      showBloomToast({
+   449→        variant: "error",
+   450→        message: "Morada não disponível",
+   451→        description: "A morada da pessoa não está registada no perfil.",
+   452→      });
+   453→      return;
+   454→    }
+   455→    const fullAddress = locationInfo.postalCode
+   456→      ? `${locationInfo.address}, ${locationInfo.postalCode}`
+   457→      : locationInfo.address;
+   458→    navigator.clipboard.writeText(fullAddress).then(() => {
+   459→      showBloomToast({
+   460→        variant: "success",
+   461→        message: "Localização copiada",
+   462→        description: "Morada copiada para a área de transferência.",
+   463→      });
+   464→    });
+   465→  }, [locationInfo]);
+   466→
+   467→  // Share full emergency file
+   468→  const handleShareFullFile = useCallback(() => {
+   469→    const configuredContacts = quickContacts.filter((c) => c.configured && c.phone);
+   470→
+   471→    const sections: string[] = [];
+   472→
+   473→    sections.push("═══════════════════════════════");
+   474→    sections.push("     FICHA DE EMERGÊNCIA");
+   475→    sections.push("═══════════════════════════════");
+   476→    sections.push("");
+   477→
+   478→    // Elder info
+   479→    sections.push("▸ DADOS DA PESSOA");
+   480→    if (familyContact.name) {
+   481→      sections.push(`  Familiar Responsável: ${familyContact.name}`);
+   482→      if (familyContact.phone) sections.push(`  Telemóvel: ${familyContact.phone}`);
+   483→      if (familyContact.email) sections.push(`  Email: ${familyContact.email}`);
+   484→    }
+   485→    sections.push("");
+   486→
+   487→    // Medical data
+   488→    sections.push("▸ DADOS MÉDICOS");
+   489→    sections.push(`  Grupo Sanguíneo: ${medicalInfo.bloodType || "Não configurado"}`);
+   490→    sections.push(`  Alergias: ${medicalInfo.allergies.length > 0 ? medicalInfo.allergies.join(", ") : "Nenhuma registada"}`);
+   491→    sections.push(`  Medicamentos Críticos: ${medicalInfo.criticalMedications.length > 0 ? medicalInfo.criticalMedications.join(", ") : "Nenhum registado"}`);
+   492→    sections.push(`  Condições Médicas: ${medicalInfo.medicalConditions.length > 0 ? medicalInfo.medicalConditions.join(", ") : "Nenhuma registada"}`);
+   493→    sections.push(`  Médico Responsável: ${medicalInfo.responsibleDoctor || "Não configurado"}`);
+   494→    sections.push(`  N.º Utente: ${medicalInfo.healthNumber || "Não configurado"}`);
+   495→    sections.push("");
+   496→
+   497→    // Emergency contacts
+   498→    sections.push("▸ CONTACTOS DE EMERGÊNCIA");
+   499→    if (configuredContacts.length > 0) {
+   500→      configuredContacts.forEach((c) => {
+   501→        sections.push(`  ${c.label}: ${c.name} — ${c.phone}`);
+   502→      });
+   503→    } else {
+   504→      sections.push("  Nenhum contacto configurado");
+   505→    }
+   506→    sections.push("");
+   507→
+   508→    // Location
+   509→    sections.push("▸ LOCALIZAÇÃO");
+   510→    const fullAddress = locationInfo.postalCode
+   511→      ? `${locationInfo.address}, ${locationInfo.postalCode}`
+   512→      : locationInfo.address;
+   513→    sections.push(`  ${fullAddress || "Morada não configurada"}`);
+   514→    sections.push("");
+   515→
+   516→    sections.push("───────────────────────────────");
+   517→    sections.push("Partilhado via Evyra CareApp");
+   518→
+   519→    const text = sections.join("\n");
+   520→
+   521→    if (typeof navigator !== "undefined" && navigator.share) {
+   522→      navigator.share({
+   523→        title: "Ficha de Emergência — Evyra CareApp",
+   524→        text,
+   525→      });
+   526→    } else {
+   527→      navigator.clipboard.writeText(text).then(() => {
+   528→        showBloomToast({
+   529→          variant: "success",
+   530→          message: "Ficha copiada",
+   531→          description: "Ficha de emergência completa copiada para a área de transferência.",
+   532→        });
+   533→      });
+   534→    }
+   535→  }, [quickContacts, medicalInfo, locationInfo, familyContact]);
+   536→
+   537→  // Filter incidents
+   538→  const filteredIncidents = incidents.filter((incident) => {
+   539→    if (dateFilter === "all") return true;
+   540→    const incidentDate = new Date(incident.date);
+   541→    const now = new Date();
+   542→    const daysAgo = dateFilter === "7d" ? 7 : 30;
+   543→    const cutoff = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+   544→    return incidentDate >= cutoff;
+   545→  });
+   546→
+   547→  // ─── Loading state ──────────────────────────────────────────────
+   548→  if (loading) {
+   549→    return (
+   550→      <PageLayout spacing="normal">
+   551→        <PageHeader
+   552→          title="Ficha de Emergência"
+   553→          subtitle="Dados médicos e contactos da pessoa para situações de emergência"
+   554→          icon={<IconHeart className="h-6 w-6 text-destructive" />}
+   555→          backHref="/app/dashboard"
+   556→        />
+   557→        <div className="animate-pulse space-y-6">
+   558→          <div className="h-10 bg-muted rounded-2xl w-48" />
+   559→          <div className="h-40 bg-muted rounded-2xl" />
+   560→          <div className="h-32 bg-muted rounded-2xl" />
+   561→          <div className="h-48 bg-muted rounded-2xl" />
+   562→        </div>
+   563→      </PageLayout>
+   564→    );
+   565→  }
+   566→
+   567→  // ─── No active contract ─────────────────────────────────────────
+   568→  if (!hasActiveContract) {
+   569→    return (
+   570→      <PageLayout spacing="normal">
+   571→        <PageHeader
+   572→          title="Ficha de Emergência"
+   573→          subtitle="Dados médicos e contactos da pessoa para situações de emergência"
+   574→          icon={<IconHeart className="h-6 w-6 text-destructive" />}
+   575→          backHref="/app/dashboard"
+   576→        />
+   577→        <BloomAlert variant="warning" title="Sem contrato ativo" message="Nenhum contrato ativo. Os dados de emergência ficam disponíveis quando tiver um contrato ativo com uma família." />
+   578→      </PageLayout>
+   579→    );
+   580→  }
+   581→
+   582→  return (
+   583→    <PageLayout spacing="normal">
+   584→      <PageHeader
+   585→        title="Ficha de Emergência"
+   586→        subtitle="Dados médicos e contactos da pessoa para situações de emergência"
+   587→        icon={<IconHeart className="h-6 w-6 text-destructive" />}
+   588→        backHref="/app/dashboard"
+   589→      />
+   590→
+   591→      {/* ==========================================
+   592→          1. EMERGENCY CALL 112 BANNER (CAREGIVER ONLY)
+   593→          ========================================== */}
+   594→      <BloomCard className="border-2 border-destructive/30 bg-destructive/5">
+   595→        <div className="flex flex-col items-center justify-center gap-4">
+   596→          <div className="flex items-center gap-2 text-destructive">
+   597→            <IconAlertTriangle className="h-5 w-5" />
+   598→            <span className="text-xs font-display font-bold tracking-widest">
+   599→              Emergência
+   600→            </span>
+   601→          </div>
+   602→          <button
+   603→            onClick={handleCall112}
+   604→            className="inline-flex items-center justify-center gap-3 h-16 px-8 sm:h-20 sm:px-12 rounded-2xl bg-destructive text-white text-2xl font-display font-semibold tracking-wide shadow-lg hover:bg-destructive/90 active:scale-[0.98] transition-all"
+   605→            aria-label="Ligar 112 — Emergência Nacional"
+   606→          >
+   607→            <IconPhone className="h-7 w-7" />
+   608→            Ligar 112
+   609→          </button>
+   610→          <p className="text-sm text-muted-foreground text-center">
+   611→            Prima para ligar diretamente para o 112 em caso de emergência
+   612→          </p>
+   613→        </div>
+   614→      </BloomCard>
+   615→
+   616→      {/* ==========================================
+   617→          2. CONTACTOS DE EMERGÊNCIA
+   618→          ========================================== */}
+   619→      <PageSection title="Contactos de Emergência" subtitle="Ligue diretamente a partir da aplicação">
+   620→        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   621→          {quickContacts.map((contact) => (
+   622→            <BloomCard
+   623→              key={contact.id}
+   624→              variant="interactive"
+   625→              onClick={() => handleCall(contact)}
+   626→              className="flex items-center gap-3 p-3 sm:p-4"
+   627→            >
+   628→              <ContactIcon type={contact.icon} />
+   629→              <div className="flex-1 min-w-0">
+   630→                <p className="text-sm font-display font-bold text-foreground truncate">
+   631→                  {contact.name}
+   632→                </p>
+   633→                <p className="text-xs font-display font-bold text-muted-foreground tracking-wide mt-0.5">
+   634→                  {contact.label}
+   635→                </p>
+   636→                {contact.configured && contact.phone ? (
+   637→                  <p className="text-xs font-mono text-primary mt-0.5">{contact.phone}</p>
+   638→                ) : (
+   639→                  <span className="text-xs text-muted-foreground italic mt-0.5 inline-block">
+   640→                    Não configurado
+   641→                  </span>
+   642→                )}
+   643→              </div>
+   644→              <div className="flex-shrink-0">
+   645→                {contact.configured && contact.phone ? (
+   646→                  <div className="w-9 h-9 rounded-xl bg-success/10 flex items-center justify-center">
+   647→                    <IconPhone className="h-4 w-4 text-success" />
+   648→                  </div>
+   649→                ) : (
+   650→                  <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center">
+   651→                    <IconPhone className="h-4 w-4 text-muted-foreground/30" />
+   652→                  </div>
+   653→                )}
+   654→              </div>
+   655→            </BloomCard>
+   656→          ))}
+   657→        </div>
+   658→      </PageSection>
+   659→
+   660→      {/* ==========================================
+   661→          3. DADOS MÉDICOS
+   662→          ========================================== */}
+   663→      <PageSection title="Dados Médicos" subtitle="Informação crítica de emergência da pessoa">
+   664→        <BloomCard>
+   665→          <div className="mb-4">
+   666→            <div className="flex items-center gap-2">
+   667→              <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center">
+   668→                <IconHeart className="h-4 w-4 text-destructive" />
+   669→              </div>
+   670→              <h3 className="text-base font-display font-bold text-foreground">Informação Médica</h3>
+   671→            </div>
+   672→          </div>
+   673→
+   674→          <div>
+   675→            {!hasMedicalData && (
+   676→              <BloomAlert variant="warning" title="Dados médicos não configurados" message="O familiar ainda não preencheu os dados médicos da pessoa no perfil. Solicite que o faça para que a informação apareça aqui." className="mb-4" />
+   677→            )}
+   678→
+   679→            {/* Blood type — large and prominent if available */}
+   680→            {medicalInfo.bloodType && (
+   681→              <div className="flex items-center justify-center py-4 mb-3 bg-destructive/5 rounded-2xl border border-destructive/20">
+   682→                <div className="text-center">
+   683→                  <p className="text-xs font-display font-bold text-muted-foreground tracking-wide mb-1">
+   684→                    Grupo Sanguíneo
+   685→                  </p>
+   686→                  <p className="text-4xl font-display font-black text-destructive">
+   687→                    {medicalInfo.bloodType}
+   688→                  </p>
+   689→                </div>
+   690→              </div>
+   691→            )}
+   692→
+   693→            <div>
+   694→              <MedicalDataRow
+   695→                icon={<IconHeart className="h-4 w-4" />}
+   696→                label="Grupo Sanguíneo"
+   697→                value={medicalInfo.bloodType ? (
+   698→                  <span className="font-mono font-black text-lg text-destructive">{medicalInfo.bloodType}</span>
+   699→                ) : ""}
+   700→                configured={!!medicalInfo.bloodType}
+   701→              />
+   702→              <MedicalDataRow
+   703→                icon={<IconAlertTriangle className="h-4 w-4" />}
+   704→                label="Alergias"
+   705→                value={medicalInfo.allergies.length > 0 ? (
+   706→                  <div className="flex flex-wrap gap-1.5 justify-end">
+   707→                    {medicalInfo.allergies.map((allergy) => (
+   708→                      <Badge key={allergy} variant="error" size="sm">{allergy}</Badge>
+   709→                    ))}
+   710→                  </div>
+   711→                ) : ""}
+   712→                configured={medicalInfo.allergies.length > 0}
+   713→              />
+   714→              <MedicalDataRow
+   715→                icon={<IconPill className="h-4 w-4" />}
+   716→                label="Medicamentos Críticos"
+   717→                value={medicalInfo.criticalMedications.length > 0 ? (
+   718→                  <div className="flex flex-wrap gap-1.5 justify-end">
+   719→                    {medicalInfo.criticalMedications.map((med) => (
+   720→                      <Badge key={med} variant="warning" size="sm" icon={<IconPill className="h-3 w-3" />}>{med}</Badge>
+   721→                    ))}
+   722→                  </div>
+   723→                ) : ""}
+   724→                configured={medicalInfo.criticalMedications.length > 0}
+   725→              />
+   726→              {medicalInfo.medicalConditions.length > 0 && (
+   727→                <MedicalDataRow
+   728→                  icon={<IconActivity className="h-4 w-4" />}
+   729→                  label="Condições Médicas"
+   730→                  value={
+   731→                    <div className="flex flex-wrap gap-1.5 justify-end">
+   732→                      {medicalInfo.medicalConditions.map((condition) => (
+   733→                        <Badge key={condition} variant="info" size="sm">{condition}</Badge>
+   734→                      ))}
+   735→                    </div>
+   736→                  }
+   737→                  configured={true}
+   738→                />
+   739→              )}
+   740→              <MedicalDataRow
+   741→                icon={<IconUser className="h-4 w-4" />}
+   742→                label="Médico Responsável"
+   743→                value={medicalInfo.responsibleDoctor}
+   744→                configured={!!medicalInfo.responsibleDoctor}
+   745→              />
+   746→              <MedicalDataRow
+   747→                icon={<IconActivity className="h-4 w-4" />}
+   748→                label="N.º Utente"
+   749→                value={medicalInfo.healthNumber ? (
+   750→                  <span className="font-mono">{medicalInfo.healthNumber}</span>
+   751→                ) : ""}
+   752→                configured={!!medicalInfo.healthNumber}
+   753→              />
+   754→            </div>
+   755→          </div>
+   756→
+   757→          <div className="mt-4">
+   758→            {hasMedicalData ? (
+   759→              <Button variant="outline" fullWidth onClick={handleShareMedicalInfo}>
+   760→                <IconSend className="h-4 w-4" />
+   761→                Partilhar Dados Médicos
+   762→              </Button>
+   763→            ) : null}
+   764→          </div>
+   765→        </BloomCard>
+   766→      </PageSection>
+   767→
+   768→      {/* ==========================================
+   769→          4. REPORTAR INCIDENTE (CAREGIVER ONLY)
+   770→          ========================================== */}
+   771→      <PageSection title="Reportar Incidente" subtitle="Comunique ocorrências ao familiar">
+   772→        <BloomCard variant="warning">
+   773→          <div className="flex flex-col items-center justify-center gap-4 py-2">
+   774→            <div className="text-center">
+   775→              <p className="text-sm font-display font-bold text-foreground">
+   776→                Ocorreu alguma situação?
+   777→              </p>
+   778→              <p className="text-xs text-muted-foreground mt-1">
+   779→                Reporte quedas, medicamentos esquecidos, SOS ou outras ocorrências. O familiar será notificado automaticamente.
+   780→              </p>
+   781→            </div>
+   782→            <Button
+   783→              variant="primary"
+   784→              size="lg"
+   785→              fullWidth
+   786→              onClick={() => setShowRegisterDialog(true)}
+   787→            >
+   788→              <IconPlus className="h-5 w-5" />
+   789→              Reportar Incidente
+   790→            </Button>
+   791→          </div>
+   792→        </BloomCard>
+   793→      </PageSection>
+   794→
+   795→      {/* ==========================================
+   796→          5. HISTÓRICO DE INCIDENTES
+   797→          ========================================== */}
+   798→      <PageSection
+   799→        title="Histórico de Incidentes"
+   800→        subtitle="Registo de ocorrências reportadas"
+   801→      >
+   802→        {/* Header with filter */}
+   803→        <div className="flex items-center justify-between gap-3 flex-wrap">
+   804→          <PillTabs value={dateFilter} onValueChange={(v) => setDateFilter(v as "all" | "30d" | "7d")}>
+   805→            <PillTabsList className="gap-1">
+   806→              <PillTabsTrigger value="all" className="text-xs px-3 py-1.5">
+   807→                Todos
+   808→              </PillTabsTrigger>
+   809→              <PillTabsTrigger value="30d" className="text-xs px-3 py-1.5">
+   810→                30 dias
+   811→              </PillTabsTrigger>
+   812→              <PillTabsTrigger value="7d" className="text-xs px-3 py-1.5">
+   813→                7 dias
+   814→              </PillTabsTrigger>
+   815→            </PillTabsList>
+   816→          </PillTabs>
+   817→        </div>
+   818→
+   819→        {/* Timeline */}
+   820→        <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+   821→          {filteredIncidents.length === 0 ? (
+   822→            <BloomEmpty
+   823→              icon={<IconClock className="h-10 w-10" />}
+   824→              title="Nenhum incidente registado"
+   825→              description="Os incidentes reportados aparecerão aqui"
+   826→            />
+   827→          ) : (
+   828→            filteredIncidents.map((incident) => (
+   829→              <BloomCard key={incident.id} className="p-3 sm:p-4">
+   830→                <div className="flex items-start gap-3">
+   831→                  {/* Timeline dot */}
+   832→                  <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+   833→                    <IconActivity className="h-4 w-4 text-destructive" />
+   834→                  </div>
+   835→
+   836→                  <div className="flex-1 min-w-0 space-y-1.5">
+   837→                    {/* Date & Type */}
+   838→                    <div className="flex items-center gap-2 flex-wrap">
+   839→                      <span className="text-xs text-muted-foreground font-mono">
+   840→                        {formatDatePT(incident.date)} às {formatTimePT(incident.date)}
+   841→                      </span>
+   842→                      <IncidentTypeBadge type={incident.type} />
+   843→                    </div>
+   844→
+   845→                    {/* Notes */}
+   846→                    {incident.notes && (
+   847→                      <p className="text-sm text-foreground leading-relaxed">
+   848→                        {incident.notes}
+   849→                      </p>
+   850→                    )}
+   851→
+   852→                    {/* Reported by */}
+   853→                    {incident.reportedBy && (
+   854→                      <p className="text-xs text-muted-foreground italic">
+   855→                        Reportado por: {incident.reportedBy}
+   856→                      </p>
+   857→                    )}
+   858→
+   859→                    {/* Resolution with update capability */}
+   860→                    <div className="flex items-center gap-2 flex-wrap">
+   861→                      <ResolutionBadge resolution={incident.resolution} />
+   862→                      {incident.resolution !== "Resolvido" && (
+   863→                        <div className="flex gap-1">
+   864→                          {(["Resolvido", "Em acompanhamento", "Encaminhado para hospital"] as const)
+   865→                            .filter((r) => r !== incident.resolution)
+   866→                            .map((resolution) => (
+   867→                              <button
+   868→                                key={resolution}
+   869→                                onClick={() => handleUpdateResolution(incident.id, resolution)}
+   870→                                className="text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+   871→                              >
+   872→                                {resolution}
+   873→                              </button>
+   874→                            ))}
+   875→                        </div>
+   876→                      )}
+   877→                    </div>
+   878→                  </div>
+   879→                </div>
+   880→              </BloomCard>
+   881→            ))
+   882→          )}
+   883→        </div>
+   884→      </PageSection>
+   885→
+   886→      {/* ==========================================
+   887→          6. LOCALIZAÇÃO DA PESSOA
+   888→          ========================================== */}
+   889→      <PageSection title="Localização da Pessoa" subtitle="Morada registada no perfil">
+   890→        <BloomCard>
+   891→          <div>
+   892→            {!locationInfo.address && (
+   893→              <BloomAlert variant="warning" title="Morada não disponível" message="A morada da pessoa não está registada no perfil. Solicite ao familiar que preencha a morada." className="mb-4" />
+   894→            )}
+   895→            <div className="flex items-start gap-3">
+   896→              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+   897→                <IconMapPin className="h-5 w-5 text-primary" />
+   898→              </div>
+   899→              <div className="flex-1 min-w-0">
+   900→                <p className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   901→                  Morada Registada
+   902→                </p>
+   903→                {locationInfo.address ? (
+   904→                  <p className="text-sm text-foreground mt-1 leading-relaxed">
+   905→                    {locationInfo.address}
+   906→                    {locationInfo.postalCode && (
+   907→                      <span className="text-muted-foreground">, {locationInfo.postalCode}</span>
+   908→                    )}
+   909→                  </p>
+   910→                ) : (
+   911→                  <span className="text-sm text-muted-foreground italic mt-1 inline-block">
+   912→                    Não configurada
+   913→                  </span>
+   914→                )}
+   915→              </div>
+   916→            </div>
+   917→          </div>
+   918→
+   919→          <div className="mt-4">
+   920→            {locationInfo.address ? (
+   921→              <Button variant="outline" fullWidth onClick={handleShareLocation}>
+   922→                <IconCopy className="h-4 w-4" />
+   923→                Copiar Localização
+   924→              </Button>
+   925→            ) : null}
+   926→          </div>
+   927→        </BloomCard>
+   928→      </PageSection>
+   929→
+   930→      {/* ==========================================
+   931→          7. PARTILHAR FICHA COMPLETA
+   932→          ========================================== */}
+   933→      <BloomCard variant="info">
+   934→        <div>
+   935→          <div className="flex flex-col items-center text-center gap-3 py-2">
+   936→            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+   937→              <IconShare className="h-6 w-6 text-primary" />
+   938→            </div>
+   939→            <div>
+   940→              <p className="text-sm font-display font-bold text-foreground">
+   941→                Partilhar Ficha Completa
+   942→              </p>
+   943→              <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+   944→                Compile todos os dados de emergência (médicos, contactos e localização) num formato partilhável com serviços de emergência.
+   945→              </p>
+   946→            </div>
+   947→            <Button variant="primary" size="md" onClick={handleShareFullFile} fullWidth>
+   948→              <IconShare className="h-4 w-4" />
+   949→              Partilhar Ficha Completa
+   950→            </Button>
+   951→          </div>
+   952→        </div>
+   953→      </BloomCard>
+   954→
+   955→      {/* ==========================================
+   956→          Register Incident Modal
+   957→          ========================================== */}
+   958→      <BloomDialog
+   959→        open={showRegisterDialog}
+   960→        onOpenChange={setShowRegisterDialog}
+   961→        title="Reportar Incidente"
+   962→        description="Comunique uma ocorrência ao familiar. O familiar será notificado automaticamente."
+   963→        icon={IconAlertTriangle}
+   964→        iconVariant="error"
+   965→      >
+   966→          <div className="space-y-5">
+   967→            {/* Incident Type */}
+   968→            <div className="space-y-2">
+   969→              <label className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   970→                Tipo de Incidente
+   971→              </label>
+   972→              <div className="flex flex-wrap gap-2">
+   973→                {(["Queda", "Medicamento esquecido", "SOS", "Outro"] as const).map(
+   974→                  (type) => (
+   975→                    <button
+   976→                      key={type}
+   977→                      onClick={() => setNewIncidentType(type)}
+   978→                      className={`px-4 py-2 rounded-xl text-sm font-display font-bold transition-all ${
+   979→                        newIncidentType === type
+   980→                          ? "bg-primary text-white shadow-md"
+   981→                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+   982→                      }`}
+   983→                    >
+   984→                      {type}
+   985→                    </button>
+   986→                  ),
+   987→                )}
+   988→              </div>
+   989→            </div>
+   990→
+   991→            {/* Notes */}
+   992→            <Textarea
+   993→              label="Notas"
+   994→              hint="Descreva o incidente com o máximo de detalhe possível. Este campo é obrigatório."
+   995→              value={newIncidentNotes}
+   996→              onChange={(e) => setNewIncidentNotes(e.target.value)}
+   997→              placeholder="Descreva o incidente..."
+   998→              className="min-h-[100px]"
+   999→            />
+  1000→
+  1001→            {/* Resolution Status */}
+  1002→            <div className="space-y-2">
+  1003→              <label className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+  1004→                Estado de Resolução
+  1005→              </label>
+  1006→              <div className="flex flex-wrap gap-2">
+  1007→                {(["Em acompanhamento", "Resolvido", "Encaminhado para hospital"] as const).map(
+  1008→                  (resolution) => (
+  1009→                    <button
+  1010→                      key={resolution}
+  1011→                      onClick={() => setNewIncidentResolution(resolution)}
+  1012→                      className={`px-4 py-2 rounded-xl text-sm font-display font-bold transition-all ${
+  1013→                        newIncidentResolution === resolution
+  1014→                          ? "bg-primary text-white shadow-md"
+  1015→                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+  1016→                      }`}
+  1017→                    >
+  1018→                      {resolution}
+  1019→                    </button>
+  1020→                  ),
+  1021→                )}
+  1022→              </div>
+  1023→            </div>
+  1024→          </div>
+  1025→
+  1026→          <div className="flex gap-3 pt-4">
+  1027→            <Button
+  1028→              variant="outline"
+  1029→              className="flex-1"
+  1030→              onClick={() => {
+  1031→                setShowRegisterDialog(false);
+  1032→                setNewIncidentNotes("");
+  1033→                setNewIncidentType("Queda");
+  1034→                setNewIncidentResolution("Em acompanhamento");
+  1035→              }}
+  1036→            >
+  1037→              Cancelar
+  1038→            </Button>
+  1039→            <Button variant="primary" className="flex-1" onClick={handleRegisterIncident} disabled={registeringIncident}>
+  1040→              {registeringIncident ? <IconActivity className="h-4 w-4 animate-spin" /> : <IconCheck className="h-4 w-4" />}
+  1041→              Reportar
+  1042→            </Button>
+  1043→          </div>
+  1044→      </BloomDialog>
+  1045→    </PageLayout>
+  1046→  );
+  1047→}
+  1048→

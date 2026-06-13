@@ -1,0 +1,760 @@
+     1→"use client";
+     2→
+     3→import React, { Suspense } from "react";
+     4→import { useState, useEffect } from "react";
+     5→import { PageLayout } from "@/components/layout/PageLayout";
+     6→import { useSession } from "next-auth/react";
+     7→import { useRouter, useParams } from "next/navigation";
+     8→import Link from "next/link";
+     9→import { Button } from "@/components/ui/button";
+    10→import { Input } from "@/components/ui/input";
+    11→import { Textarea } from "@/components/ui/textarea";
+    12→import { BloomCard, BloomBadge, BloomAlert, BloomInfoRow } from "@/components/bloom-custom";
+    13→import { apiFetch } from "@/lib/api-client";
+    14→import {
+    15→  IconArrowLeft,
+    16→  IconArrowRight,
+    17→  IconLoader2,
+    18→  IconAlertCircle,
+    19→  IconCheck,
+    20→  IconX,
+    21→  IconMessageSquare,
+    22→  IconVideo,
+    23→  IconCalendar,
+    24→  IconClock,
+    25→  IconUser,
+    26→  IconStar,
+    27→  IconFileText,
+    28→  IconInfo,
+    29→} from "@/components/icons";
+    30→
+    31→interface ProposalData {
+    32→  id: string;
+    33→  caregiverId: string;
+    34→  caregiver: {
+    35→    name: string;
+    36→    title: string;
+    37→    averageRating: number;
+    38→    hourlyRateEur: number;
+    39→  };
+    40→  demandId: string;
+    41→  message: string;
+    42→  expectedRate: number;
+    43→  aboutYou: string;
+    44→  status: string;
+    45→  createdAt: string;
+    46→}
+    47→
+    48→interface FlowState {
+    49→  chatMessage: string;
+    50→  interviewDate: string;
+    51→  interviewTime: string;
+    52→  interviewNotes: string;
+    53→  agreedTerms: boolean;
+    54→  isSubmitting: boolean;
+    55→}
+    56→
+    57→function ProposalFlowContent() {
+    58→  const params = useParams();
+    59→  const { data: session, status } = useSession();
+    60→  const router = useRouter();
+    61→  const demandId = params?.id as string;
+    62→  const proposalId = params?.proposalId as string;
+    63→
+    64→  const [step, setStep] = useState(1);
+    65→  const [proposal, setProposal] = useState<ProposalData | null>(null);
+    66→  const [loading, setLoading] = useState(true);
+    67→  const [error, setError] = useState<string | null>(null);
+    68→  const [submitError, setSubmitError] = useState<string | null>(null);
+    69→
+    70→  const [flowState, setFlowState] = useState<FlowState>({
+    71→    chatMessage: "",
+    72→    interviewDate: "",
+    73→    interviewTime: "",
+    74→    interviewNotes: "",
+    75→    agreedTerms: false,
+    76→    isSubmitting: false,
+    77→  });
+    78→
+    79→  useEffect(() => {
+    80→    if (status === "unauthenticated") {
+    81→      router.push("/auth/login");
+    82→    }
+    83→  }, [status, router]);
+    84→
+    85→  useEffect(() => {
+    86→    if (status !== "authenticated" || !proposalId) return;
+    87→
+    88→    const fetchProposal = async () => {
+    89→      try {
+    90→        setLoading(true);
+    91→        setError(null);
+    92→        const res = await apiFetch(`/api/proposals/${proposalId}`);
+    93→        if (!res.ok) throw new Error("Proposta não encontrada");
+    94→        const data = await res.json();
+    95→        setProposal(data.proposal);
+    96→      } catch (err) {
+    97→        setError(
+    98→          err instanceof Error ? err.message : "Erro ao carregar proposta",
+    99→        );
+   100→      } finally {
+   101→        setLoading(false);
+   102→      }
+   103→    };
+   104→
+   105→    fetchProposal();
+   106→  }, [status, proposalId]);
+   107→
+   108→  const handleSendMessage = async () => {
+   109→    if (!flowState.chatMessage.trim() || !proposalId) return;
+   110→    setFlowState((prev) => ({ ...prev, isSubmitting: true }));
+   111→
+   112→    try {
+   113→      const res = await apiFetch(`/api/proposals/${proposalId}/messages`, {
+   114→        method: "POST",
+   115→        headers: { "Content-Type": "application/json" },
+   116→        body: JSON.stringify({ message: flowState.chatMessage }),
+   117→      });
+   118→
+   119→      if (!res.ok) throw new Error("Erro ao enviar mensagem");
+   120→
+   121→      setFlowState((prev) => ({
+   122→        ...prev,
+   123→        chatMessage: "",
+   124→        isSubmitting: false,
+   125→      }));
+   126→      setStep(2);
+   127→    } catch (err) {
+   128→      setSubmitError(err instanceof Error ? err.message : "Erro inesperado");
+   129→      setFlowState((prev) => ({ ...prev, isSubmitting: false }));
+   130→    }
+   131→  };
+   132→
+   133→  const handleScheduleInterview = async () => {
+   134→    if (!flowState.interviewDate || !flowState.interviewTime || !proposalId) {
+   135→      setSubmitError("Data e hora são obrigatórias");
+   136→      return;
+   137→    }
+   138→
+   139→    setFlowState((prev) => ({ ...prev, isSubmitting: true }));
+   140→
+   141→    try {
+   142→      const res = await apiFetch(`/api/proposals/${proposalId}/interview`, {
+   143→        method: "POST",
+   144→        headers: { "Content-Type": "application/json" },
+   145→        body: JSON.stringify({
+   146→          interviewDate: flowState.interviewDate,
+   147→          interviewTime: flowState.interviewTime,
+   148→          notes: flowState.interviewNotes,
+   149→        }),
+   150→      });
+   151→
+   152→      if (!res.ok) throw new Error("Erro ao marcar entrevista");
+   153→
+   154→      setFlowState((prev) => ({ ...prev, isSubmitting: false }));
+   155→      setStep(3);
+   156→    } catch (err) {
+   157→      setSubmitError(err instanceof Error ? err.message : "Erro inesperado");
+   158→      setFlowState((prev) => ({ ...prev, isSubmitting: false }));
+   159→    }
+   160→  };
+   161→
+   162→  const handleApproveProposal = async () => {
+   163→    if (!flowState.agreedTerms || !proposalId) {
+   164→      setSubmitError("Deve concordar com os termos");
+   165→      return;
+   166→    }
+   167→
+   168→    setFlowState((prev) => ({ ...prev, isSubmitting: true }));
+   169→
+   170→    try {
+   171→      const res = await apiFetch(`/api/proposals/${proposalId}/accept`, {
+   172→        method: "POST",
+   173→        headers: { "Content-Type": "application/json" },
+   174→      });
+   175→
+   176→      if (!res.ok) throw new Error("Erro ao aprovar proposta");
+   177→
+   178→      setFlowState((prev) => ({ ...prev, isSubmitting: false }));
+   179→      setStep(4);
+   180→    } catch (err) {
+   181→      setSubmitError(err instanceof Error ? err.message : "Erro inesperado");
+   182→      setFlowState((prev) => ({ ...prev, isSubmitting: false }));
+   183→    }
+   184→  };
+   185→
+   186→  const handleCreateContract = async () => {
+   187→    if (!proposalId || !demandId) return;
+   188→
+   189→    setFlowState((prev) => ({ ...prev, isSubmitting: true }));
+   190→
+   191→    try {
+   192→      const res = await apiFetch("/api/contracts/from-proposal", {
+   193→        method: "POST",
+   194→        headers: { "Content-Type": "application/json" },
+   195→        body: JSON.stringify({
+   196→          proposalId,
+   197→          demandId,
+   198→        }),
+   199→      });
+   200→
+   201→      if (!res.ok) throw new Error("Erro ao criar contrato");
+   202→
+   203→      const data = await res.json();
+   204→      setStep(5);
+   205→    } catch (err) {
+   206→      setSubmitError(err instanceof Error ? err.message : "Erro inesperado");
+   207→      setFlowState((prev) => ({ ...prev, isSubmitting: false }));
+   208→    }
+   209→  };
+   210→
+   211→  if (status === "loading" || loading) {
+   212→    return (
+   213→      <PageLayout spacing="normal" className="max-w-2xl">
+   214→        <div className="animate-pulse space-y-4">
+   215→          <div className="h-24 bg-secondary rounded-3xl" />
+   216→          <div className="h-96 bg-secondary rounded-3xl" />
+   217→        </div>
+   218→      </PageLayout>
+   219→    );
+   220→  }
+   221→
+   222→  if (error || !proposal) {
+   223→    return (
+   224→      <PageLayout spacing="normal" className="max-w-2xl">
+   225→        <BloomAlert
+   226→          variant="error"
+   227→          title="Erro"
+   228→          message={error || "Proposta não encontrada"}
+   229→          icon={<IconAlertCircle className="h-5 w-5" />}
+   230→          action={{
+   231→            label: "Voltar para Demanda",
+   232→            onClick: () => router.push(`/app/family/demands/${demandId}`),
+   233→          }}
+   234→        />
+   235→      </PageLayout>
+   236→    );
+   237→  }
+   238→
+   239→  const totalSteps = 5;
+   240→  const progress = (step / totalSteps) * 100;
+   241→  const caregiver = proposal.caregiver || { name: "Profissional", title: "", averageRating: 0, hourlyRateEur: 0 };
+   242→  const caregiverInitials = (caregiver.name || "C")
+   243→    .split(" ")
+   244→    .map((n: string) => n[0])
+   245→    .join("")
+   246→    .slice(0, 2);
+   247→  const expectedRate = proposal.expectedRate || proposal.caregiver?.hourlyRateEur || 0;
+   248→  const aboutYou = proposal.aboutYou || "";
+   249→
+   250→  return (
+   251→    <PageLayout spacing="normal" className="max-w-2xl">
+   252→    <div className="space-y-8">
+   253→      {/* Header */}
+   254→      <div className="flex items-start justify-between gap-4">
+   255→        <div className="space-y-2">
+   256→          <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tighter leading-none">
+   257→            Fluxo de Proposta
+   258→          </h1>
+   259→          <p className="text-base text-muted-foreground font-medium">
+   260→            Finalize a proposta do profissional
+   261→          </p>
+   262→        </div>
+   263→        <Link
+   264→          href={`/app/family/demands/${demandId}`}
+   265→          className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors flex-shrink-0 mt-1"
+   266→          aria-label="Fechar"
+   267→        >
+   268→          <IconX className="h-5 w-5" />
+   269→        </Link>
+   270→      </div>
+   271→
+   272→      {/* Progress Stepper */}
+   273→      <div>
+   274→        <div className="flex items-center justify-between max-w-lg mx-auto">
+   275→          {[1, 2, 3, 4, 5].map((stepNum) => (
+   276→            <React.Fragment key={stepNum}>
+   277→              <div className="flex flex-col items-center gap-2">
+   278→                <div
+   279→                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-display font-bold transition-all ${
+   280→                    stepNum < step
+   281→                      ? "bg-success text-success-foreground"
+   282→                      : stepNum === step
+   283→                        ? "bg-primary text-primary-foreground shadow-md"
+   284→                        : "bg-secondary text-muted-foreground border border-border"
+   285→                  }`}
+   286→                >
+   287→                  {stepNum < step ? "✓" : stepNum}
+   288→                </div>
+   289→              </div>
+   290→              {stepNum < 5 && (
+   291→                <div
+   292→                  className={`flex-1 h-0.5 mx-2 rounded-full transition-all ${stepNum < step ? "bg-success" : "bg-border"}`}
+   293→                />
+   294→              )}
+   295→            </React.Fragment>
+   296→          ))}
+   297→        </div>
+   298→      </div>
+   299→
+   300→      {/* Caregiver Info Card */}
+   301→      <BloomCard className="p-5 sm:p-7">
+   302→        <div className="flex items-center gap-4">
+   303→          <div className="w-16 h-16 rounded-2xl flex-shrink-0 bg-primary/10 text-primary font-display font-black text-base flex items-center justify-center">
+   304→            {caregiverInitials}
+   305→          </div>
+   306→          <div className="flex-1 min-w-0">
+   307→            <p className="text-lg font-display font-bold text-foreground">
+   308→              {caregiver.name}
+   309→            </p>
+   310→            {caregiver.title && (
+   311→              <p className="text-sm text-muted-foreground mt-0.5">
+   312→                {caregiver.title}
+   313→              </p>
+   314→            )}
+   315→            <div className="flex items-center gap-1.5 mt-2">
+   316→              {caregiver.averageRating > 0 && (
+   317→                <>
+   318→                  <IconStar className="h-3.5 w-3.5 text-warning fill-warning flex-shrink-0" />
+   319→                  <span className="text-sm font-display font-bold text-foreground">
+   320→                    {caregiver.averageRating.toFixed(1)}
+   321→                  </span>
+   322→                  <span className="text-sm text-muted-foreground">•</span>
+   323→                </>
+   324→              )}
+   325→              <p className="text-lg font-display font-black text-primary tracking-tighter">
+   326→                €{Number(caregiver.hourlyRateEur || 0).toFixed(2)}/h
+   327→              </p>
+   328→            </div>
+   329→          </div>
+   330→        </div>
+   331→      </BloomCard>
+   332→
+   333→      {/* Error Alert */}
+   334→      {submitError && (
+   335→        <BloomAlert
+   336→          variant="error"
+   337→          title="Erro"
+   338→          message={submitError}
+   339→          icon={<IconAlertCircle className="h-5 w-5" />}
+   340→          onClose={() => setSubmitError(null)}
+   341→        />
+   342→      )}
+   343→
+   344→      {/* Step 1: Chat Inicial */}
+   345→      {step === 1 && (
+   346→        <BloomCard className="p-5 sm:p-7 space-y-6">
+   347→          <div>
+   348→            <h2 className="text-xl sm:text-2xl font-display font-semibold tracking-tight">
+   349→              Chat Inicial
+   350→            </h2>
+   351→            <p className="text-sm text-muted-foreground leading-relaxed mt-2">
+   352→              Converse com o profissional sobre a oportunidade
+   353→            </p>
+   354→          </div>
+   355→
+   356→          {/* Messages Container */}
+   357→          <div className="bg-secondary rounded-3xl border border-border/50 p-5 space-y-4 h-64 overflow-y-auto">
+   358→            {/* Proposal Message */}
+   359→            <div className="flex gap-3">
+   360→              <div className="h-10 w-10 flex-shrink-0 rounded-2xl bg-primary/10 text-primary text-xs font-display font-black flex items-center justify-center">
+   361→                {caregiver.name[0]}
+   362→              </div>
+   363→              <div className="flex-1 min-w-0">
+   364→                <p className="text-xs font-display font-bold text-muted-foreground tracking-wide">
+   365→                  {caregiver.name}
+   366→                </p>
+   367→                <div className="bg-secondary rounded-3xl px-4 py-3 mt-1 border border-border/30">
+   368→                  <p className="text-sm text-foreground">{proposal.message}</p>
+   369→                </div>
+   370→                <p className="text-xs text-muted-foreground mt-2">
+   371→                  {new Date(proposal.createdAt).toLocaleDateString("pt-PT")}
+   372→                </p>
+   373→              </div>
+   374→            </div>
+   375→          </div>
+   376→
+   377→          {/* Message Input */}
+   378→          <div className="space-y-2">
+   379→            <label className="text-xs font-display font-bold tracking-wide mb-2 block">
+   380→              A sua Mensagem
+   381→            </label>
+   382→            <Textarea
+   383→              value={flowState.chatMessage}
+   384→              onChange={(e) =>
+   385→                setFlowState((prev) => ({
+   386→                  ...prev,
+   387→                  chatMessage: e.target.value,
+   388→                }))
+   389→              }
+   390→              placeholder="Responda ao profissional com questões ou comentários..."
+   391→              rows={3}
+   392→              className="bg-secondary border border-border rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm resize-none transition-all"
+   393→            />
+   394→          </div>
+   395→
+   396→          <Button
+   397→            onClick={handleSendMessage}
+   398→            disabled={!flowState.chatMessage.trim() || flowState.isSubmitting}
+   399→            size="lg"
+   400→            className="w-full h-11 rounded-2xl font-display font-bold gap-2 shadow-glow"
+   401→          >
+   402→            {flowState.isSubmitting ? (
+   403→              <>
+   404→                <IconLoader2 className="h-4 w-4 animate-spin" />
+   405→                Enviando...
+   406→              </>
+   407→            ) : (
+   408→              <>
+   409→                <IconMessageSquare className="h-4 w-4" />
+   410→                Enviar Mensagem e Continuar
+   411→              </>
+   412→            )}
+   413→          </Button>
+   414→        </BloomCard>
+   415→      )}
+   416→
+   417→      {/* Step 2: Entrevista Agendada */}
+   418→      {step === 2 && (
+   419→        <BloomCard className="p-5 sm:p-7 space-y-6">
+   420→          <div>
+   421→            <h2 className="text-xl sm:text-2xl font-display font-semibold tracking-tight">
+   422→              Agendar Entrevista
+   423→            </h2>
+   424→            <p className="text-sm text-muted-foreground leading-relaxed mt-2">
+   425→              Combine data e hora para uma chamada de vídeo
+   426→            </p>
+   427→          </div>
+   428→
+   429→          <div className="space-y-4">
+   430→            <div className="space-y-2">
+   431→              <label
+   432→                htmlFor="date"
+   433→                className="text-xs font-display font-bold tracking-wide mb-2 block"
+   434→              >
+   435→                Data da Entrevista
+   436→              </label>
+   437→              <Input
+   438→                id="date"
+   439→                type="date"
+   440→                value={flowState.interviewDate}
+   441→                onChange={(e) =>
+   442→                  setFlowState((prev) => ({
+   443→                    ...prev,
+   444→                    interviewDate: e.target.value,
+   445→                  }))
+   446→                }
+   447→                className="bg-secondary border border-border rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary h-11 text-sm transition-all"
+   448→              />
+   449→            </div>
+   450→
+   451→            <div className="space-y-2">
+   452→              <label
+   453→                htmlFor="time"
+   454→                className="text-xs font-display font-bold tracking-wide mb-2 block"
+   455→              >
+   456→                Hora da Entrevista
+   457→              </label>
+   458→              <Input
+   459→                id="time"
+   460→                type="time"
+   461→                value={flowState.interviewTime}
+   462→                onChange={(e) =>
+   463→                  setFlowState((prev) => ({
+   464→                    ...prev,
+   465→                    interviewTime: e.target.value,
+   466→                  }))
+   467→                }
+   468→                className="bg-secondary border border-border rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary h-11 text-sm transition-all"
+   469→              />
+   470→            </div>
+   471→
+   472→            <div className="space-y-2">
+   473→              <label
+   474→                htmlFor="notes"
+   475→                className="text-xs font-display font-bold tracking-wide mb-2 block"
+   476→              >
+   477→                Notas (opcional)
+   478→              </label>
+   479→              <Textarea
+   480→                id="notes"
+   481→                value={flowState.interviewNotes}
+   482→                onChange={(e) =>
+   483→                  setFlowState((prev) => ({
+   484→                    ...prev,
+   485→                    interviewNotes: e.target.value,
+   486→                  }))
+   487→                }
+   488→                placeholder="Qualquer informação adicional para o profissional..."
+   489→                rows={3}
+   490→                className="bg-secondary border border-border rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm resize-none transition-all"
+   491→              />
+   492→            </div>
+   493→
+   494→            {/* Info Alert */}
+   495→            <BloomAlert
+   496→              variant="info"
+   497→              title="Dica"
+   498→              message="Um link de vídeo será gerado automaticamente e partilhado com o profissional."
+   499→              icon={<IconInfo className="h-5 w-5" />}
+   500→            />
+   501→          </div>
+   502→
+   503→          <div className="flex gap-3">
+   504→            <Button
+   505→              variant="outline"
+   506→              onClick={() => setStep(1)}
+   507→              size="lg"
+   508→              className="h-11 rounded-2xl px-4 border border-border"
+   509→              disabled={flowState.isSubmitting}
+   510→            >
+   511→              <IconArrowLeft className="h-4 w-4" />
+   512→            </Button>
+   513→            <Button
+   514→              onClick={handleScheduleInterview}
+   515→              disabled={
+   516→                !flowState.interviewDate ||
+   517→                !flowState.interviewTime ||
+   518→                flowState.isSubmitting
+   519→              }
+   520→              size="lg"
+   521→              className="flex-1 h-11 rounded-2xl font-display font-bold gap-2 shadow-glow"
+   522→            >
+   523→              {flowState.isSubmitting ? (
+   524→                <>
+   525→                  <IconLoader2 className="h-4 w-4 animate-spin" />
+   526→                  Agendando...
+   527→                </>
+   528→              ) : (
+   529→                <>
+   530→                  <IconVideo className="h-4 w-4" />
+   531→                  Agendar Entrevista
+   532→                </>
+   533→              )}
+   534→            </Button>
+   535→          </div>
+   536→        </BloomCard>
+   537→      )}
+   538→
+   539→      {/* Step 3: Revisar Proposta */}
+   540→      {step === 3 && (
+   541→        <BloomCard className="p-5 sm:p-7 space-y-6">
+   542→          <div>
+   543→            <h2 className="text-xl sm:text-2xl font-display font-semibold tracking-tight">
+   544→              Revisar Termos Propostos
+   545→            </h2>
+   546→            <p className="text-sm text-muted-foreground leading-relaxed mt-2">
+   547→              Verifique a disponibilidade e taxa horária propostas
+   548→            </p>
+   549→          </div>
+   550→
+   551→          {/* Proposal Summary */}
+   552→          <div className="space-y-4">
+   553→            <section className="space-y-2">
+   554→              <p className="text-xs font-display font-semibold text-muted-foreground tracking-[0.4em] border-l-4 border-primary pl-4">
+   555→                Detalhes da Proposta
+   556→              </p>
+   557→              <BloomCard className="p-5 space-y-4">
+   558→                <BloomInfoRow
+   559→                  label="Taxa Horária Proposta"
+   560→                  value={<span className="text-lg font-display font-black text-primary tracking-tighter">€{Number(expectedRate).toFixed(2)}/h</span>}
+   561→                />
+   562→              </BloomCard>
+   563→            </section>
+   564→
+   565→            <section className="space-y-2">
+   566→              <p className="text-xs font-display font-semibold text-muted-foreground tracking-[0.4em] border-l-4 border-primary pl-4">
+   567→                Sobre o Profissional
+   568→              </p>
+   569→              <BloomCard className="p-5">
+   570→                <p className="text-sm text-foreground line-clamp-4">
+   571→                  {aboutYou || proposal.message}
+   572→                </p>
+   573→              </BloomCard>
+   574→            </section>
+   575→
+   576→            <section className="space-y-2">
+   577→              <p className="text-xs font-display font-semibold text-muted-foreground tracking-[0.4em] border-l-4 border-primary pl-4">
+   578→                Mensagem da Proposta
+   579→              </p>
+   580→              <BloomCard className="p-5">
+   581→                <p className="text-sm text-foreground line-clamp-4">
+   582→                  {proposal.message}
+   583→                </p>
+   584→              </BloomCard>
+   585→            </section>
+   586→          </div>
+   587→
+   588→          {/* Terms Agreement */}
+   589→          <div className="space-y-2">
+   590→            <label className="flex items-start gap-3 p-4 bg-secondary rounded-2xl border border-border/50 cursor-pointer hover:border-primary/30 transition-colors group">
+   591→              <div
+   592→                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
+   593→                  flowState.agreedTerms
+   594→                    ? "bg-primary border-primary"
+   595→                    : "border-border group-hover:border-primary"
+   596→                }`}
+   597→              >
+   598→                {flowState.agreedTerms && (
+   599→                  <IconCheck className="h-3 w-3 text-primary-foreground" />
+   600→                )}
+   601→              </div>
+   602→              <span className="text-sm text-foreground font-medium">
+   603→                Concordo em revisar estes termos e prosseguir para a criação do
+   604→                contrato
+   605→              </span>
+   606→            </label>
+   607→          </div>
+   608→
+   609→          <div className="flex gap-3">
+   610→            <Button
+   611→              variant="outline"
+   612→              onClick={() => setStep(2)}
+   613→              size="lg"
+   614→              className="h-11 rounded-2xl px-4 border border-border"
+   615→              disabled={flowState.isSubmitting}
+   616→            >
+   617→              <IconArrowLeft className="h-4 w-4" />
+   618→            </Button>
+   619→            <Button
+   620→              onClick={handleApproveProposal}
+   621→              disabled={!flowState.agreedTerms || flowState.isSubmitting}
+   622→              size="lg"
+   623→              className="flex-1 h-11 rounded-2xl font-display font-bold gap-2"
+   624→            >
+   625→              {flowState.isSubmitting ? (
+   626→                <>
+   627→                  <IconLoader2 className="h-4 w-4 animate-spin" />
+   628→                  Processando...
+   629→                </>
+   630→              ) : (
+   631→                <>
+   632→                  <IconCheck className="h-4 w-4" />
+   633→                  Aprovar Proposta
+   634→                </>
+   635→              )}
+   636→            </Button>
+   637→          </div>
+   638→        </BloomCard>
+   639→      )}
+   640→
+   641→      {/* Step 4: Criar Contrato */}
+   642→      {step === 4 && (
+   643→        <BloomCard className="p-5 sm:p-7 space-y-6">
+   644→          <div>
+   645→            <h2 className="text-xl sm:text-2xl font-display font-semibold tracking-tight">
+   646→              Criar Contrato
+   647→            </h2>
+   648→            <p className="text-sm text-muted-foreground leading-relaxed mt-2">
+   649→              Agora vamos formalizar o contrato com todos os detalhes
+   650→            </p>
+   651→          </div>
+   652→
+   653→          <BloomAlert
+   654→            variant="info"
+   655→            title="Contrato Pronto"
+   656→            message="Os detalhes do pedido e da proposta serão usados para preencher automaticamente o contrato."
+   657→            icon={<IconFileText className="h-5 w-5" />}
+   658→          />
+   659→
+   660→          <div className="flex gap-3">
+   661→            <Button
+   662→              variant="outline"
+   663→              onClick={() => setStep(3)}
+   664→              size="lg"
+   665→              className="h-11 rounded-2xl px-4 border border-border"
+   666→              disabled={flowState.isSubmitting}
+   667→            >
+   668→              <IconArrowLeft className="h-4 w-4" />
+   669→            </Button>
+   670→            <Button
+   671→              onClick={handleCreateContract}
+   672→              disabled={flowState.isSubmitting}
+   673→              size="lg"
+   674→              className="flex-1 h-11 rounded-2xl font-display font-bold gap-2 shadow-glow"
+   675→            >
+   676→              {flowState.isSubmitting ? (
+   677→                <>
+   678→                  <IconLoader2 className="h-4 w-4 animate-spin" />
+   679→                  Criando Contrato...
+   680→                </>
+   681→              ) : (
+   682→                <>
+   683→                  <IconFileText className="h-4 w-4" />
+   684→                  Criar Contrato
+   685→                </>
+   686→              )}
+   687→            </Button>
+   688→          </div>
+   689→        </BloomCard>
+   690→      )}
+   691→
+   692→      {/* Step 5: Confirmação Final */}
+   693→      {step === 5 && (
+   694→        <BloomCard className="p-5 sm:p-7 space-y-6">
+   695→          <div className="text-center">
+   696→            <div className="w-16 h-16 bg-success/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
+   697→              <IconCheck className="h-8 w-8 text-success" />
+   698→            </div>
+   699→            <h2 className="text-xl sm:text-2xl font-display font-semibold tracking-tight">
+   700→              Tudo Pronto!
+   701→            </h2>
+   702→            <p className="text-sm text-muted-foreground leading-relaxed mt-2">
+   703→              O contrato foi criado com sucesso
+   704→            </p>
+   705→          </div>
+   706→
+   707→          <BloomCard className="p-5 space-y-3">
+   708→            <BloomInfoRow
+   709→              label="Profissional"
+   710→              value={<span className="text-sm font-display font-bold text-foreground">{caregiver.name}</span>}
+   711→            />
+   712→            <BloomInfoRow
+   713→              label="Taxa Horária"
+   714→              value={<span className="text-lg font-display font-black text-primary tracking-tighter">€{Number(expectedRate).toFixed(2)}/h</span>}
+   715→            />
+   716→          </BloomCard>
+   717→
+   718→          <div className="flex gap-3">
+   719→            <Button
+   720→              asChild
+   721→              size="lg"
+   722→              className="flex-1 h-11 rounded-2xl font-display font-bold shadow-glow"
+   723→            >
+   724→              <Link href={`/app/family/demands/${demandId}`}>
+   725→                Voltar para Demanda
+   726→              </Link>
+   727→            </Button>
+   728→            <Button
+   729→              asChild
+   730→              variant="outline"
+   731→              size="lg"
+   732→              className="flex-1 h-11 rounded-2xl font-display font-bold border border-border"
+   733→            >
+   734→              <Link href="/app/contracts">Ver Contratos</Link>
+   735→            </Button>
+   736→          </div>
+   737→        </BloomCard>
+   738→      )}
+   739→    </div>
+   740→    </PageLayout>
+   741→  );
+   742→}
+   743→
+   744→export default function ProposalFlowPage() {
+   745→  return (
+   746→    <Suspense
+   747→      fallback={
+   748→        <PageLayout spacing="normal" className="max-w-2xl">
+   749→          <div className="animate-pulse space-y-4">
+   750→            <div className="h-24 bg-secondary rounded-3xl" />
+   751→            <div className="h-96 bg-secondary rounded-3xl" />
+   752→          </div>
+   753→        </PageLayout>
+   754→      }
+   755→    >
+   756→      <ProposalFlowContent />
+   757→    </Suspense>
+   758→  );
+   759→}
+   760→

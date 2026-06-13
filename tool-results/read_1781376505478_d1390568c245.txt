@@ -1,0 +1,1154 @@
+     1→/**
+     2→ * Contract Creation Page (/app/contracts/new)
+     3→ *
+     4→ * PROPÓSITO: Página para criar novos contratos de cuidados entre famílias e profissionais de saúde.
+     5→ * Esta página é acessada após uma proposta ser aceita ou uma família decidir criar um contrato direto.
+     6→ *
+     7→ * FLUXO:
+     8→ * 1. Família ou Cuidador acessa /app/contracts/new com query param ?proposalId=[id]
+     9→ * 2. Carrega informações do profissional e detalhes da proposta
+    10→ * 3. Permite configurar: horário, frequência, taxa horária, benefícios
+    11→ * 4. Ao submeter, cria novo contrato via POST /api/contracts
+    12→ * 5. Redireciona para /app/contracts/[id] com sucesso
+    13→ *
+    14→ * ROLES PERMITIDOS: FAMILY (Família) - para criar e assinar contratos
+    15→ *
+    16→ * ACESSO:
+    17→ * - URL direta: /app/contracts/new
+    18→ * - Query params: ?proposalId=[id] (de proposta aceita)
+    19→ *
+    20→ * NOT IN SIDEBAR: Esta página não aparece no menu principal pois é acessada
+    21→ * via fluxo de aceitação de propostas. Link direto disponível apenas em contexto.
+    22→ */
+    23→
+    24→"use client";
+    25→
+    26→import { Suspense } from "react";
+    27→import { hasRole, UserRole } from "@/lib/roles";
+    28→import { useState, useEffect } from "react";
+    29→import { useSearchParams } from "next/navigation";
+    30→import { useSession } from "next-auth/react";
+    31→import Link from "next/link";
+    32→import { apiFetch } from "@/lib/api-client";
+    33→import {
+    34→  BloomCard,
+    35→  BloomAlert,
+    36→  BloomBadge,
+    37→  BloomProgress,
+    38→  BloomSectionHeader,
+    39→} from "@/components/bloom-custom";
+    40→import {
+    41→  IconContract,
+    42→  IconCheck,
+    43→  IconArrowRight,
+    44→  IconArrowLeft,
+    45→  IconClock,
+    46→  IconHeart,
+    47→  IconUser,
+    48→  IconPhone,
+    49→  IconAlertCircle,
+    50→  IconCalendar,
+    51→  IconLoader2,
+    52→  IconInfo,
+    53→} from "@/components/icons";
+    54→import { Button } from "@/components/ui/button";
+    55→import { Input } from "@/components/ui/input";
+    56→import { Label } from "@/components/ui/label";
+    57→import { Textarea } from "@/components/ui/textarea";
+    58→import { Checkbox } from "@/components/ui/checkbox";
+    59→import { SERVICE_TYPES, CONTRACT_FEE_EUR_CENTS, FREQUENCY_OPTIONS } from "@/lib/constants";
+    60→import { openChat } from "@/lib/chat-events";
+    61→import { PageLayout, PageHeader } from "@/components/layout/PageLayout";
+    62→
+    63→interface CaregiverInfo {
+    64→  id: string;
+    65→  name: string;
+    66→  title: string;
+    67→  averageRating: number;
+    68→  hourlyRateEur: number;
+    69→  profileImage?: string | null;
+    70→}
+    71→
+    72→// Care need option with emoji icon
+    73→interface CareOption {
+    74→  key: string;
+    75→  label: string;
+    76→  icon: string;
+    77→}
+    78→
+    79→const CARE_NEEDS: CareOption[] = [
+    80→  { key: "PERSONAL_CARE", label: "Higiene Pessoal", icon: "\uD83D\uDEC1" },
+    81→  { key: "MEDICATION", label: "Medicacao", icon: "\uD83D\uDC8A" },
+    82→  { key: "MOBILITY", label: "Mobilidade", icon: "\uD83E\uDDBD" },
+    83→  { key: "COMPANIONSHIP", label: "Companhia", icon: "\uD83E\uDDE1" },
+    84→  { key: "MEAL_PREPARATION", label: "Refeicoes", icon: "\uD83C\uDF73" },
+    85→  { key: "LIGHT_HOUSEWORK", label: "Tarefas Domesticas", icon: "\uD83E\uDDF9" },
+    86→  { key: "TRANSPORTATION", label: "Transporte", icon: "\uD83D\uDE97" },
+    87→  {
+    88→    key: "COGNITIVE_SUPPORT",
+    89→    label: "Estimulacao Cognitiva",
+    90→    icon: "\uD83E\uDDE9",
+    91→  },
+    92→  { key: "NIGHT_CARE", label: "Cuidados Noturnos", icon: "\uD83C\uDF19" },
+    93→  { key: "NURSING_CARE", label: "Enfermagem", icon: "\uD83C\uDFE5" },
+    94→];
+    95→
+    96→const SCHEDULE_OPTIONS = [
+    97→  { key: "morning", label: "Manha", desc: "06h - 12h", icon: "\u2600\uFE0F" },
+    98→  {
+    99→    key: "afternoon",
+   100→    label: "Tarde",
+   101→    desc: "12h - 18h",
+   102→    icon: "\uD83C\uDF24\uFE0F",
+   103→  },
+   104→  { key: "evening", label: "Noite", desc: "18h - 22h", icon: "\uD83C\uDF1C" },
+   105→  {
+   106→    key: "overnight",
+   107→    label: "Pernoite",
+   108→    desc: "22h - 06h",
+   109→    icon: "\uD83C\uDF19",
+   110→  },
+   111→];
+   112→
+   113→
+   114→function NewContractContent() {
+   115→  const searchParams = useSearchParams();
+   116→  const caregiverId = searchParams.get("caregiverId");
+   117→  const { status, data: session } = useSession();
+   118→  const isFamily = hasRole(session?.user, UserRole.FAMILY);
+   119→
+   120→  const [step, setStep] = useState(1);
+   121→  const [isSubmitting, setIsSubmitting] = useState(false);
+   122→  const [submitError, setSubmitError] = useState<string | null>(null);
+   123→  const [contractId, setContractId] = useState<string | null>(null);
+   124→
+   125→  // Prerequisites check
+   126→  const [prerequisites, setPrerequisites] = useState<{
+   127→    hasChat: boolean;
+   128→    hasInterview: boolean;
+   129→    interviewCompleted: boolean;
+   130→    hasActiveContract: boolean;
+   131→    canCreateContract: boolean;
+   132→    reason?: string;
+   133→  } | null>(null);
+   134→  const [prereqLoading, setPrereqLoading] = useState(true);
+   135→
+   136→  // Caregiver
+   137→  const [caregiver, setCaregiver] = useState<CaregiverInfo | null>(null);
+   138→  const [caregiverLoading, setCaregiverLoading] = useState(true);
+   139→  const [caregiverError, setCaregiverError] = useState<string | null>(null);
+   140→
+   141→  // Step 1: Care needs
+   142→  const [selectedNeeds, setSelectedNeeds] = useState<string[]>([]);
+   143→
+   144→  // Step 2: About the person receiving care
+   145→  const [elderName, setElderName] = useState("");
+   146→  const [elderAge, setElderAge] = useState("");
+   147→  const [elderConditions, setElderConditions] = useState("");
+   148→  const [emergencyName, setEmergencyName] = useState("");
+   149→  const [emergencyPhone, setEmergencyPhone] = useState("");
+   150→
+   151→  // Step 3: Schedule
+   152→  const [selectedSchedule, setSelectedSchedule] = useState<string[]>([]);
+   153→  const [frequency, setFrequency] = useState("");
+   154→  const [customHours, setCustomHours] = useState(10);
+   155→  const [startDate, setStartDate] = useState("");
+   156→  const [endDate, setEndDate] = useState("");
+   157→
+   158→  // Step 4: Review & edit
+   159→  const [hourlyRate, setHourlyRate] = useState(28); // in euros, not cents
+   160→  const [additionalNotes, setAdditionalNotes] = useState("");
+   161→  const [agreedTerms, setAgreedTerms] = useState(false);
+   162→  const [platformFeePercent, setPlatformFeePercent] = useState(15);
+   163→
+   164→  // Fetch prerequisites and caregiver data
+   165→  useEffect(() => {
+   166→    async function fetchData() {
+   167→      if (!caregiverId) {
+   168→        setCaregiverLoading(false);
+   169→        setPrereqLoading(false);
+   170→        setCaregiverError("ID do profissional não fornecido.");
+   171→        return;
+   172→      }
+   173→
+   174→      // Fetch prerequisites
+   175→      try {
+   176→        const prereqRes = await apiFetch(`/api/contracts/prerequisites?caregiverId=${caregiverId}`);
+   177→        if (prereqRes.ok) {
+   178→          const prereqData = await prereqRes.json();
+   179→          setPrerequisites(prereqData);
+   180→        } else {
+   181→          setPrerequisites({ hasChat: false, hasInterview: false, interviewCompleted: false, hasActiveContract: false, canCreateContract: false, reason: "Nao foi possivel verificar os prerequisitos." });
+   182→        }
+   183→      } catch {
+   184→        setPrerequisites({ hasChat: false, hasInterview: false, interviewCompleted: false, hasActiveContract: false, canCreateContract: false, reason: "Erro ao verificar prerequisitos." });
+   185→      } finally {
+   186→        setPrereqLoading(false);
+   187→      }
+   188→
+   189→      // Fetch caregiver data
+   190→      try {
+   191→        setCaregiverLoading(true);
+   192→        const res = await apiFetch(`/api/caregivers/${caregiverId}`);
+   193→        if (!res.ok) {
+   194→          setCaregiverError(
+   195→            res.status === 404
+   196→              ? "Profissional não encontrado."
+   197→              : "Erro ao carregar profissional.",
+   198→          );
+   199→          return;
+   200→        }
+   201→        const data = await res.json();
+   202→        const c = data.caregiver;
+   203→        setCaregiver({
+   204→          id: c.id,
+   205→          name: c.name,
+   206→          title: c.title,
+   207→          averageRating: c.averageRating,
+   208→          hourlyRateEur: c.hourlyRateEur,
+   209→          profileImage: c.profileImage,
+   210→        });
+   211→        setHourlyRate(c.hourlyRateEur || 28);
+   212→      } catch {
+   213→        setCaregiverError("Erro inesperado ao carregar profissional.");
+   214→      } finally {
+   215→        setCaregiverLoading(false);
+   216→      }
+   217→    }
+   218→    fetchData();
+   219→
+   220→    // Fetch platform settings
+   221→    apiFetch("/api/settings")
+   222→      .then((res) => (res.ok ? res.json() : { platformFeePercent: 15 }))
+   223→      .then((data) => setPlatformFeePercent(data.platformFeePercent || 15))
+   224→      .catch(() => setPlatformFeePercent(15));
+   225→  }, [caregiverId]);
+   226→
+   227→  // Calculate actual hours based on dates
+   228→  const calculateTotalHours = () => {
+   229→    if (!startDate) return 0;
+   230→
+   231→    const hoursPerWeek =
+   232→      frequency === "custom"
+   233→        ? customHours
+   234→        : FREQUENCY_OPTIONS.find((f) => f.key === frequency)?.hours || 10;
+   235→
+   236→    const start = new Date(startDate + "T00:00:00");
+   237→    const end = endDate ? new Date(endDate + "T00:00:00") : start;
+   238→
+   239→    // Add 1 day to include the end date
+   240→    const endWithInclusion = new Date(end.getTime() + 24 * 60 * 60 * 1000);
+   241→    const diffMs = endWithInclusion.getTime() - start.getTime();
+   242→    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+   243→
+   244→    // Count weekdays if weekdays frequency
+   245→    let totalDays = diffDays;
+   246→    if (frequency === "weekdays") {
+   247→      totalDays = 0;
+   248→      let current = new Date(start);
+   249→      while (current < endWithInclusion) {
+   250→        const dayOfWeek = current.getDay();
+   251→        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+   252→          // 0 = Sunday, 6 = Saturday
+   253→          totalDays++;
+   254→        }
+   255→        current.setDate(current.getDate() + 1);
+   256→      }
+   257→    } else if (frequency === "weekends") {
+   258→      totalDays = 0;
+   259→      let current = new Date(start);
+   260→      while (current < endWithInclusion) {
+   261→        const dayOfWeek = current.getDay();
+   262→        if (dayOfWeek === 0 || dayOfWeek === 6) {
+   263→          totalDays++;
+   264→        }
+   265→        current.setDate(current.getDate() + 1);
+   266→      }
+   267→    }
+   268→
+   269→    const weeks = totalDays / 7;
+   270→    return Math.round(weeks * hoursPerWeek * 10) / 10; // Round to 1 decimal
+   271→  };
+   272→
+   273→  // Calculated values
+   274→  const hoursPerWeek =
+   275→    frequency === "custom"
+   276→      ? customHours
+   277→      : FREQUENCY_OPTIONS.find((f) => f.key === frequency)?.hours || 10;
+   278→  const totalHours = calculateTotalHours();
+   279→  const totalEur = totalHours * hourlyRate;
+   280→  const platformFee = totalEur * (platformFeePercent / 100);
+   281→  const contractFee = CONTRACT_FEE_EUR_CENTS / 100;
+   282→  const caregiverReceives = totalEur - platformFee - contractFee;
+   283→
+   284→  // Build description from questionnaire answers
+   285→  const buildDescription = () => {
+   286→    const parts: string[] = [];
+   287→    const needLabels = selectedNeeds
+   288→      .map((k) => CARE_NEEDS.find((n) => n.key === k)?.label)
+   289→      .filter(Boolean);
+   290→    if (needLabels.length)
+   291→      parts.push(`Cuidados necessarios: ${needLabels.join(", ")}`);
+   292→    if (elderName) parts.push(`Nome da Pessoa a Cuidar: ${elderName}`);
+   293→    if (elderAge) parts.push(`Idade: ${elderAge} anos`);
+   294→    if (elderConditions)
+   295→      parts.push(`Condicoes/observacoes: ${elderConditions}`);
+   296→    const schedLabels = selectedSchedule
+   297→      .map((k) => SCHEDULE_OPTIONS.find((s) => s.key === k)?.label)
+   298→      .filter(Boolean);
+   299→    if (schedLabels.length) parts.push(`Horarios: ${schedLabels.join(", ")}`);
+   300→    const freqLabel = FREQUENCY_OPTIONS.find((f) => f.key === frequency)?.label;
+   301→    if (freqLabel)
+   302→      parts.push(`Frequencia: ${freqLabel} (~${hoursPerWeek}h/semana)`);
+   303→    if (emergencyName)
+   304→      parts.push(`Contato de emergencia: ${emergencyName} (${emergencyPhone})`);
+   305→    if (additionalNotes) parts.push(`Observacoes: ${additionalNotes}`);
+   306→    return parts.join("\n");
+   307→  };
+   308→
+   309→  const handleSubmit = async () => {
+   310→    if (!caregiver) return;
+   311→    setIsSubmitting(true);
+   312→    setSubmitError(null);
+   313→
+   314→    try {
+   315→      const title = `Cuidado ${elderName ? `para ${elderName}` : `com ${caregiver.name}`}`;
+   316→      const res = await apiFetch("/api/contracts", {
+   317→        method: "POST",
+   318→        headers: { "Content-Type": "application/json" },
+   319→        body: JSON.stringify({
+   320→          caregiverUserId: caregiver.id,
+   321→          title: title.slice(0, 200),
+   322→          hourlyRateEur: Math.round(hourlyRate * 100) / 100, // Send in euros (API converts to cents)
+   323→          totalHours: Math.round(totalHours),
+   324→          description: buildDescription().slice(0, 2000),
+   325→          startDate: startDate || undefined,
+   326→          endDate: endDate || undefined,
+   327→          serviceTypes: selectedNeeds.join(",") || undefined,
+   328→          hoursPerWeek: Math.round(hoursPerWeek),
+   329→        }),
+   330→      });
+   331→
+   332→      if (!res.ok) {
+   333→        const errorData = await res.json();
+   334→        if (errorData.code === "KYC_REQUIRED") {
+   335→          throw new Error(
+   336→            "Voce precisa completar a verificacao de identidade (KYC) antes de criar um contrato.",
+   337→          );
+   338→        }
+   339→        if (errorData.code === "CAREGIVER_KYC_PENDING") {
+   340→          throw new Error(
+   341→            "O profissional ainda não completou a verificação de identidade.",
+   342→          );
+   343→        }
+   344→        throw new Error(errorData.error || "Erro ao criar contrato.");
+   345→      }
+   346→
+   347→      const data = await res.json();
+   348→      setContractId(data.contractId);
+   349→      setStep(5);
+   350→    } catch (err) {
+   351→      setSubmitError(err instanceof Error ? err.message : "Erro inesperado.");
+   352→    } finally {
+   353→      setIsSubmitting(false);
+   354→    }
+   355→  };
+   356→
+   357→  const toggleNeed = (key: string) => {
+   358→    setSelectedNeeds((prev) =>
+   359→      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+   360→    );
+   361→  };
+   362→
+   363→  const toggleSchedule = (key: string) => {
+   364→    setSelectedSchedule((prev) =>
+   365→      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+   366→    );
+   367→  };
+   368→
+   369→  // Error/loading states
+   370→  if (caregiverError) {
+   371→    return (
+   372→      <PageLayout spacing="normal" className="max-w-2xl">
+   373→        <PageHeader
+   374→          title="Erro"
+   375→          subtitle="Não conseguimos carregar o profissional"
+   376→          icon={<IconAlertCircle className="h-6 w-6 text-destructive" />}
+   377→        />
+   378→
+   379→        <div className="text-center space-y-6 py-8">
+   380→          <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+   381→            {caregiverError}
+   382→          </p>
+   383→          <Button asChild className="h-12 px-8">
+   384→            <Link href="/app/search">Voltar para busca</Link>
+   385→          </Button>
+   386→        </div>
+   387→      </PageLayout>
+   388→    );
+   389→  }
+   390→
+   391→  if (caregiverLoading || prereqLoading || !caregiver) {
+   392→    return (
+   393→      <PageLayout spacing="normal" className="max-w-2xl">
+   394→        <div className="space-y-2">
+   395→          <div className="h-10 bg-muted rounded-2xl w-64 animate-pulse"></div>
+   396→          <div className="h-4 bg-muted rounded w-48 animate-pulse"></div>
+   397→        </div>
+   398→        <div className="animate-pulse space-y-4">
+   399→          <div className="h-64 bg-muted rounded-3xl"></div>
+   400→          <div className="h-40 bg-muted rounded-3xl"></div>
+   401→        </div>
+   402→      </PageLayout>
+   403→    );
+   404→  }
+   405→
+   406→  // Prerequisites not met — show helpful message
+   407→  if (prerequisites && !prerequisites.canCreateContract) {
+   408→    return (
+   409→      <PageLayout spacing="normal" className="max-w-2xl">
+   410→        <PageHeader
+   411→          title="Novo Contrato"
+   412→          subtitle=""
+   413→          icon={<IconContract className="h-6 w-6 text-primary" />}
+   414→          backHref="/app/contracts"
+   415→          backLabel="Contratos"
+   416→        />
+   417→
+   418→        <BloomCard className="text-center py-8 space-y-6">
+   419→          <div className="w-16 h-16 mx-auto rounded-2xl bg-warning/10 flex items-center justify-center">
+   420→            <IconAlertCircle className="h-8 w-8 text-warning" />
+   421→          </div>
+   422→          <div className="space-y-2">
+   423→            <h2 className="text-xl font-display font-semibold tracking-tight text-foreground">
+   424→              Pré-requisitos não cumpridos
+   425→            </h2>
+   426→            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+   427→              Antes de criar um contrato com {caregiver.name}, precisa completar os seguintes passos:
+   428→            </p>
+   429→          </div>
+   430→
+   431→          <div className="space-y-3 max-w-sm mx-auto text-left">
+   432→            {/* Step 1: Chat */}
+   433→            <div className={`flex items-center gap-3 p-4 rounded-2xl border ${prerequisites.hasChat ? 'border-success/30 bg-success/5' : 'border-warning/30 bg-warning/5'}`}>
+   434→              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${prerequisites.hasChat ? 'bg-success/10' : 'bg-warning/10'}`}>
+   435→                <IconCheck className={`h-4 w-4 ${prerequisites.hasChat ? 'text-success' : 'text-warning opacity-30'}`} />
+   436→              </div>
+   437→              <div className="flex-1">
+   438→                <p className="text-sm font-display font-bold text-foreground">Conversar com o profissional</p>
+   439→                {!prerequisites.hasChat && (
+   440→                  <button onClick={() => openChat({ userId: caregiverId ?? undefined })} className="text-xs text-primary hover:underline mt-1 block">
+   441→                    Iniciar conversa →
+   442→                  </button>
+   443→                )}
+   444→              </div>
+   445→            </div>
+   446→
+   447→            {/* Step 2: Interview */}
+   448→            <div className={`flex items-center gap-3 p-4 rounded-2xl border ${prerequisites.interviewCompleted ? 'border-success/30 bg-success/5' : 'border-warning/30 bg-warning/5'}`}>
+   449→              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${prerequisites.interviewCompleted ? 'bg-success/10' : 'bg-warning/10'}`}>
+   450→                <IconCheck className={`h-4 w-4 ${prerequisites.interviewCompleted ? 'text-success' : 'text-warning opacity-30'}`} />
+   451→              </div>
+   452→              <div className="flex-1">
+   453→                <p className="text-sm font-display font-bold text-foreground">Agendar entrevista</p>
+   454→                {!prerequisites.interviewCompleted && prerequisites.hasChat && (
+   455→                  <button onClick={() => openChat()} className="text-xs text-primary hover:underline mt-1 block">
+   456→                    Agendar entrevista no chat →
+   457→                  </button>
+   458→                )}
+   459→              </div>
+   460→            </div>
+   461→
+   462→            {/* Step 3: No active contract */}
+   463→            <div className={`flex items-center gap-3 p-4 rounded-2xl border ${!prerequisites.hasActiveContract ? 'border-success/30 bg-success/5' : 'border-destructive/30 bg-destructive/5'}`}>
+   464→              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${!prerequisites.hasActiveContract ? 'bg-success/10' : 'bg-destructive/10'}`}>
+   465→                <IconCheck className={`h-4 w-4 ${!prerequisites.hasActiveContract ? 'text-success' : 'text-destructive opacity-30'}`} />
+   466→              </div>
+   467→              <div className="flex-1">
+   468→                <p className="text-sm font-display font-bold text-foreground">Sem contrato ativo</p>
+   469→                {prerequisites.hasActiveContract && (
+   470→                  <p className="text-xs text-destructive mt-1">Já existe um contrato ativo com este profissional</p>
+   471→                )}
+   472→              </div>
+   473→            </div>
+   474→          </div>
+   475→
+   476→          <Button asChild className="h-12 px-8">
+   477→            <Link href="/app/search">Voltar para busca</Link>
+   478→          </Button>
+   479→        </BloomCard>
+   480→      </PageLayout>
+   481→    );
+   482→  }
+   483→
+   484→  const totalSteps = 4;
+   485→
+   486→  return (
+   487→    <PageLayout spacing="normal" className="max-w-2xl">
+   488→      <div className="space-y-2">
+   489→        <PageHeader
+   490→          title="Novo Contrato"
+   491→          subtitle=""
+   492→          icon={<IconContract className="h-6 w-6 text-primary" />}
+   493→          backHref="/app/contracts"
+   494→          backLabel="Contratos"
+   495→        />
+   496→        <div className="flex items-center gap-3">
+   497→          {caregiver.profileImage ? (
+   498→            <img src={caregiver.profileImage} alt={caregiver.name} className="w-10 h-10 rounded-xl object-cover border border-border shrink-0" />
+   499→          ) : (
+   500→            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-display font-black text-primary shrink-0">
+   501→              {caregiver.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
+   502→            </div>
+   503→          )}
+   504→          <p className="text-base text-muted-foreground font-medium">
+   505→            Com <span className="font-display font-black text-foreground">{caregiver.name}</span> • {caregiver.title}
+   506→          </p>
+   507→        </div>
+   508→      </div>
+   509→
+   510→      {/* Progress Bar */}
+   511→      {step <= totalSteps && (
+   512→        <BloomProgress
+   513→          value={step}
+   514→          max={totalSteps}
+   515→          label={`Passo ${step} de ${totalSteps}`}
+   516→          showPercentage
+   517→        />
+   518→      )}
+   519→
+   520→      {/* ====== STEP 1: Care Needs ====== */}
+   521→      {step === 1 && (
+   522→        <BloomCard className="space-y-8">
+   523→          <BloomSectionHeader title="De que cuidados precisa?" desc="Selecione tudo que se aplica. Isto ajuda o profissional a preparar-se." />
+   524→
+   525→          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   526→            {CARE_NEEDS.map((need) => {
+   527→              const selected = selectedNeeds.includes(need.key);
+   528→              return (
+   529→                <button
+   530→                  key={need.key}
+   531→                  onClick={() => toggleNeed(need.key)}
+   532→                  className={`flex items-center gap-3 p-5 rounded-2xl border-2 text-left transition-all ${
+   533→                    selected
+   534→                      ? "border-primary bg-primary/5 shadow-card"
+   535→                      : "border-border hover:border-primary/30 hover:bg-secondary/50"
+   536→                  }`}
+   537→                >
+   538→                  <span className="text-2xl flex-shrink-0">{need.icon}</span>
+   539→                  <span
+   540→                    className={`text-sm font-medium leading-tight ${selected ? "text-primary" : "text-foreground"}`}
+   541→                  >
+   542→                    {need.label}
+   543→                  </span>
+   544→                  {selected && (
+   545→                    <IconCheck className="h-4 w-4 text-primary ml-auto flex-shrink-0" />
+   546→                  )}
+   547→                </button>
+   548→              );
+   549→            })}
+   550→          </div>
+   551→
+   552→          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
+   553→            <Button
+   554→              onClick={() => setStep(2)}
+   555→              disabled={selectedNeeds.length === 0}
+   556→              size="lg"
+   557→              className="flex-1 h-12 text-base font-semibold"
+   558→            >
+   559→              Continuar
+   560→              <IconArrowRight className="h-5 w-5 ml-2" />
+   561→            </Button>
+   562→          </div>
+   563→        </BloomCard>
+   564→      )}
+   565→
+   566→      {/* ====== STEP 2: About the Care Recipient ====== */}
+   567→      {step === 2 && (
+   568→        <BloomCard className="space-y-8">
+   569→          <BloomSectionHeader title="Sobre a Pessoa a Cuidar" desc="Informações básicas para o profissional conhecer melhor." />
+   570→
+   571→          <BloomCard className="space-y-6">
+   572→            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+   573→              <div className="col-span-2 space-y-2">
+   574→                <label className="text-xs font-display font-bold text-foreground tracking-wide mb-2 block">
+   575→                  Nome da Pessoa a Cuidar
+   576→                </label>
+   577→                <Input
+   578→                  value={elderName}
+   579→                  onChange={(e) => setElderName(e.target.value)}
+   580→                  placeholder="Maria da Silva"
+   581→                  className="w-full"
+   582→                />
+   583→              </div>
+   584→              <div className="space-y-2">
+   585→                <label className="text-xs font-display font-bold text-foreground tracking-wide mb-2 block">
+   586→                  Idade
+   587→                </label>
+   588→                <Input
+   589→                  type="number"
+   590→                  value={elderAge}
+   591→                  onChange={(e) => setElderAge(e.target.value)}
+   592→                  placeholder="75"
+   593→                  min={1}
+   594→                  max={120}
+   595→                  className="w-full text-center"
+   596→                />
+   597→              </div>
+   598→            </div>
+   599→
+   600→            <div className="space-y-2">
+   601→              <label className="text-xs font-display font-bold text-foreground tracking-wide mb-2 block">
+   602→                Condicoes ou observacoes importantes
+   603→              </label>
+   604→              <Textarea
+   605→                value={elderConditions}
+   606→                onChange={(e) => setElderConditions(e.target.value)}
+   607→                placeholder="Ex: Diabetes tipo 2, dificuldade de locomocao, toma medicacao as 8h e 20h..."
+   608→                rows={3}
+   609→                className="w-full"
+   610→              />
+   611→            </div>
+   612→
+   613→            <BloomCard className="space-y-4" variant="warning">
+   614→              <p className="text-xs font-display font-bold text-foreground tracking-wide">
+   615→                Contato de Emergencia
+   616→              </p>
+   617→              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+   618→                <div className="space-y-2">
+   619→                  <label className="text-xs font-display font-bold text-foreground tracking-wide mb-2 block">
+   620→                    Nome
+   621→                  </label>
+   622→                  <div className="relative">
+   623→                    <IconUser className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+   624→                    <Input
+   625→                      value={emergencyName}
+   626→                      onChange={(e) => setEmergencyName(e.target.value)}
+   627→                      placeholder="Joao Silva"
+   628→                      className="w-full pl-11"
+   629→                    />
+   630→                  </div>
+   631→                </div>
+   632→                <div className="space-y-2">
+   633→                  <label className="text-xs font-display font-bold text-foreground tracking-wide mb-2 block">
+   634→                    Telefone
+   635→                  </label>
+   636→                  <div className="relative">
+   637→                    <IconPhone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+   638→                    <Input
+   639→                      value={emergencyPhone}
+   640→                      onChange={(e) => setEmergencyPhone(e.target.value)}
+   641→                      placeholder="+351 912 345 678"
+   642→                      type="tel"
+   643→                      className="w-full pl-11"
+   644→                    />
+   645→                  </div>
+   646→                </div>
+   647→              </div>
+   648→            </BloomCard>
+   649→          </BloomCard>
+   650→
+   651→          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
+   652→            <Button
+   653→              variant="outline"
+   654→              onClick={() => setStep(1)}
+   655→              size="lg"
+   656→              className="h-12 px-6"
+   657→            >
+   658→              <IconArrowLeft className="h-5 w-5" />
+   659→            </Button>
+   660→            <Button
+   661→              onClick={() => setStep(3)}
+   662→              size="lg"
+   663→              className="flex-1 h-12 text-base font-semibold"
+   664→            >
+   665→              Continuar
+   666→              <IconArrowRight className="h-5 w-5 ml-2" />
+   667→            </Button>
+   668→          </div>
+   669→        </BloomCard>
+   670→      )}
+   671→
+   672→      {/* ====== STEP 3: Schedule & Frequency ====== */}
+   673→      {step === 3 && (
+   674→        <BloomCard className="space-y-8">
+   675→          <BloomSectionHeader title="Horarios e frequencia" desc="Quando precisa do profissional?" />
+   676→
+   677→          <div className="space-y-6">
+   678→            {/* Time of day */}
+   679→            <div className="space-y-3">
+   680→              <label className="text-xs font-display font-bold text-foreground tracking-wide mb-2 block">
+   681→                Periodos do dia
+   682→              </label>
+   683→              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   684→                {SCHEDULE_OPTIONS.map((opt) => {
+   685→                  const selected = selectedSchedule.includes(opt.key);
+   686→                  return (
+   687→                    <button
+   688→                      key={opt.key}
+   689→                      onClick={() => toggleSchedule(opt.key)}
+   690→                      className={`p-4 rounded-2xl border-2 text-left transition-all ${
+   691→                        selected
+   692→                          ? "border-primary bg-primary/5 shadow-card"
+   693→                          : "border-border hover:border-primary/30 hover:bg-secondary/50"
+   694→                      }`}
+   695→                    >
+   696→                      <div className="flex items-center gap-3">
+   697→                        <span className="text-2xl">{opt.icon}</span>
+   698→                        <span
+   699→                          className={`text-sm font-medium ${selected ? "text-primary" : "text-foreground"}`}
+   700→                        >
+   701→                          {opt.label}
+   702→                        </span>
+   703→                      </div>
+   704→                      <p className="text-xs text-muted-foreground mt-2 ml-8">
+   705→                        {opt.desc}
+   706→                      </p>
+   707→                    </button>
+   708→                  );
+   709→                })}
+   710→              </div>
+   711→            </div>
+   712→
+   713→            {/* Frequency */}
+   714→            <div className="space-y-3 pt-2">
+   715→              <label className="text-xs font-display font-bold text-foreground tracking-wide mb-2 block">
+   716→                Frequencia
+   717→              </label>
+   718→              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   719→                {FREQUENCY_OPTIONS.map((opt) => (
+   720→                  <button
+   721→                    key={opt.key}
+   722→                    onClick={() => setFrequency(opt.key)}
+   723→                    className={`p-4 rounded-2xl border-2 text-left transition-all ${
+   724→                      frequency === opt.key
+   725→                        ? "border-primary bg-primary/5 shadow-card"
+   726→                        : "border-border hover:border-primary/30 hover:bg-secondary/50"
+   727→                    }`}
+   728→                  >
+   729→                    <span
+   730→                      className={`text-sm font-medium ${frequency === opt.key ? "text-primary" : "text-foreground"}`}
+   731→                    >
+   732→                      {opt.label}
+   733→                    </span>
+   734→                    {opt.hours > 0 && (
+   735→                      <p className="text-xs text-muted-foreground mt-1">
+   736→                        ~{opt.hours}h/semana
+   737→                      </p>
+   738→                    )}
+   739→                  </button>
+   740→                ))}
+   741→              </div>
+   742→              {frequency === "custom" && (
+   743→                <div className="space-y-2 pt-2">
+   744→                  <label className="text-xs font-display font-bold text-foreground tracking-wide mb-2 block">
+   745→                    Horas por semana
+   746→                  </label>
+   747→                  <Input
+   748→                    type="number"
+   749→                    value={customHours}
+   750→                    onChange={(e) =>
+   751→                      setCustomHours(Number(e.target.value) || 1)
+   752→                    }
+   753→                    min={1}
+   754→                    max={60}
+   755→                    className="w-full"
+   756→                  />
+   757→                </div>
+   758→              )}
+   759→            </div>
+   760→
+   761→            {/* Dates */}
+   762→            <div className="space-y-3 pt-2">
+   763→              <label className="text-xs font-display font-bold text-foreground tracking-wide mb-2 block">
+   764→                Periodo do contrato
+   765→              </label>
+   766→              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+   767→                <div className="space-y-2">
+   768→                  <label className="text-xs font-display font-bold text-foreground tracking-wide mb-2 block">
+   769→                    Inicio
+   770→                  </label>
+   771→                  <div className="relative">
+   772→                    <IconCalendar className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+   773→                    <Input
+   774→                      type="date"
+   775→                      value={startDate}
+   776→                      onChange={(e) => setStartDate(e.target.value)}
+   777→                      className="w-full pl-11"
+   778→                    />
+   779→                  </div>
+   780→                </div>
+   781→                <div className="space-y-2">
+   782→                  <label className="text-xs font-display font-bold text-foreground tracking-wide mb-2 block">
+   783→                    Termino (opcional)
+   784→                  </label>
+   785→                  <div className="relative">
+   786→                    <IconCalendar className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+   787→                    <Input
+   788→                      type="date"
+   789→                      value={endDate}
+   790→                      onChange={(e) => setEndDate(e.target.value)}
+   791→                      className="w-full pl-11"
+   792→                    />
+   793→                  </div>
+   794→                </div>
+   795→              </div>
+   796→            </div>
+   797→          </div>
+   798→
+   799→          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
+   800→            <Button
+   801→              variant="outline"
+   802→              onClick={() => setStep(2)}
+   803→              size="lg"
+   804→              className="h-12 px-6"
+   805→            >
+   806→              <IconArrowLeft className="h-5 w-5" />
+   807→            </Button>
+   808→            <Button
+   809→              onClick={() => setStep(4)}
+   810→              disabled={!frequency || selectedSchedule.length === 0}
+   811→              size="lg"
+   812→              className="flex-1 h-12 text-base font-semibold"
+   813→            >
+   814→              Revisar Contrato
+   815→              <IconArrowRight className="h-5 w-5 ml-2" />
+   816→            </Button>
+   817→          </div>
+   818→        </BloomCard>
+   819→      )}
+   820→
+   821→      {/* ====== STEP 4: Review & Confirm ====== */}
+   822→      {step === 4 && (
+   823→        <BloomCard className="space-y-8">
+   824→          <BloomSectionHeader title="Revisar e confirmar" desc="Verifique os detalhes. Voce pode editar o valor por hora." />
+   825→
+   826→          {/* Care summary */}
+   827→          <BloomCard className="divide-y divide-border">
+   828→            {/* Needs */}
+   829→            <div className="p-5 sm:p-7">
+   830→              <p className="text-xs font-display font-bold text-foreground tracking-wide mb-3">
+   831→                Cuidados
+   832→              </p>
+   833→              <div className="flex flex-wrap gap-2">
+   834→                {selectedNeeds.map((key) => {
+   835→                  const need = CARE_NEEDS.find((n) => n.key === key);
+   836→                  return need ? (
+   837→                    <BloomBadge
+   838→                      key={key}
+   839→                      variant="default"
+   840→                      className="inline-flex items-center gap-2"
+   841→                    >
+   842→                      {need.icon} {need.label}
+   843→                    </BloomBadge>
+   844→                  ) : null;
+   845→                })}
+   846→              </div>
+   847→            </div>
+   848→
+   849→            {/* Elder info */}
+   850→            {elderName && (
+   851→              <div className="p-5 sm:p-7">
+   852→                <p className="text-xs font-display font-bold text-foreground tracking-wide mb-2">
+   853→                  Pessoa a Cuidar
+   854→                </p>
+   855→                <p className="text-sm font-medium text-foreground">
+   856→                  {elderName}
+   857→                  {elderAge ? `, ${elderAge} anos` : ""}
+   858→                </p>
+   859→                {elderConditions && (
+   860→                  <p className="text-xs text-muted-foreground mt-2">
+   861→                    {elderConditions}
+   862→                  </p>
+   863→                )}
+   864→              </div>
+   865→            )}
+   866→
+   867→            {/* Schedule */}
+   868→            <div className="p-5 sm:p-7">
+   869→              <p className="text-xs font-display font-bold text-foreground tracking-wide mb-4">
+   870→                Horario
+   871→              </p>
+   872→              <div className="space-y-3">
+   873→                <BloomCard className="p-4 space-y-2">
+   874→                  <p className="text-xs font-display font-bold text-foreground tracking-wide">
+   875→                    Periodos:
+   876→                  </p>
+   877→                  <div className="space-y-1.5">
+   878→                    {selectedSchedule.map((k) => {
+   879→                      const opt = SCHEDULE_OPTIONS.find((s) => s.key === k);
+   880→                      return opt ? (
+   881→                        <div key={k} className="text-sm text-foreground">
+   882→                          <span className="font-medium">{opt.label}</span>
+   883→                          <span className="text-muted-foreground ml-2">
+   884→                            ({opt.desc})
+   885→                          </span>
+   886→                        </div>
+   887→                      ) : null;
+   888→                    })}
+   889→                  </div>
+   890→                </BloomCard>
+   891→                <div>
+   892→                  <p className="text-xs font-display font-bold text-foreground tracking-wide mb-1">
+   893→                    Frequencia:
+   894→                  </p>
+   895→                  <p className="text-sm font-medium text-foreground">
+   896→                    {FREQUENCY_OPTIONS.find((f) => f.key === frequency)?.label}{" "}
+   897→                    <span className="text-muted-foreground">
+   898→                      ({hoursPerWeek}h/semana)
+   899→                    </span>
+   900→                  </p>
+   901→                </div>
+   902→                {startDate && (
+   903→                  <div>
+   904→                    <p className="text-xs font-display font-bold text-foreground tracking-wide mb-1">
+   905→                      Periodo:
+   906→                    </p>
+   907→                    <p className="text-sm text-foreground font-medium">
+   908→                      {new Date(startDate + "T00:00:00").toLocaleDateString(
+   909→                        "pt-PT",
+   910→                      )}
+   911→                      {endDate
+   912→                        ? ` até ${new Date(endDate + "T00:00:00").toLocaleDateString("pt-PT")}`
+   913→                        : ""}
+   914→                    </p>
+   915→                  </div>
+   916→                )}
+   917→              </div>
+   918→            </div>
+   919→
+   920→            {/* Financial - editable hourly rate */}
+   921→            <div className="p-5 sm:p-7">
+   922→              <p className="text-xs font-display font-bold text-foreground tracking-wide mb-4">
+   923→                Valores
+   924→              </p>
+   925→              <div className="space-y-3">
+   926→                <div className="flex items-center justify-between">
+   927→                  <span className="text-sm text-muted-foreground">
+   928→                    Valor por hora
+   929→                  </span>
+   930→                  <div className="flex items-center gap-2">
+   931→                    <button
+   932→                      onClick={() => setHourlyRate(Math.max(5, hourlyRate - 1))}
+   933→                      className="w-9 h-9 rounded-2xl border border-border flex items-center justify-center text-sm hover:bg-secondary transition-colors"
+   934→                    >
+   935→                      -
+   936→                    </button>
+   937→                    <span className="w-20 text-center font-display font-black text-base text-foreground">
+   938→                      €{hourlyRate.toFixed(2)}
+   939→                    </span>
+   940→                    <button
+   941→                      onClick={() =>
+   942→                        setHourlyRate(Math.min(100, hourlyRate + 1))
+   943→                      }
+   944→                      className="w-9 h-9 rounded-2xl border border-border flex items-center justify-center text-sm hover:bg-secondary transition-colors"
+   945→                    >
+   946→                      +
+   947→                    </button>
+   948→                  </div>
+   949→                </div>
+   950→                <div className="flex justify-between text-sm text-foreground font-medium">
+   951→                  <span className="text-muted-foreground">Horas/semana</span>
+   952→                  <span>{hoursPerWeek}h</span>
+   953→                </div>
+   954→                <div className="flex justify-between text-sm font-display font-bold text-foreground pt-3 border-t border-secondary">
+   955→                  <span>Total do período ({totalHours.toFixed(1)}h)</span>
+   956→                  <span>€{totalEur.toFixed(2)}</span>
+   957→                </div>
+   958→              </div>
+   959→
+   960→              {!isFamily && (
+   961→                <div className="pt-4 space-y-2 border-t border-secondary">
+   962→                  <div className="flex justify-between text-xs text-muted-foreground">
+   963→                    <span>Taxa plataforma ({platformFeePercent}%)</span>
+   964→                    <span className="text-destructive">
+   965→                      -€{platformFee.toFixed(2)}
+   966→                    </span>
+   967→                  </div>
+   968→                  <div className="flex justify-between text-xs text-muted-foreground">
+   969→                    <span>Taxa de contrato</span>
+   970→                    <span className="text-destructive">
+   971→                      -€{contractFee.toFixed(2)}
+   972→                    </span>
+   973→                  </div>
+   974→                  <div className="flex justify-between text-sm font-display font-bold text-foreground pt-2 border-t border-secondary">
+   975→                    <span>Profissional recebe</span>
+   976→                    <span className="text-success">
+   977→                      €{caregiverReceives.toFixed(2)}
+   978→                    </span>
+   979→                  </div>
+   980→                </div>
+   981→              )}
+   982→            </div>
+   983→          </BloomCard>
+   984→
+   985→          {/* Contract fee notice - only show to caregivers */}
+   986→          {!isFamily && (
+   987→            <BloomAlert
+   988→              variant="info"
+   989→              title={`Taxa de contrato de €${(CONTRACT_FEE_EUR_CENTS / 100).toFixed(2)}`}
+   990→              message="Esta taxa será deduzida do valor que o profissional recebe após aceitar o contrato."
+   991→              icon={<IconInfo className="h-5 w-5" />}
+   992→            />
+   993→          )}
+   994→
+   995→          {/* Additional notes */}
+   996→          <div className="space-y-2">
+   997→            <label className="text-xs font-display font-bold text-foreground tracking-wide mb-2 block">
+   998→              Observacoes adicionais (opcional)
+   999→            </label>
+  1000→            <Textarea
+  1001→              value={additionalNotes}
+  1002→              onChange={(e) => setAdditionalNotes(e.target.value)}
+  1003→              placeholder="Algo mais que o profissional precise saber..."
+  1004→              rows={2}
+  1005→              className="w-full"
+  1006→            />
+  1007→          </div>
+  1008→
+  1009→          {/* Error */}
+  1010→          {submitError && (
+  1011→            <BloomAlert
+  1012→              variant="error"
+  1013→              title="Erro"
+  1014→              message={submitError}
+  1015→              icon={<IconAlertCircle className="h-5 w-5" />}
+  1016→            />
+  1017→          )}
+  1018→
+  1019→          {/* Terms */}
+  1020→          <BloomCard className="flex items-start gap-3">
+  1021→            <Checkbox
+  1022→              id="terms"
+  1023→              checked={agreedTerms}
+  1024→              onCheckedChange={(checked) => setAgreedTerms(checked === true)}
+  1025→              className="mt-0.5"
+  1026→            />
+  1027→            <Label
+  1028→              htmlFor="terms"
+  1029→              className="text-xs text-foreground leading-relaxed cursor-pointer font-medium"
+  1030→            >
+  1031→              Li e concordo com os{" "}
+  1032→              <Link href="/termos" className="text-primary underline">
+  1033→                Termos de Utilização
+  1034→              </Link>{" "}
+  1035→              e{" "}
+  1036→              <Link href="/privacidade" className="text-primary underline">
+  1037→                Politica de Privacidade
+  1038→              </Link>
+  1039→              . Entendo que este contrato será enviado ao profissional para
+  1040→              aceitacao.
+  1041→            </Label>
+  1042→          </BloomCard>
+  1043→
+  1044→          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
+  1045→            <Button
+  1046→              variant="outline"
+  1047→              onClick={() => setStep(3)}
+  1048→              size="lg"
+  1049→              className="h-12 px-6"
+  1050→            >
+  1051→              <IconArrowLeft className="h-5 w-5" />
+  1052→            </Button>
+  1053→            <Button
+  1054→              onClick={handleSubmit}
+  1055→              disabled={isSubmitting || !agreedTerms}
+  1056→              size="lg"
+  1057→              className="flex-1 h-12 text-base font-semibold"
+  1058→            >
+  1059→              {isSubmitting ? (
+  1060→                <>
+  1061→                  <IconLoader2 className="h-5 w-5 mr-2 animate-spin" />
+  1062→                  Criando...
+  1063→                </>
+  1064→              ) : (
+  1065→                <>
+  1066→                  <IconContract className="h-5 w-5 mr-2" />
+  1067→                  Criar Contrato
+  1068→                </>
+  1069→              )}
+  1070→            </Button>
+  1071→          </div>
+  1072→        </BloomCard>
+  1073→      )}
+  1074→
+  1075→      {/* ====== STEP 5: Success ====== */}
+  1076→      {step === 5 && (
+  1077→        <BloomCard className="text-center py-8 space-y-6">
+  1078→          <div className="w-20 h-20 mx-auto rounded-3xl bg-success/10 flex items-center justify-center ring-4 ring-success/20">
+  1079→            <IconCheck className="h-10 w-10 text-success" />
+  1080→          </div>
+  1081→
+  1082→          <div className="space-y-2">
+  1083→            <h2 className="text-3xl sm:text-4xl font-display font-semibold tracking-tight leading-none text-foreground">
+  1084→              Contrato Criado!
+  1085→            </h2>
+  1086→            <p className="text-base text-muted-foreground font-medium">
+  1087→              O contrato foi enviado para{" "}
+  1088→              <span className="font-display font-black text-foreground">
+  1089→                {caregiver.name}
+  1090→              </span>
+  1091→              . Sera notificado(a) quando aceitar.
+  1092→            </p>
+  1093→          </div>
+  1094→
+  1095→          <BloomCard className="text-left space-y-3">
+  1096→            <div className="flex items-center gap-3">
+  1097→              <IconContract className="h-5 w-5 text-primary flex-shrink-0" />
+  1098→              <span className="text-sm font-display font-bold text-foreground">
+  1099→                Contrato #{contractId}
+  1100→              </span>
+  1101→            </div>
+  1102→            <div className="flex items-center gap-3">
+  1103→              <IconClock className="h-5 w-5 text-warning flex-shrink-0" />
+  1104→              <span className="text-sm text-muted-foreground font-medium">
+  1105→                Aguardando aceite do profissional
+  1106→              </span>
+  1107→            </div>
+  1108→            <p className="text-xs text-muted-foreground pt-2 border-t border-border">
+  1109→              O profissional recebe uma notificação e pode aceitar ou propor
+  1110→              alteracoes. Apos aceite de ambas as partes, o contrato e ativado.
+  1111→            </p>
+  1112→          </BloomCard>
+  1113→
+  1114→          <div className="flex flex-col sm:flex-row gap-3">
+  1115→            <Button
+  1116→              variant="outline"
+  1117→              asChild
+  1118→              className="flex-1 h-12"
+  1119→            >
+  1120→              <Link href="/app/contracts">Ver Contratos</Link>
+  1121→            </Button>
+  1122→            <Button asChild className="flex-1 h-12">
+  1123→              <Link href="/app/dashboard">Dashboard</Link>
+  1124→            </Button>
+  1125→          </div>
+  1126→        </BloomCard>
+  1127→      )}
+  1128→    </PageLayout>
+  1129→  );
+  1130→}
+  1131→
+  1132→function LoadingFallback() {
+  1133→  return (
+  1134→    <PageLayout spacing="normal" className="max-w-2xl">
+  1135→      <div className="animate-pulse space-y-2">
+  1136→        <div className="h-10 bg-muted rounded-2xl w-64" />
+  1137→        <div className="h-4 bg-muted rounded w-48" />
+  1138→      </div>
+  1139→      <div className="animate-pulse space-y-4">
+  1140→        <div className="h-64 bg-muted rounded-3xl" />
+  1141→        <div className="h-40 bg-muted rounded-3xl" />
+  1142→      </div>
+  1143→    </PageLayout>
+  1144→  );
+  1145→}
+  1146→
+  1147→export default function NewContractPage() {
+  1148→  return (
+  1149→    <Suspense fallback={<LoadingFallback />}>
+  1150→      <NewContractContent />
+  1151→    </Suspense>
+  1152→  );
+  1153→}
+  1154→
