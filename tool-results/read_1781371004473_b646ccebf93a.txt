@@ -1,0 +1,2002 @@
+     1→# Evyra Admin Panel Architecture
+     2→
+     3→## Complete Technical Specification
+     4→
+     5→---
+     6→
+     7→## Table of Contents
+     8→
+     9→1. [Overview](#1-overview)
+    10→2. [Permission Levels & RBAC](#2-permission-levels--rbac)
+    11→3. [Page Structure & Navigation](#3-page-structure--navigation)
+    12→4. [Component Hierarchy](#4-component-hierarchy)
+    13→5. [API Endpoints](#5-api-endpoints)
+    14→6. [Database Queries](#6-database-queries)
+    15→7. [Data Tables Specification](#7-data-tables-specification)
+    16→8. [Actions Per Entity](#8-actions-per-entity)
+    17→9. [Flow Diagrams](#9-flow-diagrams)
+    18→10. [Audit & Logging](#10-audit--logging)
+    19→11. [Security Considerations](#11-security-considerations)
+    20→12. [Implementation Roadmap](#12-implementation-roadmap)
+    21→
+    22→---
+    23→
+    24→## 1. Overview
+    25→
+    26→### 1.1 Purpose
+    27→
+    28→The Admin Panel provides comprehensive management capabilities for the Evyra platform, enabling administrators to:
+    29→- Monitor platform health and KPIs
+    30→- Manage users, caregivers, and families
+    31→- Handle contracts, disputes, and payments
+    32→- Control token economics
+    33→- Moderate content and reviews
+    34→- Configure platform settings
+    35→- Access analytics and reports
+    36→- Audit all administrative actions
+    37→
+    38→### 1.2 Technology Stack
+    39→
+    40→| Layer | Technology |
+    41→|-------|------------|
+    42→| Frontend | Next.js 15 (App Router), React 19 |
+    43→| UI Components | shadcn/ui, Tailwind CSS |
+    44→| Charts | Recharts |
+    45→| State | React Query (TanStack Query) |
+    46→| Database | SQLite (Turso) via Prisma |
+    47→| Auth | NextAuth.js with Admin Role |
+    48→| Real-time | WebSocket for live updates |
+    49→
+    50→### 1.3 Design Principles
+    51→
+    52→1. **Secure by Default**: All admin actions require authentication and authorization
+    53→2. **Audit Everything**: Every action is logged with user, timestamp, and details
+    54→3. **Mobile Responsive**: Admin panel works on tablets for on-call admins
+    55→4. **Progressive Disclosure**: Complex actions hidden behind confirmations
+    56→5. **Fail Safely**: Destructive operations require multiple confirmations
+    57→
+    58→---
+    59→
+    60→## 2. Permission Levels & RBAC
+    61→
+    62→### 2.1 Admin Roles
+    63→
+    64→```typescript
+    65→enum AdminRole {
+    66→  SUPER_ADMIN    = 'SUPER_ADMIN',    // Full access
+    67→  ADMIN          = 'ADMIN',          // Most operations
+    68→  SUPPORT        = 'SUPPORT',        // Read + user support
+    69→  MODERATOR      = 'MODERATOR',      // Content moderation
+    70→  ANALYST        = 'ANALYST',        // Read-only + analytics
+    71→}
+    72→```
+    73→
+    74→### 2.2 Permission Matrix
+    75→
+    76→| Permission | SUPER_ADMIN | ADMIN | SUPPORT | MODERATOR | ANALYST |
+    77→|------------|:-----------:|:-----:|:-------:|:---------:|:-------:|
+    78→| **Dashboard** |
+    79→| View Dashboard | ✅ | ✅ | ✅ | ✅ | ✅ |
+    80→| **Users** |
+    81→| View Users List | ✅ | ✅ | ✅ | ❌ | ✅ |
+    82→| View User Details | ✅ | ✅ | ✅ | ❌ | ✅ |
+    83→| Edit User Data | ✅ | ✅ | ✅ | ❌ | ❌ |
+    84→| Suspend/Activate User | ✅ | ✅ | ✅ | ❌ | ❌ |
+    85→| Delete User | ✅ | ❌ | ❌ | ❌ | ❌ |
+    86→| Impersonate User | ✅ | ✅ | ❌ | ❌ | ❌ |
+    87→| **Caregivers** |
+    88→| View Caregiver List | ✅ | ✅ | ✅ | ✅ | ✅ |
+    89→| Verify Caregiver (KYC) | ✅ | ✅ | ❌ | ❌ | ❌ |
+    90→| Set Featured Status | ✅ | ✅ | ❌ | ❌ | ❌ |
+    91→| Edit Caregiver Stats | ✅ | ✅ | ❌ | ❌ | ❌ |
+    92→| **Contracts** |
+    93→| View Contracts | ✅ | ✅ | ✅ | ❌ | ✅ |
+    94→| Cancel Contract | ✅ | ✅ | ✅ | ❌ | ❌ |
+    95→| Handle Disputes | ✅ | ✅ | ✅ | ❌ | ❌ |
+    96→| Force Complete | ✅ | ✅ | ❌ | ❌ | ❌ |
+    97→| **Payments** |
+    98→| View Payments | ✅ | ✅ | ✅ | ❌ | ✅ |
+    99→| Process Refunds | ✅ | ✅ | ❌ | ❌ | ❌ |
+   100→| Manage Escrow | ✅ | ✅ | ❌ | ❌ | ❌ |
+   101→| View Stripe Data | ✅ | ✅ | ❌ | ❌ | ❌ |
+   102→| **Tokens** |
+   103→| View Token Stats | ✅ | ✅ | ❌ | ❌ | ✅ |
+   104→| Manual Token Adjustment | ✅ | ✅ | ❌ | ❌ | ❌ |
+   105→| Modify Token Price | ✅ | ❌ | ❌ | ❌ | ❌ |
+   106→| **Moderation** |
+   107→| Moderate Reviews | ✅ | ✅ | ✅ | ✅ | ❌ |
+   108→| Moderate Chat Messages | ✅ | ✅ | ✅ | ✅ | ❌ |
+   109→| Moderate Profiles | ✅ | ✅ | ✅ | ✅ | ❌ |
+   110→| Ban Users | ✅ | ✅ | ✅ | ✅ | ❌ |
+   111→| **Settings** |
+   112→| View Settings | ✅ | ✅ | ❌ | ❌ | ❌ |
+   113→| Modify Settings | ✅ | ✅ | ❌ | ❌ | ❌ |
+   114→| Modify Fee Structure | ✅ | ❌ | ❌ | ❌ | ❌ |
+   115→| **Admin Management** |
+   116→| Create Admin Users | ✅ | ❌ | ❌ | ❌ | ❌ |
+   117→| Modify Admin Roles | ✅ | ❌ | ❌ | ❌ | ❌ |
+   118→| View Audit Logs | ✅ | ✅ | ✅ | ❌ | ✅ |
+   119→
+   120→### 2.3 Database Schema Extension
+   121→
+   122→```prisma
+   123→// Add to schema.prisma
+   124→
+   125→model AdminUser {
+   126→  id              String      @id @default(cuid())
+   127→  userId          String      @unique
+   128→  user            User        @relation(fields: [userId], references: [id])
+   129→  
+   130→  role            AdminRole   @default(ADMIN)
+   131→  
+   132→  // Permissions override (JSON)
+   133→  customPermissions String?   // Override specific permissions
+   134→  
+   135→  // Access
+   136→  isActive        Boolean     @default(true)
+   137→  lastAdminActionAt DateTime?
+   138→  
+   139→  // Two-Factor Authentication
+   140→  twoFactorEnabled Boolean    @default(false)
+   141→  twoFactorSecret  String?
+   142→  
+   143→  createdAt       DateTime    @default(now())
+   144→  updatedAt       DateTime    @updatedAt
+   145→  
+   146→  adminActions    AdminAction[]
+   147→  
+   148→  @@index([role])
+   149→}
+   150→
+   151→model AdminAction {
+   152→  id              String    @id @default(cuid())
+   153→  adminUserId     String
+   154→  adminUser       AdminUser @relation(fields: [adminUserId], references: [id])
+   155→  
+   156→  // Action Details
+   157→  action          String    // CREATE, UPDATE, DELETE, VIEW, IMPERSONATE, etc.
+   158→  entityType      String    // USER, CONTRACT, PAYMENT, TOKEN, etc.
+   159→  entityId        String?   // ID of affected entity
+   160→  
+   161→  // Data
+   162→  oldValue        String?   // JSON of previous state
+   163→  newValue        String?   // JSON of new state
+   164→  
+   165→  // Context
+   166→  ipAddress       String?
+   167→  userAgent       String?
+   168→  reason          String?   // Required for destructive actions
+   169→  
+   170→  createdAt       DateTime  @default(now())
+   171→  
+   172→  @@index([adminUserId, createdAt])
+   173→  @@index([entityType, entityId])
+   174→  @@index([createdAt])
+   175→}
+   176→
+   177→enum AdminRole {
+   178→  SUPER_ADMIN
+   179→  ADMIN
+   180→  SUPPORT
+   181→  MODERATOR
+   182→  ANALYST
+   183→}
+   184→```
+   185→
+   186→---
+   187→
+   188→## 3. Page Structure & Navigation
+   189→
+   190→### 3.1 Admin Panel Routes
+   191→
+   192→```
+   193→/admin
+   194→├── /dashboard                    # Main dashboard with KPIs
+   195→├── /users
+   196→│   ├── /                         # Users list with filters
+   197→│   ├── /[id]                     # User detail view
+   198→│   └── /new                      # Create new user (admin only)
+   199→├── /caregivers
+   200→│   ├── /                         # Caregivers list
+   201→│   ├── /[id]                     # Caregiver detail
+   202→│   ├── /pending                  # Pending verifications
+   203→│   └── /featured                 # Featured caregivers management
+   204→├── /contracts
+   205→│   ├── /                         # Contracts list
+   206→│   ├── /[id]                     # Contract detail
+   207→│   ├── /disputes                 # Active disputes
+   208→│   └── /cancelled                # Cancelled contracts
+   209→├── /payments
+   210→│   ├── /                         # Payments list
+   211→│   ├── /[id]                     # Payment detail
+   212→│   ├── /refunds                  # Refund requests
+   213→│   └── /escrow                   # Escrow management
+   214→├── /tokens
+   215→│   ├── /                         # Token overview
+   216→│   ├── /transactions             # Token ledger
+   217→│   ├── /adjustments              # Manual adjustments
+   218→│   └── /economics                # Token economics settings
+   219→├── /moderation
+   220→│   ├── /                         # Moderation dashboard
+   221→│   ├── /reviews                  # Review moderation
+   222→│   ├── /chat                     # Chat message moderation
+   223→│   ├── /profiles                 # Profile moderation
+   224→│   └── /reports                  # User reports
+   225→├── /settings
+   226→│   ├── /                         # Platform settings
+   227→│   ├── /fees                     # Fee configuration
+   228→│   ├── /features                 # Feature flags
+   229→│   └── /integrations             # External services
+   230→├── /analytics
+   231→│   ├── /                         # Analytics overview
+   232→│   ├── /users                    # User analytics
+   233→│   ├── /financial                # Financial analytics
+   234→│   ├── /tokens                   # Token analytics
+   235→│   └── /export                   # Export reports
+   236→├── /logs
+   237→│   ├── /                         # Audit logs
+   238→│   ├── /admin                    # Admin action logs
+   239→│   └── /system                   # System event logs
+   240→├── /notifications
+   241→│   ├── /                         # Admin notifications
+   242→│   ├── /alerts                   # Alert configuration
+   243→│   └── /templates                # Notification templates
+   244→└── /support
+   245→    ├── /                         # Support dashboard
+   246→    ├── /tickets                  # Support tickets
+   247→    └── /impersonation            # User impersonation log
+   248→```
+   249→
+   250→### 3.2 Navigation Structure
+   251→
+   252→```tsx
+   253→// Admin Sidebar Navigation
+   254→
+   255→const adminNavigation = {
+   256→  main: [
+   257→    { 
+   258→      label: 'Dashboard', 
+   259→      href: '/admin/dashboard', 
+   260→      icon: 'LayoutDashboard',
+   261→      badge: null 
+   262→    },
+   263→    { 
+   264→      label: 'Usuários', 
+   265→      href: '/admin/users', 
+   266→      icon: 'Users',
+   267→      badge: { count: 5, variant: 'warning' } // Pending verifications
+   268→    },
+   269→    { 
+   270→      label: 'Cuidadores', 
+   271→      href: '/admin/caregivers', 
+   272→      icon: 'UserCheck',
+   273→      badge: { count: 12, variant: 'default' } // Pending KYC
+   274→    },
+   275→    { 
+   276→      label: 'Contratos', 
+   277→      href: '/admin/contracts', 
+   278→      icon: 'FileText',
+   279→      badge: { count: 3, variant: 'destructive' } // Disputes
+   280→    },
+   281→    { 
+   282→      label: 'Pagamentos', 
+   283→      href: '/admin/payments', 
+   284→      icon: 'CreditCard' 
+   285→    },
+   286→    { 
+   287→      label: 'Tokens', 
+   288→      href: '/admin/tokens', 
+   289→      icon: 'Coins' 
+   290→    },
+   291→  ],
+   292→  moderation: [
+   293→    { 
+   294→      label: 'Moderação', 
+   295→      href: '/admin/moderation', 
+   296→      icon: 'Shield',
+   297→      badge: { count: 8, variant: 'warning' } // Pending reviews
+   298→    },
+   299→  ],
+   300→  system: [
+   301→    { 
+   302→      label: 'Configurações', 
+   303→      href: '/admin/settings', 
+   304→      icon: 'Settings',
+   305→      roles: ['SUPER_ADMIN', 'ADMIN']
+   306→    },
+   307→    { 
+   308→      label: 'Analytics', 
+   309→      href: '/admin/analytics', 
+   310→      icon: 'BarChart3' 
+   311→    },
+   312→    { 
+   313→      label: 'Logs', 
+   314→      href: '/admin/logs', 
+   315→      icon: 'FileSearch' 
+   316→    },
+   317→    { 
+   318→      label: 'Notificações', 
+   319→      href: '/admin/notifications', 
+   320→      icon: 'Bell' 
+   321→    },
+   322→    { 
+   323→      label: 'Suporte', 
+   324→      href: '/admin/support', 
+   325→      icon: 'Headphones' 
+   326→    },
+   327→  ],
+   328→};
+   329→```
+   330→
+   331→### 3.3 Page Layout Structure
+   332→
+   333→```tsx
+   334→// Admin Layout Component
+   335→
+   336→<AdminLayout>
+   337→  <AdminSidebar />           {/* Collapsible sidebar */}
+   338→  <AdminHeader>              {/* Top header */}
+   339→    <Breadcrumb />
+   340→    <AdminUserMenu />
+   341→    <AdminNotifications />
+   342→  </AdminHeader>
+   343→  <AdminMain>
+   344→    <AdminPageHeader>        {/* Page title + actions */}
+   345→      <PageTitle />
+   346→      <PageActions />
+   347→    </AdminPageHeader>
+   348→    <AdminContent>           {/* Main content area */}
+   349→      {children}
+   350→    </AdminContent>
+   351→  </AdminMain>
+   352→  <AdminFooter />            {/* Optional footer */}
+   353→</AdminLayout>
+   354→```
+   355→
+   356→---
+   357→
+   358→## 4. Component Hierarchy
+   359→
+   360→### 4.1 Shared Admin Components
+   361→
+   362→```
+   363→src/components/admin/
+   364→├── layout/
+   365→│   ├── admin-layout.tsx         # Main layout wrapper
+   366→│   ├── admin-sidebar.tsx        # Navigation sidebar
+   367→│   ├── admin-header.tsx         # Top header with breadcrumbs
+   368→│   ├── admin-footer.tsx         # Footer with version info
+   369→│   └── admin-mobile-nav.tsx     # Mobile navigation
+   370→├── common/
+   371→│   ├── page-header.tsx          # Page title + breadcrumb
+   372→│   ├── data-table.tsx           # Reusable data table
+   373→│   ├── data-filters.tsx         # Filter panel component
+   374→│   ├── stats-card.tsx           # KPI stat card
+   375→│   ├── chart-container.tsx      # Chart wrapper
+   376→│   ├── empty-state.tsx          # Empty data state
+   377→│   ├── loading-skeleton.tsx     # Loading states
+   378→│   └── error-boundary.tsx       # Error handling
+   379→├── forms/
+   380→│   ├── user-form.tsx            # User create/edit form
+   381→│   ├── caregiver-form.tsx       # Caregiver edit form
+   382→│   ├── contract-form.tsx        # Contract edit form
+   383→│   ├── settings-form.tsx        # Settings form
+   384→│   └── token-adjustment-form.tsx # Token adjustment form
+   385→├── modals/
+   386→│   ├── confirmation-modal.tsx   # Action confirmation
+   387→│   ├── user-detail-modal.tsx    # Quick user view
+   388→│   ├── refund-modal.tsx         # Process refund
+   389→│   ├── dispute-modal.tsx        # Handle dispute
+   390→│   ├── impersonation-modal.tsx  # User impersonation
+   391→│   └── audit-log-modal.tsx      # View audit details
+   392→├── tables/
+   393→│   ├── users-table.tsx          # Users data table
+   394→│   ├── caregivers-table.tsx     # Caregivers data table
+   395→│   ├── contracts-table.tsx      # Contracts data table
+   396→│   ├── payments-table.tsx       # Payments data table
+   397→│   ├── tokens-table.tsx         # Token ledger table
+   398→│   ├── reviews-table.tsx        # Reviews moderation table
+   399→│   └── audit-logs-table.tsx     # Audit logs table
+   400→├── charts/
+   401→│   ├── revenue-chart.tsx        # Revenue over time
+   402→│   ├── users-chart.tsx          # User growth chart
+   403→│   ├── tokens-chart.tsx         # Token distribution
+   404→│   ├── contracts-chart.tsx      # Contract stats
+   405→│   └── kpi-gauge.tsx            # KPI gauge chart
+   406→├── widgets/
+   407→│   ├── recent-activity.tsx      # Recent admin actions
+   408→│   ├── alerts-widget.tsx        # Active alerts
+   409→│   ├── pending-verifications.tsx # Pending items
+   410→│   ├── quick-actions.tsx        # Quick action buttons
+   411→│   └── platform-health.tsx      # System health status
+   412→└── guards/
+   413→    ├── admin-guard.tsx          # Auth check wrapper
+   414→    ├── permission-guard.tsx     # Permission check wrapper
+   415→    └── role-guard.tsx           # Role check wrapper
+   416→```
+   417→
+   418→### 4.2 Page-Specific Components
+   419→
+   420→```
+   421→src/app/admin/
+   422→├── dashboard/
+   423→│   └── components/
+   424→│       ├── kpi-cards.tsx        # Main KPI cards
+   425→│       ├── revenue-chart.tsx    # Revenue chart
+   426→│       ├── user-stats.tsx       # User statistics
+   427→│       ├── contract-stats.tsx   # Contract statistics
+   428→│       ├── token-stats.tsx      # Token statistics
+   429→│       └── recent-activity.tsx  # Activity feed
+   430→├── users/
+   431→│   └── components/
+   432→│       ├── user-filters.tsx     # User search filters
+   433→│       ├── user-card.tsx        # User card view
+   434→│       ├── user-timeline.tsx    # User activity timeline
+   435→│       └── user-contracts.tsx   # User's contracts
+   436→├── caregivers/
+   437→│   └── components/
+   438→│       ├── kyc-review.tsx       # KYC verification panel
+   439→│       ├── featured-manager.tsx # Featured status management
+   440→│       ├── stats-editor.tsx     # Edit caregiver stats
+   441→│       └── availability-calendar.tsx
+   442→├── contracts/
+   443→│   └── components/
+   444→│       ├── dispute-panel.tsx    # Dispute handling UI
+   445→│       ├── contract-timeline.tsx # Contract lifecycle
+   446→│       ├── payment-breakdown.tsx # Payment details
+   447→│       └── escrow-status.tsx    # Escrow status widget
+   448→├── payments/
+   449→│   └── components/
+   450→│       ├── refund-form.tsx      # Refund processing
+   451→│       ├── payment-receipt.tsx  # Receipt view
+   452→│       └── transaction-log.tsx  # Transaction history
+   453→├── tokens/
+   454→│   └── components/
+   455→│       ├── token-supply.tsx     # Token supply widget
+   456→│       ├── reserve-status.tsx   # Reserve status
+   457→│       ├── adjustment-form.tsx  # Manual adjustment
+   458→│       └── price-history.tsx    # Price history chart
+   459→├── moderation/
+   460→│   └── components/
+   461→│       ├── review-card.tsx      # Review moderation card
+   462→│       ├── chat-message-card.tsx # Chat message card
+   463→│       ├── profile-flag-card.tsx # Flagged profile
+   464→│       └── moderation-actions.tsx # Action buttons
+   465→├── settings/
+   466→│   └── components/
+   467→│       ├── fee-config.tsx       # Fee configuration
+   468→│       ├── feature-flags.tsx    # Feature toggle
+   469→│       └── integration-status.tsx # Integration health
+   470→└── analytics/
+   471→    └── components/
+   472→        ├── export-form.tsx      # Export configuration
+   473→        ├── custom-report.tsx    # Custom report builder
+   474→        └── scheduled-reports.tsx # Scheduled reports
+   475→```
+   476→
+   477→---
+   478→
+   479→## 5. API Endpoints
+   480→
+   481→### 5.1 Admin API Structure
+   482→
+   483→```
+   484→/api/admin/
+   485→├── /dashboard
+   486→│   ├── GET /stats               # Dashboard KPIs
+   487→│   ├── GET /revenue             # Revenue data
+   488→│   ├── GET /activity            # Recent activity
+   489→│   └── GET /health              # Platform health
+   490→├── /users
+   491→│   ├── GET /                    # List users (paginated)
+   492→│   ├── GET /[id]                # Get user details
+   493→│   ├── POST /                   # Create user
+   494→│   ├── PATCH /[id]              # Update user
+   495→│   ├── DELETE /[id]             # Delete user (soft)
+   496→│   ├── POST /[id]/suspend       # Suspend user
+   497→│   ├── POST /[id]/activate      # Activate user
+   498→│   ├── POST /[id]/impersonate   # Generate impersonation token
+   499→│   └── GET /[id]/activity       # User activity log
+   500→├── /caregivers
+   501→│   ├── GET /                    # List caregivers
+   502→│   ├── GET /pending             # Pending verifications
+   503→│   ├── GET /[id]                # Caregiver details
+   504→│   ├── PATCH /[id]              # Update caregiver
+   505→│   ├── POST /[id]/verify        # Approve verification
+   506→│   ├── POST /[id]/reject        # Reject verification
+   507→│   ├── POST /[id]/feature       # Set featured status
+   508→│   └── PATCH /[id]/stats        # Update statistics
+   509→├── /contracts
+   510→│   ├── GET /                    # List contracts
+   511→│   ├── GET /disputes            # List disputes
+   512→│   ├── GET /[id]                # Contract details
+   513→│   ├── POST /[id]/cancel        # Cancel contract
+   514→│   ├── POST /[id]/complete      # Force complete
+   515→│   ├── POST /[id]/dispute       # Open dispute
+   516→│   └── POST /[id]/resolve       # Resolve dispute
+   517→├── /payments
+   518→│   ├── GET /                    # List payments
+   519→│   ├── GET /refunds             # List refund requests
+   520→│   ├── GET /[id]                # Payment details
+   521→│   ├── POST /[id]/refund        # Process refund
+   522→│   └── GET /escrow              # Escrow payments list
+   523→├── /tokens
+   524→│   ├── GET /stats               # Token statistics
+   525→│   ├── GET /transactions        # Token ledger
+   526→│   ├── POST /adjust             # Manual adjustment
+   527→│   └── PATCH /price             # Update token price
+   528→├── /moderation
+   529→│   ├── GET /reviews             # Pending reviews
+   530→│   ├── POST /reviews/[id]/approve
+   531→│   ├── POST /reviews/[id]/reject
+   532→│   ├── GET /chat                # Flagged messages
+   533→│   ├── POST /chat/[id]/moderate
+   534→│   └── GET /reports             # User reports
+   535→├── /settings
+   536→│   ├── GET /                    # Get all settings
+   537→│   ├── PATCH /                  # Update settings
+   538→│   ├── GET /fees                # Fee structure
+   539→│   ├── PATCH /fees              # Update fees
+   540→│   └── GET /features            # Feature flags
+   541→├── /analytics
+   542→│   ├── GET /overview            # Analytics overview
+   543→│   ├── GET /users               # User analytics
+   544→│   ├── GET /financial           # Financial analytics
+   545→│   ├── GET /tokens              # Token analytics
+   546→│   └── POST /export             # Export data
+   547→├── /logs
+   548→│   ├── GET /                    # Audit logs
+   549→│   ├── GET /admin               # Admin actions
+   550→│   └── GET /[id]                # Log details
+   551→├── /notifications
+   552→│   ├── GET /                    # Admin notifications
+   553→│   ├── POST /[id]/read          # Mark as read
+   554→│   └── GET /alerts              # Alert configuration
+   555→└── /support
+   556→    ├── GET /tickets             # Support tickets
+   557→    └── GET /impersonation       # Impersonation logs
+   558→```
+   559→
+   560→### 5.2 API Request/Response Examples
+   561→
+   562→#### Dashboard Stats
+   563→
+   564→```typescript
+   565→// GET /api/admin/dashboard/stats
+   566→
+   567→interface DashboardStatsResponse {
+   568→  kpis: {
+   569→    totalUsers: number;
+   570→    activeUsers: number;
+   571→    newUsersToday: number;
+   572→    totalCaregivers: number;
+   573→    verifiedCaregivers: number;
+   574→    activeContracts: number;
+   575→    pendingDisputes: number;
+   576→    totalRevenueEur: number;
+   577→    revenueToday: number;
+   578→    tokensInCirculation: number;
+   579→    reserveEur: number;
+   580→  };
+   581→  alerts: {
+   582→    pendingKyc: number;
+   583→    pendingDisputes: number;
+   584→    pendingRefunds: number;
+   585→    flaggedContent: number;
+   586→  };
+   587→  health: {
+   588→    database: 'healthy' | 'degraded' | 'down';
+   589→    stripe: 'healthy' | 'degraded' | 'down';
+   590→    easypay: 'healthy' | 'degraded' | 'down';
+   591→    blockchain: 'healthy' | 'degraded' | 'down';
+   592→  };
+   593→}
+   594→```
+   595→
+   596→#### Users List
+   597→
+   598→```typescript
+   599→// GET /api/admin/users?page=1&limit=20&status=ACTIVE&role=FAMILY&search=maria
+   600→
+   601→interface UsersListResponse {
+   602→  users: Array<{
+   603→    id: string;
+   604→    email: string;
+   605→    name: string;
+   606→    role: UserRole;
+   607→    status: UserStatus;
+   608→    verificationStatus: VerificationStatus;
+   609→    createdAt: string;
+   610→    lastLoginAt: string | null;
+   611→    walletBalance: number;
+   612→    contractsCount: number;
+   613→  }>;
+   614→  pagination: {
+   615→    page: number;
+   616→    limit: number;
+   617→    total: number;
+   618→    totalPages: number;
+   619→  };
+   620→  filters: {
+   621→    roles: Array<{ value: string; count: number }>;
+   622→    statuses: Array<{ value: string; count: number }>;
+   623→  };
+   624→}
+   625→```
+   626→
+   627→#### Process Refund
+   628→
+   629→```typescript
+   630→// POST /api/admin/payments/[id]/refund
+   631→
+   632→interface RefundRequest {
+   633→  amount: number;           // Amount in cents, optional for partial
+   634→  reason: string;           // Required
+   635→  notifyUser: boolean;      // Send email notification
+   636→}
+   637→
+   638→interface RefundResponse {
+   639→  success: boolean;
+   640→  refund: {
+   641→    id: string;
+   642→    paymentId: string;
+   643→    amount: number;
+   644→    status: string;
+   645→    stripeRefundId: string;
+   646→    createdAt: string;
+   647→  };
+   648→  auditLogId: string;       // Reference to audit entry
+   649→}
+   650→```
+   651→
+   652→---
+   653→
+   654→## 6. Database Queries
+   655→
+   656→### 6.1 Dashboard Queries
+   657→
+   658→```sql
+   659→-- Dashboard KPIs
+   660→
+   661→-- Total users count
+   662→SELECT COUNT(*) as totalUsers FROM User;
+   663→
+   664→-- Active users (last 30 days)
+   665→SELECT COUNT(*) as activeUsers 
+   666→FROM User 
+   667→WHERE lastLoginAt >= datetime('now', '-30 days');
+   668→
+   669→-- New users today
+   670→SELECT COUNT(*) as newUsersToday 
+   671→FROM User 
+   672→WHERE date(createdAt) = date('now');
+   673→
+   674→-- Total caregivers
+   675→SELECT COUNT(*) as totalCaregivers 
+   676→FROM User 
+   677→WHERE role = 'CAREGIVER';
+   678→
+   679→-- Verified caregivers
+   680→SELECT COUNT(*) as verifiedCaregivers 
+   681→FROM ProfileCaregiver 
+   682→WHERE verificationStatus = 'VERIFIED';
+   683→
+   684→-- Active contracts
+   685→SELECT COUNT(*) as activeContracts 
+   686→FROM Contract 
+   687→WHERE status = 'ACTIVE';
+   688→
+   689→-- Pending disputes
+   690→SELECT COUNT(*) as pendingDisputes 
+   691→FROM Contract 
+   692→WHERE status = 'DISPUTED';
+   693→
+   694→-- Total revenue
+   695→SELECT COALESCE(SUM(amountEurCents), 0) as totalRevenue 
+   696→FROM Payment 
+   697→WHERE status = 'COMPLETED';
+   698→
+   699→-- Revenue today
+   700→SELECT COALESCE(SUM(amountEurCents), 0) as revenueToday 
+   701→FROM Payment 
+   702→WHERE status = 'COMPLETED' 
+   703→  AND date(paidAt) = date('now');
+   704→
+   705→-- Tokens in circulation
+   706→SELECT totalTokensMinted - totalTokensBurned as tokensInCirculation,
+   707→       totalReserveEurCents as reserveEur
+   708→FROM PlatformSettings 
+   709→LIMIT 1;
+   710→```
+   711→
+   712→### 6.2 User Management Queries
+   713→
+   714→```sql
+   715→-- Users list with filters
+   716→SELECT 
+   717→  u.id,
+   718→  u.email,
+   719→  u.name,
+   720→  u.role,
+   721→  u.status,
+   722→  u.verificationStatus,
+   723→  u.createdAt,
+   724→  u.lastLoginAt,
+   725→  w.balanceTokens as walletBalance,
+   726→  (SELECT COUNT(*) FROM Contract WHERE familyUserId = u.id OR caregiverUserId = u.id) as contractsCount
+   727→FROM User u
+   728→LEFT JOIN Wallet w ON u.id = w.userId
+   729→WHERE 1=1
+   730→  AND (:role IS NULL OR u.role = :role)
+   731→  AND (:status IS NULL OR u.status = :status)
+   732→  AND (:search IS NULL OR u.name LIKE '%' || :search || '%' OR u.email LIKE '%' || :search || '%')
+   733→ORDER BY u.createdAt DESC
+   734→LIMIT :limit OFFSET :offset;
+   735→
+   736→-- User detail with all relations
+   737→SELECT 
+   738→  u.*,
+   739→  w.id as walletId,
+   740→  w.address as walletAddress,
+   741→  w.balanceTokens,
+   742→  w.balanceEurCents,
+   743→  pf.elderName,
+   744→  pf.city as familyCity,
+   745→  pc.title as caregiverTitle,
+   746→  pc.bio,
+   747→  pc.totalContracts,
+   748→  pc.averageRating,
+   749→  pc.totalReviews
+   750→FROM User u
+   751→LEFT JOIN Wallet w ON u.id = w.userId
+   752→LEFT JOIN ProfileFamily pf ON u.id = pf.userId
+   753→LEFT JOIN ProfileCaregiver pc ON u.id = pc.userId
+   754→WHERE u.id = :userId;
+   755→
+   756→-- User activity timeline
+   757→SELECT 
+   758→  'PAYMENT' as type,
+   759→  p.id as id,
+   760→  p.description as title,
+   761→  p.amountEurCents as amount,
+   762→  p.status,
+   763→  p.createdAt
+   764→FROM Payment p
+   765→WHERE p.userId = :userId
+   766→UNION ALL
+   767→SELECT 
+   768→  'CONTRACT_FAMILY' as type,
+   769→  c.id as id,
+   770→  c.title,
+   771→  c.totalEurCents as amount,
+   772→  c.status,
+   773→  c.createdAt
+   774→FROM Contract c
+   775→WHERE c.familyUserId = :userId
+   776→UNION ALL
+   777→SELECT 
+   778→  'CONTRACT_CAREGIVER' as type,
+   779→  c.id as id,
+   780→  c.title,
+   781→  c.totalEurCents as amount,
+   782→  c.status,
+   783→  c.createdAt
+   784→FROM Contract c
+   785→WHERE c.caregiverUserId = :userId
+   786→ORDER BY createdAt DESC
+   787→LIMIT 50;
+   788→
+   789→-- User contracts summary
+   790→SELECT 
+   791→  c.id,
+   792→  c.title,
+   793→  c.status,
+   794→  c.totalEurCents,
+   795→  c.startDate,
+   796→  c.endDate,
+   797→  CASE 
+   798→    WHEN c.familyUserId = :userId THEN 'FAMILY'
+   799→    ELSE 'CAREGIVER'
+   800→  END as role,
+   801→  CASE 
+   802→    WHEN c.familyUserId = :userId THEN uCaregiver.name
+   803→    ELSE uFamily.name
+   804→  END as otherPartyName
+   805→FROM Contract c
+   806→LEFT JOIN User uFamily ON c.familyUserId = uFamily.id
+   807→LEFT JOIN User uCaregiver ON c.caregiverUserId = uCaregiver.id
+   808→WHERE c.familyUserId = :userId OR c.caregiverUserId = :userId
+   809→ORDER BY c.createdAt DESC;
+   810→```
+   811→
+   812→### 6.3 Caregiver Management Queries
+   813→
+   814→```sql
+   815→-- Caregivers pending KYC verification
+   816→SELECT 
+   817→  u.id,
+   818→  u.email,
+   819→  u.name,
+   820→  pc.title,
+   821→  pc.city,
+   822→  pc.experienceYears,
+   823→  pc.verificationStatus,
+   824→  pc.kycSessionId,
+   825→  pc.kycCompletedAt,
+   826→  pc.kycConfidence,
+   827→  u.createdAt
+   828→FROM User u
+   829→JOIN ProfileCaregiver pc ON u.id = pc.userId
+   830→WHERE pc.verificationStatus = 'PENDING'
+   831→ORDER BY u.createdAt ASC;
+   832→
+   833→-- Caregiver statistics for verification
+   834→SELECT 
+   835→  u.id,
+   836→  u.name,
+   837→  pc.totalContracts,
+   838→  pc.totalHoursWorked,
+   839→  pc.averageRating,
+   840→  pc.totalReviews,
+   841→  (SELECT COUNT(*) FROM Review WHERE toUserId = u.id AND isModerated = 0) as unmoderatedReviews,
+   842→  (SELECT COALESCE(AVG(rating), 0) FROM Review WHERE toUserId = u.id AND createdAt >= datetime('now', '-90 days')) as recentRating
+   843→FROM User u
+   844→JOIN ProfileCaregiver pc ON u.id = pc.userId
+   845→WHERE u.id = :caregiverId;
+   846→
+   847→-- Featured caregivers
+   848→SELECT 
+   849→  u.id,
+   850→  u.name,
+   851→  pc.title,
+   852→  pc.city,
+   853→  pc.averageRating,
+   854→  pc.totalContracts,
+   855→  pc.featured
+   856→FROM User u
+   857→JOIN ProfileCaregiver pc ON u.id = pc.userId
+   858→WHERE pc.featured = 1 OR pc.verificationStatus = 'VERIFIED'
+   859→ORDER BY pc.averageRating DESC, pc.totalContracts DESC
+   860→LIMIT 20;
+   861→```
+   862→
+   863→### 6.4 Contract Management Queries
+   864→
+   865→```sql
+   866→-- Contracts with disputes
+   867→SELECT 
+   868→  c.id,
+   869→  c.title,
+   870→  c.status,
+   871→  c.totalEurCents,
+   872→  c.createdAt,
+   873→  c.updatedAt,
+   874→  uFamily.name as familyName,
+   875→  uFamily.email as familyEmail,
+   876→  uCaregiver.name as caregiverName,
+   877→  uCaregiver.email as caregiverEmail,
+   878→  e.status as escrowStatus,
+   879→  e.totalAmountCents as escrowAmount
+   880→FROM Contract c
+   881→JOIN User uFamily ON c.familyUserId = uFamily.id
+   882→JOIN User uCaregiver ON c.caregiverUserId = uCaregiver.id
+   883→LEFT JOIN EscrowPayment e ON c.id = e.contractId
+   884→WHERE c.status = 'DISPUTED'
+   885→ORDER BY c.updatedAt ASC;
+   886→
+   887→-- Contract timeline
+   888→SELECT 
+   889→  'CREATED' as event,
+   890→  c.createdAt as timestamp,
+   891→  NULL as details
+   892→FROM Contract c
+   893→WHERE c.id = :contractId
+   894→UNION ALL
+   895→SELECT 
+   896→  'FAMILY_ACCEPTED' as event,
+   897→  ca.acceptedByFamilyAt as timestamp,
+   898→  ca.familyIpAddress as details
+   899→FROM ContractAcceptance ca
+   900→WHERE ca.contractId = :contractId AND ca.acceptedByFamilyAt IS NOT NULL
+   901→UNION ALL
+   902→SELECT 
+   903→  'CAREGIVER_ACCEPTED' as event,
+   904→  ca.acceptedByCaregiverAt as timestamp,
+   905→  ca.caregiverIpAddress as details
+   906→FROM ContractAcceptance ca
+   907→WHERE ca.contractId = :contractId AND ca.acceptedByCaregiverAt IS NOT NULL
+   908→UNION ALL
+   909→SELECT 
+   910→  'PAYMENT' as event,
+   911→  p.paidAt as timestamp,
+   912→  printf('%d cents - %s', p.amountEurCents, p.type) as details
+   913→FROM Payment p
+   914→WHERE p.contractId = :contractId AND p.status = 'COMPLETED'
+   915→UNION ALL
+   916→SELECT 
+   917→  'STATUS_CHANGE' as event,
+   918→  c.updatedAt as timestamp,
+   919→  c.status as details
+   920→FROM Contract c
+   921→WHERE c.id = :contractId AND c.status IN ('ACTIVE', 'COMPLETED', 'CANCELLED', 'DISPUTED')
+   922→ORDER BY timestamp;
+   923→
+   924→-- Contract payment breakdown
+   925→SELECT 
+   926→  p.id,
+   927→  p.type,
+   928→  p.status,
+   929→  p.amountEurCents,
+   930→  p.tokensAmount,
+   931→  p.paidAt,
+   932→  p.refundedAt,
+   933→  u.name as userName
+   934→FROM Payment p
+   935→JOIN User u ON p.userId = u.id
+   936→WHERE p.contractId = :contractId
+   937→ORDER BY p.createdAt;
+   938→```
+   939→
+   940→### 6.5 Payment Management Queries
+   941→
+   942→```sql
+   943→-- Payments list with filters
+   944→SELECT 
+   945→  p.id,
+   946→  p.type,
+   947→  p.status,
+   948→  p.provider,
+   949→  p.amountEurCents,
+   950→  p.tokensAmount,
+   951→  p.createdAt,
+   952→  p.paidAt,
+   953→  u.email as userEmail,
+   954→  u.name as userName,
+   955→  c.title as contractTitle
+   956→FROM Payment p
+   957→JOIN User u ON p.userId = u.id
+   958→LEFT JOIN Contract c ON p.contractId = c.id
+   959→WHERE 1=1
+   960→  AND (:type IS NULL OR p.type = :type)
+   961→  AND (:status IS NULL OR p.status = :status)
+   962→  AND (:userId IS NULL OR p.userId = :userId)
+   963→ORDER BY p.createdAt DESC
+   964→LIMIT :limit OFFSET :offset;
+   965→
+   966→-- Refund requests (payments that can be refunded)
+   967→SELECT 
+   968→  p.id,
+   969→  p.amountEurCents,
+   970→  p.tokensAmount,
+   971→  p.paidAt,
+   972→  p.stripePaymentIntentId,
+   973→  u.email as userEmail,
+   974→  u.name as userName,
+   975→  w.balanceTokens as userTokenBalance,
+   976→  tl.id as ledgerEntryId,
+   977→  tl.type as ledgerType
+   978→FROM Payment p
+   979→JOIN User u ON p.userId = u.id
+   980→LEFT JOIN Wallet w ON u.id = w.userId
+   981→LEFT JOIN TokenLedger tl ON tl.referenceId = p.id AND tl.reason IN ('ACTIVATION_BONUS', 'TOKEN_PURCHASE')
+   982→WHERE p.status = 'COMPLETED'
+   983→  AND p.refundedAt IS NULL
+   984→  AND p.type IN ('ACTIVATION', 'TOKEN_PURCHASE')
+   985→ORDER BY p.paidAt DESC;
+   986→
+   987→-- Escrow payments status
+   988→SELECT 
+   989→  e.id,
+   990→  e.contractId,
+   991→  e.totalAmountCents,
+   992→  e.platformFeeCents,
+   993→  e.caregiverAmountCents,
+   994→  e.status,
+   995→  e.capturedAt,
+   996→  e.releasedAt,
+   997→  c.title as contractTitle,
+   998→  uFamily.name as familyName,
+   999→  uCaregiver.name as caregiverName
+  1000→FROM EscrowPayment e
+  1001→JOIN Contract c ON e.contractId = c.id
+  1002→JOIN User uFamily ON c.familyUserId = uFamily.id
+  1003→JOIN User uCaregiver ON c.caregiverUserId = uCaregiver.id
+  1004→WHERE e.status = 'HELD'
+  1005→ORDER BY e.capturedAt ASC;
+  1006→```
+  1007→
+  1008→### 6.6 Token Management Queries
+  1009→
+  1010→```sql
+  1011→-- Token statistics
+  1012→SELECT 
+  1013→  (SELECT totalTokensMinted FROM PlatformSettings LIMIT 1) as totalMinted,
+  1014→  (SELECT totalTokensBurned FROM PlatformSettings LIMIT 1) as totalBurned,
+  1015→  (SELECT totalTokensMinted - totalTokensBurned FROM PlatformSettings LIMIT 1) as inCirculation,
+  1016→  (SELECT totalReserveEurCents FROM PlatformSettings LIMIT 1) as reserveEurCents,
+  1017→  (SELECT tokenPriceEurCents FROM PlatformSettings LIMIT 1) as currentPriceCents,
+  1018→  (SELECT COUNT(DISTINCT userId) FROM Wallet WHERE balanceTokens > 0) as holdersCount,
+  1019→  (SELECT COALESCE(SUM(balanceTokens), 0) FROM Wallet) as walletBalances;
+  1020→
+  1021→-- Token transaction history
+  1022→SELECT 
+  1023→  tl.id,
+  1024→  tl.type,
+  1025→  tl.reason,
+  1026→  tl.amountTokens,
+  1027→  tl.amountEurCents,
+  1028→  tl.description,
+  1029→  tl.txHash,
+  1030→  tl.createdAt,
+  1031→  u.email as userEmail,
+  1032→  u.name as userName
+  1033→FROM TokenLedger tl
+  1034→JOIN User u ON tl.userId = u.id
+  1035→WHERE 1=1
+  1036→  AND (:userId IS NULL OR tl.userId = :userId)
+  1037→  AND (:type IS NULL OR tl.type = :type)
+  1038→  AND (:reason IS NULL OR tl.reason = :reason)
+  1039→ORDER BY tl.createdAt DESC
+  1040→LIMIT :limit OFFSET :offset;
+  1041→
+  1042→-- Token distribution by reason
+  1043→SELECT 
+  1044→  reason,
+  1045→  type,
+  1046→  SUM(amountTokens) as totalTokens,
+  1047→  SUM(amountEurCents) as totalEurCents,
+  1048→  COUNT(*) as transactionCount
+  1049→FROM TokenLedger
+  1050→GROUP BY reason, type
+  1051→ORDER BY totalTokens DESC;
+  1052→```
+  1053→
+  1054→### 6.7 Moderation Queries
+  1055→
+  1056→```sql
+  1057→-- Pending review moderation
+  1058→SELECT 
+  1059→  r.id,
+  1060→  r.rating,
+  1061→  r.comment,
+  1062→  r.createdAt,
+  1063→  r.isPublic,
+  1064→  c.title as contractTitle,
+  1065→  uFrom.name as fromUserName,
+  1066→  uTo.name as toUserName,
+  1067→  uTo.role as toUserRole
+  1068→FROM Review r
+  1069→JOIN Contract c ON r.contractId = c.id
+  1070→JOIN User uFrom ON r.fromUserId = uFrom.id
+  1071→JOIN User uTo ON r.toUserId = uTo.id
+  1072→WHERE r.isModerated = 0
+  1073→ORDER BY r.createdAt ASC;
+  1074→
+  1075→-- Flagged chat messages (conceptual - would need content moderation)
+  1076→SELECT 
+  1077→  cm.id,
+  1078→  cm.content,
+  1079→  cm.messageType,
+  1080→  cm.createdAt,
+  1081→  u.name as senderName,
+  1082→  u.email as senderEmail,
+  1083→  cr.type as roomType,
+  1084→  cr.referenceId
+  1085→FROM ChatMessage cm
+  1086→JOIN User u ON cm.senderId = u.id
+  1087→JOIN ChatRoom cr ON cm.chatRoomId = cr.id
+  1088→WHERE cm.isDeleted = 0
+  1089→ORDER BY cm.createdAt DESC
+  1090→LIMIT 50;
+  1091→
+  1092→-- Caregivers with low ratings (potential issues)
+  1093→SELECT 
+  1094→  u.id,
+  1095→  u.name,
+  1096→  u.email,
+  1097→  pc.totalReviews,
+  1098→  pc.averageRating,
+  1099→  (SELECT COUNT(*) FROM Review WHERE toUserId = u.id AND rating <= 2) as lowRatings,
+  1100→  (SELECT GROUP_CONCAT(comment, ' | ') FROM Review WHERE toUserId = u.id AND rating <= 2 LIMIT 5) as recentLowComments
+  1101→FROM User u
+  1102→JOIN ProfileCaregiver pc ON u.id = pc.userId
+  1103→WHERE pc.averageRating < 3.0
+  1104→  AND pc.totalReviews >= 3
+  1105→ORDER BY pc.averageRating ASC;
+  1106→```
+  1107→
+  1108→### 6.8 Analytics Queries
+  1109→
+  1110→```sql
+  1111→-- Revenue over time (daily for last 30 days)
+  1112→SELECT 
+  1113→  date(paidAt) as date,
+  1114→  type,
+  1115→  COUNT(*) as count,
+  1116→  SUM(amountEurCents) as revenue
+  1117→FROM Payment
+  1118→WHERE status = 'COMPLETED'
+  1119→  AND paidAt >= datetime('now', '-30 days')
+  1120→GROUP BY date(paidAt), type
+  1121→ORDER BY date;
+  1122→
+  1123→-- User growth over time
+  1124→SELECT 
+  1125→  date(createdAt) as date,
+  1126→  role,
+  1127→  COUNT(*) as newUsers
+  1128→FROM User
+  1129→WHERE createdAt >= datetime('now', '-90 days')
+  1130→GROUP BY date(createdAt), role
+  1131→ORDER BY date;
+  1132→
+  1133→-- Contract statistics
+  1134→SELECT 
+  1135→  status,
+  1136→  COUNT(*) as count,
+  1137→  SUM(totalEurCents) as totalValue,
+  1138→  AVG(totalEurCents) as avgValue
+  1139→FROM Contract
+  1140→GROUP BY status;
+  1141→
+  1142→-- Geographic distribution
+  1143→SELECT 
+  1144→  city,
+  1145→  role,
+  1146→  COUNT(*) as count
+  1147→FROM User u
+  1148→LEFT JOIN ProfileFamily pf ON u.id = pf.userId
+  1149→LEFT JOIN ProfileCaregiver pc ON u.id = pc.userId
+  1150→WHERE COALESCE(pf.city, pc.city) IS NOT NULL
+  1151→GROUP BY COALESCE(pf.city, pc.city), role
+  1152→ORDER BY count DESC
+  1153→LIMIT 20;
+  1154→```
+  1155→
+  1156→---
+  1157→
+  1158→## 7. Data Tables Specification
+  1159→
+  1160→### 7.1 Users Table
+  1161→
+  1162→| Column | Type | Filterable | Sortable | Description |
+  1163→|--------|------|:----------:|:--------:|-------------|
+  1164→| Avatar | Image | ❌ | ❌ | User profile image |
+  1165→| Nome | String | ✅ (search) | ✅ | User full name |
+  1166→| Email | String | ✅ (search) | ✅ | Email address |
+  1167→| Função | Badge | ✅ | ✅ | FAMILY / CAREGIVER |
+  1168→| Status | Badge | ✅ | ✅ | ACTIVE / SUSPENDED / INACTIVE |
+  1169→| KYC | Badge | ✅ | ✅ | VERIFIED / PENDING / UNVERIFIED |
+  1170→| Carteira | Number | ❌ | ✅ | Token balance |
+  1171→| Contratos | Number | ❌ | ✅ | Total contracts |
+  1172→| Criado | Date | ✅ (range) | ✅ | Registration date |
+  1173→| Último Acesso | Date | ✅ (range) | ✅ | Last login |
+  1174→| Ações | Actions | ❌ | ❌ | View, Edit, Suspend |
+  1175→
+  1176→**Actions:**
+  1177→- 👁️ Ver Detalhes (modal/page)
+  1178→- ✏️ Editar (inline/modal)
+  1179→- 🚫 Suspender (confirmation)
+  1180→- ✅ Ativar (confirmation)
+  1181→- 🔐 Impersonate (admin only)
+  1182→- 🗑️ Excluir (double confirmation)
+  1183→
+  1184→### 7.2 Caregivers Table
+  1185→
+  1186→| Column | Type | Filterable | Sortable | Description |
+  1187→|--------|------|:----------:|:--------:|-------------|
+  1188→| Avatar | Image | ❌ | ❌ | Profile image |
+  1189→| Nome | String | ✅ (search) | ✅ | Full name |
+  1190→| Título | String | ✅ (search) | ❌ | Professional title |
+  1191→| Cidade | String | ✅ | ✅ | Location |
+  1192→| Verificação | Badge | ✅ | ✅ | KYC status |
+  1193→| Avaliação | Rating | ✅ | ✅ | Average rating (1-5) |
+  1194→| Contratos | Number | ❌ | ✅ | Total completed |
+  1195→| Horas | Number | ❌ | ✅ | Hours worked |
+  1196→| Featured | Badge | ✅ | ✅ | Featured status |
+  1197→| Disponível | Badge | ✅ | ✅ | Available now |
+  1198→| Criado | Date | ✅ (range) | ✅ | Registration date |
+  1199→| Ações | Actions | ❌ | ❌ | View, Verify, Feature |
+  1200→
+  1201→**Actions:**
+  1202→- 👁️ Ver Detalhes
+  1203→- ✅ Aprovar KYC
+  1204→- ❌ Rejeitar KYC
+  1205→- ⭐ Feature/Unfeature
+  1206→- ✏️ Editar Estatísticas
+  1207→- 📊 Ver Relatório
+  1208→
+  1209→### 7.3 Contracts Table
+  1210→
+  1211→| Column | Type | Filterable | Sortable | Description |
+  1212→|--------|------|:----------:|:--------:|-------------|
+  1213→| ID | String | ✅ (search) | ❌ | Contract ID (short) |
+  1214→| Título | String | ✅ (search) | ✅ | Contract title |
+  1215→| Família | String | ✅ (search) | ❌ | Family user name |
+  1216→| Cuidador | String | ✅ (search) | ❌ | Caregiver name |
+  1217→| Status | Badge | ✅ | ✅ | Contract status |
+  1218→| Valor | Currency | ✅ (range) | ✅ | Total value in EUR |
+  1219→| Tokens | Number | ❌ | ✅ | Token fees |
+  1220→| Data Início | Date | ✅ (range) | ✅ | Start date |
+  1221→| Data Fim | Date | ✅ (range) | ✅ | End date |
+  1222→| Criado | Date | ✅ (range) | ✅ | Creation date |
+  1223→| Ações | Actions | ❌ | ❌ | View, Cancel, Resolve |
+  1224→
+  1225→**Actions:**
+  1226→- 👁️ Ver Detalhes
+  1227→- ❌ Cancelar Contrato
+  1228→- ⚖️ Abrir Disputa
+  1229→- ✅ Resolver Disputa
+  1230→- 💰 Ver Pagamentos
+  1231→- 📝 Ver Logs
+  1232→
+  1233→### 7.4 Payments Table
+  1234→
+  1235→| Column | Type | Filterable | Sortable | Description |
+  1236→|--------|------|:----------:|:--------:|-------------|
+  1237→| ID | String | ✅ (search) | ❌ | Payment ID |
+  1238→| Usuário | String | ✅ (search) | ❌ | User name/email |
+  1239→| Tipo | Badge | ✅ | ✅ | ACTIVATION / TOKEN_PURCHASE / CONTRACT_FEE |
+  1240→| Status | Badge | ✅ | ✅ | PENDING / COMPLETED / FAILED / REFUNDED |
+  1241→| Provider | Badge | ✅ | ✅ | STRIPE / BANK_TRANSFER / INTERNAL |
+  1242→| Valor EUR | Currency | ✅ (range) | ✅ | Amount in EUR |
+  1243→| Tokens | Number | ❌ | ✅ | Token amount |
+  1244→| Contrato | String | ✅ (search) | ❌ | Related contract |
+  1245→| Pago em | Date | ✅ (range) | ✅ | Payment date |
+  1246→| Criado | Date | ✅ (range) | ✅ | Creation date |
+  1247→| Ações | Actions | ❌ | ❌ | View, Refund |
+  1248→
+  1249→**Actions:**
+  1250→- 👁️ Ver Detalhes
+  1251→- 💰 Processar Reembolso
+  1252→- 📄 Ver no Stripe
+  1253→- 📊 Ver Transações
+  1254→
+  1255→### 7.5 Token Ledger Table
+  1256→
+  1257→| Column | Type | Filterable | Sortable | Description |
+  1258→|--------|------|:----------:|:--------:|-------------|
+  1259→| ID | String | ✅ (search) | ❌ | Ledger entry ID |
+  1260→| Usuário | String | ✅ (search) | ❌ | User name/email |
+  1261→| Tipo | Badge | ✅ | ✅ | CREDIT / DEBIT |
+  1262→| Razão | Badge | ✅ | ✅ | Transaction reason |
+  1263→| Tokens | Number | ✅ (range) | ✅ | Token amount |
+  1264→| EUR | Currency | ❌ | ✅ | EUR equivalent |
+  1265→| Descrição | String | ✅ (search) | ❌ | Human-readable description |
+  1266→| Referência | String | ✅ (search) | ❌ | Related entity |
+  1267→| Tx Hash | String | ✅ (search) | ❌ | Blockchain hash |
+  1268→| Data | Date | ✅ (range) | ✅ | Transaction date |
+  1269→| Ações | Actions | ❌ | ❌ | View |
+  1270→
+  1271→**Actions:**
+  1272→- 👁️ Ver Detalhes
+  1273→- 🔗 Ver na Blockchain
+  1274→- 👤 Ver Usuário
+  1275→
+  1276→### 7.6 Reviews Table (Moderation)
+  1277→
+  1278→| Column | Type | Filterable | Sortable | Description |
+  1279→|--------|------|:----------:|:--------:|-------------|
+  1280→| ID | String | ❌ | ❌ | Review ID |
+  1281→| De | String | ✅ (search) | ❌ | Reviewer name |
+  1282→| Para | String | ✅ (search) | ❌ | Reviewee name |
+  1283→| Rating | Rating | ✅ | ✅ | Star rating |
+  1284→| Comentário | Text | ✅ (search) | ❌ | Review text |
+  1285→| Contrato | String | ✅ (search) | ❌ | Related contract |
+  1286→| Público | Badge | ✅ | ✅ | Public status |
+  1287→| Moderado | Badge | ✅ | ✅ | Moderation status |
+  1288→| Criado | Date | ✅ (range) | ✅ | Creation date |
+  1289→| Ações | Actions | ❌ | ❌ | Approve, Reject, Edit |
+  1290→
+  1291→**Actions:**
+  1292→- ✅ Aprovar
+  1293→- ❌ Rejeitar
+  1294→- ✏️ Editar
+  1295→- 🚫 Ocultar
+  1296→- 👁️ Ver Contrato
+  1297→
+  1298→### 7.7 Audit Logs Table
+  1299→
+  1300→| Column | Type | Filterable | Sortable | Description |
+  1301→|--------|------|:----------:|:--------:|-------------|
+  1302→| ID | String | ❌ | ❌ | Log ID |
+  1303→| Admin | String | ✅ (search) | ❌ | Admin user name |
+  1304→| Ação | Badge | ✅ | ✅ | Action type |
+  1305→| Entidade | String | ✅ | ✅ | Entity type |
+  1306→| ID Entidade | String | ✅ (search) | ❌ | Entity ID |
+  1307→| IP | String | ✅ (search) | ❌ | IP address |
+  1308→| Razão | Text | ✅ (search) | ❌ | Action reason |
+  1309→| Data | Date | ✅ (range) | ✅ | Action date |
+  1310→| Ações | Actions | ❌ | ❌ | View Details |
+  1311→
+  1312→**Actions:**
+  1313→- 👁️ Ver Detalhes (shows old/new values)
+  1314→- 🔄 Reverter (if applicable)
+  1315→
+  1316→---
+  1317→
+  1318→## 8. Actions Per Entity
+  1319→
+  1320→### 8.1 User Actions
+  1321→
+  1322→| Action | Endpoint | Method | Permission | Confirmation | Audit |
+  1323→|--------|----------|--------|------------|--------------|-------|
+  1324→| List Users | `/api/admin/users` | GET | SUPPORT+ | No | No |
+  1325→| View User | `/api/admin/users/[id]` | GET | SUPPORT+ | No | Yes |
+  1326→| Create User | `/api/admin/users` | POST | ADMIN+ | No | Yes |
+  1327→| Update User | `/api/admin/users/[id]` | PATCH | ADMIN+ | No | Yes |
+  1328→| Delete User | `/api/admin/users/[id]` | DELETE | SUPER_ADMIN | Double | Yes |
+  1329→| Suspend User | `/api/admin/users/[id]/suspend` | POST | ADMIN+ | Yes | Yes |
+  1330→| Activate User | `/api/admin/users/[id]/activate` | POST | ADMIN+ | Yes | Yes |
+  1331→| Impersonate | `/api/admin/users/[id]/impersonate` | POST | ADMIN+ | Yes | Yes |
+  1332→| Reset KYC | `/api/admin/users/[id]/reset-kyc` | POST | ADMIN+ | Yes | Yes |
+  1333→| Reset Password | `/api/admin/users/[id]/reset-password` | POST | ADMIN+ | No | Yes |
+  1334→| View Activity | `/api/admin/users/[id]/activity` | GET | SUPPORT+ | No | Yes |
+  1335→
+  1336→### 8.2 Caregiver Actions
+  1337→
+  1338→| Action | Endpoint | Method | Permission | Confirmation | Audit |
+  1339→|--------|----------|--------|------------|--------------|-------|
+  1340→| List Caregivers | `/api/admin/caregivers` | GET | SUPPORT+ | No | No |
+  1341→| View Caregiver | `/api/admin/caregivers/[id]` | GET | SUPPORT+ | No | Yes |
+  1342→| Update Caregiver | `/api/admin/caregivers/[id]` | PATCH | ADMIN+ | No | Yes |
+  1343→| Verify KYC | `/api/admin/caregivers/[id]/verify` | POST | ADMIN+ | Yes | Yes |
+  1344→| Reject KYC | `/api/admin/caregivers/[id]/reject` | POST | ADMIN+ | Yes | Yes |
+  1345→| Set Featured | `/api/admin/caregivers/[id]/feature` | POST | ADMIN+ | Yes | Yes |
+  1346→| Update Stats | `/api/admin/caregivers/[id]/stats` | PATCH | ADMIN+ | No | Yes |
+  1347→| Export Data | `/api/admin/caregivers/export` | GET | ANALYST+ | No | Yes |
+  1348→
+  1349→### 8.3 Contract Actions
+  1350→
+  1351→| Action | Endpoint | Method | Permission | Confirmation | Audit |
+  1352→|--------|----------|--------|------------|--------------|-------|
+  1353→| List Contracts | `/api/admin/contracts` | GET | SUPPORT+ | No | No |
+  1354→| View Contract | `/api/admin/contracts/[id]` | GET | SUPPORT+ | No | Yes |
+  1355→| Cancel Contract | `/api/admin/contracts/[id]/cancel` | POST | ADMIN+ | Double | Yes |
+  1356→| Force Complete | `/api/admin/contracts/[id]/complete` | POST | ADMIN+ | Yes | Yes |
+  1357→| Open Dispute | `/api/admin/contracts/[id]/dispute` | POST | ADMIN+ | Yes | Yes |
+  1358→| Resolve Dispute | `/api/admin/contracts/[id]/resolve` | POST | ADMIN+ | Double | Yes |
+  1359→| View Timeline | `/api/admin/contracts/[id]/timeline` | GET | SUPPORT+ | No | No |
+  1360→| View Payments | `/api/admin/contracts/[id]/payments` | GET | SUPPORT+ | No | No |
+  1361→
+  1362→### 8.4 Payment Actions
+  1363→
+  1364→| Action | Endpoint | Method | Permission | Confirmation | Audit |
+  1365→|--------|----------|--------|------------|--------------|-------|
+  1366→| List Payments | `/api/admin/payments` | GET | SUPPORT+ | No | No |
+  1367→| View Payment | `/api/admin/payments/[id]` | GET | SUPPORT+ | No | Yes |
+  1368→| Process Refund | `/api/admin/payments/[id]/refund` | POST | ADMIN+ | Double | Yes |
+  1369→| View Stripe | `/api/admin/payments/[id]/stripe` | GET | ADMIN+ | No | Yes |
+  1370→| View Escrow | `/api/admin/payments/escrow` | GET | ADMIN+ | No | No |
+  1371→| Release Escrow | `/api/admin/payments/escrow/[id]/release` | POST | ADMIN+ | Yes | Yes |
+  1372→| Refund Escrow | `/api/admin/payments/escrow/[id]/refund` | POST | ADMIN+ | Double | Yes |
+  1373→
+  1374→### 8.5 Token Actions
+  1375→
+  1376→| Action | Endpoint | Method | Permission | Confirmation | Audit |
+  1377→|--------|----------|--------|------------|--------------|-------|
+  1378→| View Stats | `/api/admin/tokens/stats` | GET | SUPPORT+ | No | No |
+  1379→| List Transactions | `/api/admin/tokens/transactions` | GET | SUPPORT+ | No | No |
+  1380→| Manual Adjust | `/api/admin/tokens/adjust` | POST | ADMIN+ | Double | Yes |
+  1381→| Update Price | `/api/admin/tokens/price` | PATCH | SUPER_ADMIN | Double | Yes |
+  1382→| Export Ledger | `/api/admin/tokens/export` | GET | ANALYST+ | No | Yes |
+  1383→
+  1384→### 8.6 Moderation Actions
+  1385→
+  1386→| Action | Endpoint | Method | Permission | Confirmation | Audit |
+  1387→|--------|----------|--------|------------|--------------|-------|
+  1388→| List Pending Reviews | `/api/admin/moderation/reviews` | GET | MODERATOR+ | No | No |
+  1389→| Approve Review | `/api/admin/moderation/reviews/[id]/approve` | POST | MODERATOR+ | No | Yes |
+  1390→| Reject Review | `/api/admin/moderation/reviews/[id]/reject` | POST | MODERATOR+ | Yes | Yes |
+  1391→| Edit Review | `/api/admin/moderation/reviews/[id]` | PATCH | MODERATOR+ | No | Yes |
+  1392→| Hide Review | `/api/admin/moderation/reviews/[id]/hide` | POST | MODERATOR+ | Yes | Yes |
+  1393→| List Flagged Chat | `/api/admin/moderation/chat` | GET | MODERATOR+ | No | No |
+  1394→| Delete Message | `/api/admin/moderation/chat/[id]` | DELETE | MODERATOR+ | Yes | Yes |
+  1395→| Warn User | `/api/admin/moderation/warn/[userId]` | POST | MODERATOR+ | Yes | Yes |
+  1396→
+  1397→### 8.7 Settings Actions
+  1398→
+  1399→| Action | Endpoint | Method | Permission | Confirmation | Audit |
+  1400→|--------|----------|--------|------------|--------------|-------|
+  1401→| View Settings | `/api/admin/settings` | GET | ADMIN+ | No | No |
+  1402→| Update Settings | `/api/admin/settings` | PATCH | ADMIN+ | No | Yes |
+  1403→| View Fees | `/api/admin/settings/fees` | GET | ADMIN+ | No | No |
+  1404→| Update Fees | `/api/admin/settings/fees` | PATCH | SUPER_ADMIN | Double | Yes |
+  1405→| View Features | `/api/admin/settings/features` | GET | ADMIN+ | No | No |
+  1406→| Toggle Feature | `/api/admin/settings/features/[id]` | PATCH | ADMIN+ | No | Yes |
+  1407→
+  1408→---
+  1409→
+  1410→## 9. Flow Diagrams
+  1411→
+  1412→### 9.1 User Suspension Flow
+  1413→
+  1414→```
+  1415→┌─────────────────────────────────────────────────────────────────┐
+  1416→│                    USER SUSPENSION FLOW                         │
+  1417→└─────────────────────────────────────────────────────────────────┘
+  1418→
+  1419→Admin                    System                    User
+  1420→  │                         │                        │
+  1421→  ├─ Select User────────────►                        │
+  1422→  │                         │                        │
+  1423→  ├─ Click "Suspend"────────►                        │
+  1424→  │                         │                        │
+  1425→  │   ┌─────────────────────┴────────────────────┐   │
+  1426→  │   │ Confirmation Modal                       │   │
+  1427→  │   │ - Reason (required)                      │   │
+  1428→  │   │ - Duration (optional)                    │   │
+  1429→  │   │ - Notify user checkbox                   │   │
+  1430→  │   │ - Active contracts warning               │   │
+  1431→  │   └─────────────────────┬────────────────────┘   │
+  1432→  │                         │                        │
+  1433→  ├─ Confirm────────────────►                        │
+  1434→  │                         │                        │
+  1435→  │                         ├─ Validate permissions  │
+  1436→  │                         ├─ Check active contracts│
+  1437→  │                         │                        │
+  1438→  │                    ┌────┴────┐                   │
+  1439→  │                    │ Has     │                   │
+  1440→  │                    │ Active  │                   │
+  1441→  │                    │Contracts│                   │
+  1442→  │                    └────┬────┘                   │
+  1443→  │                         │                        │
+  1444→  │              ┌──────────┴──────────┐             │
+  1445→  │              │                     │             │
+  1446→  │              ▼                     ▼             │
+  1447→  │         Show Warning         Proceed with        │
+  1448→  │         about contracts      suspension          │
+  1449→  │              │                     │             │
+  1450→  │              └──────────┬──────────┘             │
+  1451→  │                         │                        │
+  1452→  │                         ├─ Update User.status   │
+  1453→  │                         ├─ Create AdminAction   │
+  1454→  │                         ├─ Cancel contracts     │
+  1455→  │                         ├─ Release escrow       │
+  1456→  │                         │                        │
+  1457→  │                         ├─ Send notification────►│
+  1458→  │                         │                        │
+  1459→  │◄── Success Message ─────┤                        │
+  1460→  │                         │                        │
+  1461→  │                         │      ┌─────────────────┤
+  1462→  │                         │      │ Email: Account  │
+  1463→  │                         │      │ Suspended       │
+  1464→  │                         │      └─────────────────┤
+  1465→  │                         │                        │
+  1466→```
+  1467→
+  1468→### 9.2 Dispute Resolution Flow
+  1469→
+  1470→```
+  1471→┌─────────────────────────────────────────────────────────────────┐
+  1472→│                   DISPUTE RESOLUTION FLOW                       │
+  1473→└─────────────────────────────────────────────────────────────────┘
+  1474→
+  1475→Admin                System              Family           Caregiver
+  1476→  │                     │                   │                  │
+  1477→  ├─ View Disputes─────►│                   │                  │
+  1478→  │                     │                   │                  │
+  1479→  ├─ Select Dispute────►│                   │                  │
+  1480→  │                     │                   │                  │
+  1481→  │   ┌─────────────────┴───────────────────────────────────┐   │
+  1482→  │   │ Dispute Detail View                                 │   │
+  1483→  │   │ - Contract details                                  │   │
+  1484→  │   │ - Escrow status                                     │   │
+  1485→  │   │ - Chat history                                      │   │
+  1486→  │   │ - Evidence from both parties                        │   │
+  1487→  │   │ - Timeline of events                                │   │
+  1488→  │   └─────────────────────┬───────────────────────────────┘   │
+  1489→  │                         │                   │                  │
+  1490→  │   ┌─────────────────────┴───────────────┐   │                  │
+  1491→  │   │ Resolution Options                  │   │                  │
+  1492→  │   │ 1. Release to Caregiver (default)   │   │                  │
+  1493→  │   │ 2. Refund to Family                 │   │                  │
+  1494→  │   │ 3. Split (custom %)                 │   │                  │
+  1495→  │   │ 4. Hold for investigation           │   │                  │
+  1496→  │   └─────────────────────┬───────────────┘   │                  │
+  1497→  │                         │                   │                  │
+  1498→  ├─ Choose Resolution─────►│                   │                  │
+  1499→  │                         │                   │                  │
+  1500→  │   ┌─────────────────────┴───────────────────────┐             │
+  1501→  │   │ Resolution Confirmation                     │             │
+  1502→  │   │ - Resolution type                           │             │
+  1503→  │   │ - Amount breakdown                          │             │
+  1504→  │   │ - Reason (required)                         │             │
+  1505→  │   │ - Notify parties checkbox                   │             │
+  1506→  │   │ - Warning: This action is irreversible      │             │
+  1507→  │   └─────────────────────┬───────────────────────┘             │
+  1508→  │                         │                   │                  │
+  1509→  ├─ Confirm Resolution────►│                   │                  │
+  1510→  │                         │                   │                  │
+  1511→  │                         ├─ Validate admin   │                  │
+  1512→  │                         ├─ Validate escrow  │                  │
+  1513→  │                         │                   │                  │
+  1514→  │                         ├─ Process Stripe Transfer           │
+  1515→  │                         │                   │                  │
+  1516→  │                         ├─ Update Contract.status            │
+  1517→  │                         ├─ Update EscrowPayment.status       │
+  1518→  │                         ├─ Create AdminAction                │
+  1519→  │                         │                   │                  │
+  1520→  │                         ├─ Send Notification─────────────────►│
+  1521→  │                         ├─ Send Notification─────────────────►│
+  1522→  │                         │                   │                  │
+  1523→  │◄── Success Message──────┤                   │                  │
+  1524→  │                         │                   │                  │
+  1525→```
+  1526→
+  1527→### 9.3 KYC Verification Flow
+  1528→
+  1529→```
+  1530→┌─────────────────────────────────────────────────────────────────┐
+  1531→│                   KYC VERIFICATION FLOW                         │
+  1532→└─────────────────────────────────────────────────────────────────┘
+  1533→
+  1534→Admin                    System                 Didit           Caregiver
+  1535→  │                         │                     │                  │
+  1536→  │                         │◄────────────────────┤                  │
+  1537→  │                         │  KYC Webhook        │                  │
+  1538→  │                         │  (session complete) │                  │
+  1539→  │                         │                     │                  │
+  1540→  │                         ├─ Store KYC data     │                  │
+  1541→  │                         ├─ Update status─────►│                  │
+  1542→  │                         │  to PENDING_REVIEW  │ Notification     │
+  1543→  │                         │                     │                  │
+  1544→  ├─ View Pending KYC──────►│                     │                  │
+  1545→  │                         │                     │                  │
+  1546→  │   ┌─────────────────────┴─────────────────────┐                │
+  1547→  │   │ KYC Review Dashboard                      │                │
+  1548→  │   │ - Didit verification result               │                │
+  1549→  │   │ - Confidence score                        │                │
+  1550→  │   │ - Document images (if available)          │                │
+  1551→  │   │ - Selfie comparison                       │                │
+  1552→  │   │ - Profile data                            │                │
+  1553→  │   │ - Background check status                 │                │
+  1554→  │   └─────────────────────┬─────────────────────┘                │
+  1555→  │                         │                     │                  │
+  1556→  │   ┌─────────────────────┴─────────────────┐                    │
+  1557→  │   │ Decision Options                      │                    │
+  1558→  │   │ ✅ Approve - Full verification        │                    │
+  1559→  │   │ ⚠️ Approve with limits - Basic only   │                    │
+  1560→  │   │ ❌ Reject - Failed verification       │                    │
+  1561→  │   │ 🔄 Request re-verification            │                    │
+  1562→  │   └─────────────────────┬─────────────────┘                    │
+  1563→  │                         │                     │                  │
+  1564→  ├─ Make Decision──────────►│                     │                  │
+  1565→  │                         │                     │                  │
+  1566→  │                         ├─ Update ProfileCaregiver              │
+  1567→  │                         ├─ Set verificationStatus               │
+  1568→  │                         ├─ Create AdminAction                   │
+  1569→  │                         │                     │                  │
+  1570→  │                         ├─ If Approved:       │                  │
+  1571→  │                         │  - Enable profile    │                  │
+  1572→  │                         │  - Send welcome─────►│                  │
+  1573→  │                         │                     │ Notification     │
+  1574→  │                         │                     │                  │
+  1575→  │                         ├─ If Rejected:       │                  │
+  1576→  │                         │  - Disable profile   │                  │
+  1577→  │                         │  - Send reason─────►│                  │
+  1578→  │                         │                     │ Notification     │
+  1579→  │                         │                     │                  │
+  1580→  │◄── Success Message──────┤                     │                  │
+  1581→  │                         │                     │                  │
+  1582→```
+  1583→
+  1584→### 9.4 Refund Processing Flow
+  1585→
+  1586→```
+  1587→┌─────────────────────────────────────────────────────────────────┐
+  1588→│                   REFUND PROCESSING FLOW                        │
+  1589→└─────────────────────────────────────────────────────────────────┘
+  1590→
+  1591→Admin                    System                 Stripe            User
+  1592→  │                         │                     │                 │
+  1593→  ├─ View Payments─────────►│                     │                 │
+  1594→  │                         │                     │                 │
+  1595→  ├─ Select Payment────────►│                     │                 │
+  1596→  │                         │                     │                 │
+  1597→  │   ┌─────────────────────┴─────────────────────┐                │
+  1598→  │   │ Payment Detail                           │                │
+  1599→  │   │ - Payment info                           │                │
+  1600→  │   │ - User info                              │                │
+  1601→  │   │ - Token balance                          │                │
+  1602→  │   │ - Ledger entries                         │                │
+  1603→  │   │ - Refundable amount                      │                │
+  1604→  │   └─────────────────────┬─────────────────────┘                │
+  1605→  │                         │                     │                 │
+  1606→  ├─ Click "Refund"────────►│                     │                 │
+  1607→  │                         │                     │                 │
+  1608→  │   ┌─────────────────────┴─────────────────────┐                │
+  1609→  │   │ Refund Modal                             │                │
+  1610→  │   │ - Amount (full/partial)                  │                │
+  1611→  │   │ - Reason (required)                      │                │
+  1612→  │   │ - Token deduction checkbox               │                │
+  1613→  │   │ - Notify user checkbox                   │                │
+  1614→  │   │ - Warning: Irreversible action           │                │
+  1615→  │   └─────────────────────┬─────────────────────┘                │
+  1616→  │                         │                     │                 │
+  1617→  ├─ Confirm Refund────────►│                     │                 │
+  1618→  │                         │                     │                 │
+  1619→  │                         ├─ Validate admin    │                 │
+  1620→  │                         ├─ Validate payment  │                 │
+  1621→  │                         │                     │                 │
+  1622→  │                         ├─ Call Stripe API───►│                 │
+  1623→  │                         │                     │                 │
+  1624→  │                         │◄──── Refund Result──┤                 │
+  1625→  │                         │                     │                 │
+  1626→  │                         ├─ Update Payment.status               │
+  1627→  │                         ├─ Update Payment.refundedAt           │
+  1628→  │                         │                     │                 │
+  1629→  │                         ├─ If token deduction:                 │
+  1630→  │                         │  - Deduct from Wallet                │
+  1631→  │                         │  - Create TokenLedger (DEBIT)        │
+  1632→  │                         │  - Update PlatformSettings           │
+  1633→  │                         │                     │                 │
+  1634→  │                         ├─ Create AdminAction  │                 │
+  1635→  │                         │                     │                 │
+  1636→  │                         ├─ Send notification──────────────────►│
+  1637→  │                         │                     │                 │
+  1638→  │◄── Success Message──────┤                     │                 │
+  1639→  │                         │                     │                 │
+  1640→```
+  1641→
+  1642→### 9.5 Token Adjustment Flow
+  1643→
+  1644→```
+  1645→┌─────────────────────────────────────────────────────────────────┐
+  1646→│                   TOKEN ADJUSTMENT FLOW                         │
+  1647→└─────────────────────────────────────────────────────────────────┘
+  1648→
+  1649→Admin                    System                 Blockchain        User
+  1650→  │                         │                     │                 │
+  1651→  ├─ View Token Stats──────►│                     │                 │
+  1652→  │                         │                     │                 │
+  1653→  ├─ Click "Adjust"────────►│                     │                 │
+  1654→  │                         │                     │                 │
+  1655→  │   ┌─────────────────────┴─────────────────────┐                │
+  1656→  │   │ Token Adjustment Form                    │                │
+  1657→  │   │ - User selection                         │                │
+  1658→  │   │ - Amount (+/-)                           │                │
+  1659→  │   │ - Reason (dropdown + custom)             │                │
+  1660→  │   │ - Description (required)                 │                │
+  1661→  │   │ - Reference ID (optional)                │                │
+  1662→  │   │ - Mint/Burn on blockchain checkbox       │                │
+  1663→  │   └─────────────────────┬─────────────────────┘                │
+  1664→  │                         │                     │                 │
+  1665→  ├─ Submit Adjustment──────►│                     │                 │
+  1666→  │                         │                     │                 │
+  1667→  │   ┌─────────────────────┴─────────────────────┐                │
+  1668→  │   │ Confirmation Modal                       │                │
+  1669→  │   │ - Adjustment details                     │                │
+  1670→  │   │ - Impact preview                         │                │
+  1671→  │   │ - Warning: Affects token economics       │                │
+  1672→  │   │ - Supervisor approval (if required)      │                │
+  1673→  │   └─────────────────────┬─────────────────────┘                │
+  1674→  │                         │                     │                 │
+  1675→  ├─ Confirm────────────────►│                     │                 │
+  1676→  │                         │                     │                 │
+  1677→  │                         ├─ Validate admin    │                 │
+  1678→  │                         ├─ Validate amount   │                 │
+  1679→  │                         │                     │                 │
+  1680→  │                         ├─ If blockchain:    │                 │
+  1681→  │                         │  - Mint/Burn───────►│                 │
+  1682→  │                         │◄──── Tx Hash────────┤                 │
+  1683→  │                         │                     │                 │
+  1684→  │                         ├─ Update Wallet.balance               │
+  1685→  │                         ├─ Create TokenLedger                  │
+  1686→  │                         ├─ Update PlatformSettings             │
+  1687→  │                         │                     │                 │
+  1688→  │                         ├─ Create AdminAction  │                 │
+  1689→  │                         │                     │                 │
+  1690→  │                         ├─ Send notification──────────────────►│
+  1691→  │                         │                     │                 │
+  1692→  │◄── Success Message──────┤                     │                 │
+  1693→  │                         │                     │                 │
+  1694→```
+  1695→
+  1696→---
+  1697→
+  1698→## 10. Audit & Logging
+  1699→
+  1700→### 10.1 AdminAction Model
+  1701→
+  1702→```prisma
+  1703→model AdminAction {
+  1704→  id              String    @id @default(cuid())
+  1705→  adminUserId     String
+  1706→  adminUser       AdminUser @relation(fields: [adminUserId], references: [id])
+  1707→  
+  1708→  // Action Details
+  1709→  action          String    // CREATE, UPDATE, DELETE, VIEW, IMPERSONATE, etc.
+  1710→  entityType      String    // USER, CONTRACT, PAYMENT, TOKEN, etc.
+  1711→  entityId        String?   // ID of affected entity
+  1712→  
+  1713→  // Data
+  1714→  oldValue        String?   // JSON of previous state
+  1715→  newValue        String?   // JSON of new state
+  1716→  
+  1717→  // Context
+  1718→  ipAddress       String?
+  1719→  userAgent       String?
+  1720→  reason          String?   // Required for destructive actions
+  1721→  
+  1722→  createdAt       DateTime  @default(now())
+  1723→  
+  1724→  @@index([adminUserId, createdAt])
+  1725→  @@index([entityType, entityId])
+  1726→  @@index([createdAt])
+  1727→}
+  1728→```
+  1729→
+  1730→### 10.2 Logged Actions
+  1731→
+  1732→| Action Category | Actions Logged |
+  1733→|-----------------|----------------|
+  1734→| **Authentication** | Login, Logout, Failed login, Password change |
+  1735→| **User Management** | View, Create, Update, Delete, Suspend, Activate, Impersonate |
+  1736→| **Caregiver Management** | Verify, Reject, Feature, Update stats |
+  1737→| **Contract Management** | View, Cancel, Complete, Open Dispute, Resolve Dispute |
+  1738→| **Payment Management** | View, Refund, Release Escrow |
+  1739→| **Token Management** | Adjust balance, Update price |
+  1740→| **Moderation** | Approve review, Reject review, Delete message, Warn user |
+  1741→| **Settings** | Update any setting, Toggle feature |
+  1742→| **Analytics** | Export data |
+  1743→| **Admin Management** | Create admin, Update role, Disable admin |
+  1744→
+  1745→### 10.3 Log Entry Structure
+  1746→
+  1747→```typescript
+  1748→interface AuditLogEntry {
+  1749→  id: string;
+  1750→  timestamp: Date;
+  1751→  adminUser: {
+  1752→    id: string;
+  1753→    email: string;
+  1754→    role: AdminRole;
+  1755→  };
+  1756→  action: ActionType;
+  1757→  entityType: EntityType;
+  1758→  entityId?: string;
+  1759→  changes?: {
+  1760→    oldValue: any;
+  1761→    newValue: any;
+  1762→  };
+  1763→  context: {
+  1764→    ipAddress: string;
+  1765→    userAgent: string;
+  1766→    sessionId: string;
+  1767→  };
+  1768→  reason?: string;
+  1769→  relatedEntities?: Array<{
+  1770→    type: string;
+  1771→    id: string;
+  1772→  }>;
+  1773→}
+  1774→
+  1775→type ActionType = 
+  1776→  | 'VIEW' | 'CREATE' | 'UPDATE' | 'DELETE'
+  1777→  | 'SUSPEND' | 'ACTIVATE' | 'IMPERSONATE'
+  1778→  | 'VERIFY' | 'REJECT' | 'FEATURE'
+  1779→  | 'CANCEL' | 'COMPLETE' | 'DISPUTE' | 'RESOLVE'
+  1780→  | 'REFUND' | 'RELEASE'
+  1781→  | 'ADJUST' | 'PRICE_UPDATE'
+  1782→  | 'APPROVE' | 'WARN'
+  1783→  | 'EXPORT';
+  1784→
+  1785→type EntityType =
+  1786→  | 'USER' | 'PROFILE_FAMILY' | 'PROFILE_CAREGIVER'
+  1787→  | 'CONTRACT' | 'CONTRACT_ACCEPTANCE'
+  1788→  | 'PAYMENT' | 'ESCROW_PAYMENT'
+  1789→  | 'WALLET' | 'TOKEN_LEDGER'
+  1790→  | 'REVIEW' | 'TIP' | 'CHAT_MESSAGE'
+  1791→  | 'PLATFORM_SETTINGS' | 'ADMIN_USER';
+  1792→```
+  1793→
+  1794→### 10.4 Log Retention Policy
+  1795→
+  1796→| Log Type | Retention Period | Archive Policy |
+  1797→|----------|------------------|----------------|
+  1798→| Admin Actions | 2 years | Archive to cold storage |
+  1799→| Login History | 1 year | Delete |
+  1800→| View Actions | 90 days | Delete |
+  1801→| Export Actions | 2 years | Archive |
+  1802→| Security Events | 5 years | Permanent archive |
+  1803→
+  1804→---
+  1805→
+  1806→## 11. Security Considerations
+  1807→
+  1808→### 11.1 Authentication Requirements
+  1809→
+  1810→1. **Strong Password Policy**
+  1811→   - Minimum 12 characters
+  1812→   - Mix of uppercase, lowercase, numbers, symbols
+  1813→   - Password history check (last 5 passwords)
+  1814→
+  1815→2. **Two-Factor Authentication (2FA)**
+  1816→   - Required for SUPER_ADMIN and ADMIN roles
+  1817→   - Recommended for all roles
+  1818→   - TOTP (Google Authenticator) or SMS
+  1819→
+  1820→3. **Session Management**
+  1821→   - Session timeout: 30 minutes idle
+  1822→   - Maximum session: 8 hours
+  1823→   - Concurrent sessions: Maximum 2
+  1824→   - IP binding for sensitive operations
+  1825→
+  1826→### 11.2 Authorization Checks
+  1827→
+  1828→```typescript
+  1829→// Permission check middleware
+  1830→async function checkPermission(
+  1831→  adminUser: AdminUser,
+  1832→  action: string,
+  1833→  entityType: string
+  1834→): Promise<boolean> {
+  1835→  // Check if admin is active
+  1836→  if (!adminUser.isActive) {
+  1837→    throw new Error('Admin account is disabled');
+  1838→  }
+  1839→  
+  1840→  // Check custom permissions override
+  1841→  if (adminUser.customPermissions) {
+  1842→    const permissions = JSON.parse(adminUser.customPermissions);
+  1843→    if (permissions.denied?.includes(`${action}:${entityType}`)) {
+  1844→      return false;
+  1845→    }
+  1846→  }
+  1847→  
+  1848→  // Check role-based permissions
+  1849→  const rolePermissions = PERMISSION_MATRIX[adminUser.role];
+  1850→  return rolePermissions[`${action}:${entityType}`] ?? false;
+  1851→}
+  1852→```
+  1853→
+  1854→### 11.3 Sensitive Operations
+  1855→
+  1856→Operations requiring additional verification:
+  1857→
+  1858→| Operation | Additional Verification |
+  1859→|-----------|------------------------|
+  1860→| Delete User | 2FA + Confirmation |
+  1861→| Process Refund > €100 | 2FA + Supervisor approval |
+  1862→| Token Adjustment > 1000 | 2FA + Supervisor approval |
+  1863→| Update Token Price | 2FA + Super Admin approval |
+  1864→| Impersonate User | 2FA + Reason required |
+  1865→| Export User Data | Reason required |
+  1866→
+  1867→### 11.4 IP Whitelisting
+  1868→
+  1869→```typescript
+  1870→// Optional IP whitelist for admin access
+  1871→const ADMIN_IP_WHITELIST = [
+  1872→  // Office IPs
+  1873→  '192.168.1.0/24',
+  1874→  // VPN IPs
+  1875→  '10.0.0.0/8',
+  1876→];
+  1877→
+  1878→async function validateAdminAccess(
+  1879→  request: NextRequest,
+  1880→  adminUser: AdminUser
+  1881→): Promise<boolean> {
+  1882→  // Skip IP check in development
+  1883→  if (process.env.NODE_ENV === 'development') {
+  1884→    return true;
+  1885→  }
+  1886→  
+  1887→  // Check if IP whitelist is enabled for this admin
+  1888→  if (adminUser.ipWhitelistEnabled) {
+  1889→    const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0];
+  1890→    if (!isIpInWhitelist(clientIp, ADMIN_IP_WHITELIST)) {
+  1891→      logSecurityEvent('UNAUTHORIZED_IP_ACCESS', { adminId: adminUser.id, ip: clientIp });
+  1892→      return false;
+  1893→    }
+  1894→  }
+  1895→  
+  1896→  return true;
+  1897→}
+  1898→```
+  1899→
+  1900→### 11.5 Rate Limiting
+  1901→
+  1902→```typescript
+  1903→// Admin API rate limits
+  1904→const ADMIN_RATE_LIMITS = {
+  1905→  'api/admin/users': { requests: 100, window: '1m' },
+  1906→  'api/admin/payments/refund': { requests: 10, window: '1m' },
+  1907→  'api/admin/tokens/adjust': { requests: 5, window: '1m' },
+  1908→  'api/admin/export': { requests: 3, window: '1h' },
+  1909→};
+  1910→```
+  1911→
+  1912→---
+  1913→
+  1914→## 12. Implementation Roadmap
+  1915→
+  1916→### Phase 1: Foundation (Week 1-2)
+  1917→
+  1918→- [ ] Admin authentication & authorization
+  1919→- [ ] Admin layout & navigation
+  1920→- [ ] Dashboard with basic KPIs
+  1921→- [ ] User list & detail view (read-only)
+  1922→- [ ] Audit logging infrastructure
+  1923→
+  1924→### Phase 2: User Management (Week 3-4)
+  1925→
+  1926→- [ ] User CRUD operations
+  1927→- [ ] User suspension/activation
+  1928→- [ ] KYC verification review
+  1929→- [ ] Impersonation feature
+  1930→- [ ] User activity timeline
+  1931→
+  1932→### Phase 3: Financial Operations (Week 5-6)
+  1933→
+  1934→- [ ] Payment management
+  1935→- [ ] Refund processing
+  1936→- [ ] Escrow management
+  1937→- [ ] Token adjustments
+  1938→- [ ] Financial reports
+  1939→
+  1940→### Phase 4: Contract & Moderation (Week 7-8)
+  1941→
+  1942→- [ ] Contract management
+  1943→- [ ] Dispute resolution
+  1944→- [ ] Review moderation
+  1945→- [ ] Chat moderation
+  1946→- [ ] User reports
+  1947→
+  1948→### Phase 5: Advanced Features (Week 9-10)
+  1949→
+  1950→- [ ] Advanced analytics
+  1951→- [ ] Export functionality
+  1952→- [ ] Scheduled reports
+  1953→- [ ] Platform settings
+  1954→- [ ] Feature flags
+  1955→
+  1956→### Phase 6: Polish & Security (Week 11-12)
+  1957→
+  1958→- [ ] 2FA implementation
+  1959→- [ ] IP whitelisting
+  1960→- [ ] Rate limiting
+  1961→- [ ] Performance optimization
+  1962→- [ ] Security audit
+  1963→- [ ] Documentation
+  1964→
+  1965→---
+  1966→
+  1967→## Appendix A: Environment Variables
+  1968→
+  1969→```env
+  1970→# Admin Panel
+  1971→ADMIN_SECRET_KEY=your-admin-secret-key
+  1972→ADMIN_2FA_REQUIRED=true
+  1973→ADMIN_IP_WHITELIST_ENABLED=false
+  1974→
+  1975→# Audit Logging
+  1976→AUDIT_LOG_RETENTION_DAYS=730
+  1977→AUDIT_ARCHIVE_ENABLED=true
+  1978→
+  1979→# Rate Limiting
+  1980→ADMIN_RATE_LIMIT_ENABLED=true
+  1981→```
+  1982→
+  1983→## Appendix B: Error Codes
+  1984→
+  1985→| Code | Description |
+  1986→|------|-------------|
+  1987→| ADMIN_001 | Unauthorized admin access |
+  1988→| ADMIN_002 | Insufficient permissions |
+  1989→| ADMIN_003 | Admin account disabled |
+  1990→| ADMIN_004 | 2FA required |
+  1991→| ADMIN_005 | IP not whitelisted |
+  1992→| ADMIN_006 | Rate limit exceeded |
+  1993→| ADMIN_007 | Invalid confirmation token |
+  1994→| ADMIN_008 | Action requires supervisor approval |
+  1995→
+  1996→---
+  1997→
+  1998→*Document Version: 1.0*
+  1999→*Last Updated: February 2025*
+  2000→*Author: Evyra Development Team*
+
+[showing lines 1-2000 of 2001; use offset=2001 with limit to continue reading]

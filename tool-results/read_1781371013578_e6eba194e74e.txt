@@ -1,0 +1,1651 @@
+     1→// SeniorToken - IdosoLink Platform Schema
+     2→// PostgreSQL Database
+     3→
+     4→generator client {
+     5→  provider = "prisma-client-js"
+     6→}
+     7→
+     8→datasource db {
+     9→  provider = "postgresql"
+    10→  url      = env("DATABASE_URL")
+    11→}
+    12→
+    13→// ==================== ENUMS ====================
+    14→
+    15→enum UserRole {
+    16→  FAMILY // Familiar - quem contrata
+    17→  CAREGIVER // Cuidador - quem trabalha
+    18→  ADMIN // Administrador da plataforma
+    19→}
+    20→
+    21→// ==================== ADMIN SYSTEM ====================
+    22→
+    23→enum AdminRole {
+    24→  SUPER_ADMIN // Full access, can modify fees, manage admins
+    25→  ADMIN // Most operations
+    26→  SUPPORT // Read + user support
+    27→  MODERATOR // Content moderation only
+    28→  ANALYST // Read-only + analytics
+    29→}
+    30→
+    31→enum UserStatus {
+    32→  PENDING // Cadastro iniciado, aguardando pagamento
+    33→  ACTIVE // Ativo, pode usar a plataforma
+    34→  SUSPENDED // Suspenso por violação
+    35→  INACTIVE // Desativado pelo usuário
+    36→}
+    37→
+    38→enum VerificationStatus {
+    39→  UNVERIFIED // Não verificado
+    40→  PENDING // Em verificação
+    41→  VERIFIED // Verificado
+    42→  REJECTED // Rejeitado
+    43→}
+    44→
+    45→enum PaymentType {
+    46→  ACTIVATION // Pagamento de ativação
+    47→  CONTRACT_FEE // Taxa de contrato
+    48→  SERVICE_PAYMENT // Pagamento de serviço
+    49→  VISIBILITY_BOOST // Boost de visibilidade de demanda
+    50→}
+    51→
+    52→enum PaymentStatus {
+    53→  PENDING
+    54→  PROCESSING
+    55→  COMPLETED
+    56→  FAILED
+    57→  REFUNDED
+    58→}
+    59→
+    60→enum PaymentProvider {
+    61→  STRIPE
+    62→  EASYPAY
+    63→  BANK_TRANSFER
+    64→  INTERNAL
+    65→}
+    66→
+    67→enum ContractStatus {
+    68→  DRAFT // Em criação
+    69→  PENDING_ACCEPTANCE // Aguardando aceite do cuidador
+    70→  PENDING_PAYMENT // Aguardando pagamento
+    71→  ACTIVE // Ativo
+    72→  COMPLETED // Finalizado
+    73→  CANCELLED // Cancelado
+    74→  DISPUTED // Em disputa
+    75→  COUNTER_PROPOSED // Contraproposta do cuidador
+    76→}
+    77→
+    78→enum ServiceType {
+    79→  PERSONAL_CARE // Cuidados pessoais (higiene, banho)
+    80→  MEDICATION // Administração de medicação
+    81→  MOBILITY // Ajuda com mobilidade
+    82→  COMPANIONSHIP // Companhia e conversa
+    83→  MEAL_PREPARATION // Preparo de refeições
+    84→  LIGHT_HOUSEWORK // Tarefas domésticas leves
+    85→  TRANSPORTATION // Transporte para consultas
+    86→  COGNITIVE_SUPPORT // Estimulação cognitiva
+    87→  NIGHT_CARE // Cuidados noturnos
+    88→  PALLIATIVE_CARE // Cuidados paliativos
+    89→  PHYSIOTHERAPY // Fisioterapia
+    90→  NURSING_CARE // Enfermagem
+    91→}
+    92→
+    93→enum DayOfWeek {
+    94→  MONDAY
+    95→  TUESDAY
+    96→  WEDNESDAY
+    97→  THURSDAY
+    98→  FRIDAY
+    99→  SATURDAY
+   100→  SUNDAY
+   101→}
+   102→
+   103→enum DemandStatus {
+   104→  ACTIVE // Demanda ativa, recebendo propostas
+   105→  CLOSED // Fechada, contratação feita
+   106→  PAUSED // Em pausa, temporariamente inativa
+   107→  EXPIRED // Expirada (sem propostas)
+   108→}
+   109→
+   110→enum ExperienceLevel {
+   111→  BEGINNER // Sem experiência comprovada
+   112→  INTERMEDIATE // 1-3 anos de experiência
+   113→  ADVANCED // 3-5 anos de experiência
+   114→  EXPERT // 5+ anos de experiência
+   115→}
+   116→
+   117→enum VisibilityPackage {
+   118→  NONE // Sem boost de visibilidade
+   119→  BASIC // 7 dias, audiência padrão (€3)
+   120→  PREMIUM // 30 dias, destacado (€8)
+   121→  URGENT // 3 dias, urgente topo lista (€15)
+   122→}
+   123→
+   124→enum CareType {
+   125→  URGENT // Necessidade urgente imediata
+   126→  RECURRING // Cuidado regular/recorrente
+   127→  BOTH // Urgente + recorrente
+   128→}
+   129→
+   130→// ==================== USER & PROFILES ====================
+   131→
+   132→model User {
+   133→  id           String  @id @default(cuid())
+   134→  email        String  @unique
+   135→  phone        String? @unique
+   136→  name         String
+   137→  passwordHash String?
+   138→
+   139→  // Role e Status
+   140→  role   UserRole   @default(FAMILY)
+   141→  status UserStatus @default(PENDING)
+   142→
+   143→  // Documentos pessoais
+   144→  nif            String? // NIF português (9 dígitos)
+   145→  documentType   String? // Tipo de documento (CC, Passaporte, etc.)
+   146→  documentNumber String? // Número do documento
+   147→
+   148→  // Verificação
+   149→  emailVerified      DateTime?
+   150→  phoneVerified      DateTime?
+   151→  verificationStatus VerificationStatus @default(UNVERIFIED)
+   152→
+   153→  // KYC (Didit)
+   154→  kycSessionId        String?
+   155→  kycSessionToken     String? // Token for embedded widget
+   156→  kycSessionCreatedAt DateTime?
+   157→  kycCompletedAt      DateTime?
+   158→  kycConfidence       Int       @default(0)
+   159→  kycData             String? // Full KYC data JSON from Didit (birthDate, nationality, etc)
+   160→
+   161→  // KYC Document Details (from Didit)
+   162→  kycBirthDate          DateTime? // Data de nascimento
+   163→  kycNationality        String? // Nacionalidade (BRA, PT, etc)
+   164→  kycDocumentIssueDate  DateTime? // Data de emissão
+   165→  kycDocumentExpiryDate DateTime? // Data de validade
+   166→  kycDocumentIssuer     String? // Órgão emissor
+   167→
+   168→  // KYC Test Mode
+   169→  kycTestMode       Boolean @default(false) // Enable/disable KYC test mode
+   170→  kycTestModeStatus String? // Status of test mode: PENDING, COMPLETED, FAILED, APPROVED
+   171→
+   172→  // Payment Test Mode
+   173→  paymentTestMode Boolean @default(false) // Enable/disable payment test mode
+   174→
+   175→  // Antecedentes criminais
+   176→  backgroundCheckStatus String? @default("PENDING") // PENDING, SUBMITTED, VERIFIED, REJECTED
+   177→  backgroundCheckUrl    String? // URL do comprovante
+   178→
+   179→  // Notificações
+   180→  notificationsEmail Boolean @default(true)
+   181→  notificationsPush  Boolean @default(false)
+   182→
+   183→  // Metadados
+   184→  profileImage      String?
+   185→  preferredLanguage String  @default("pt")
+   186→  timezone          String  @default("Europe/Lisbon")
+   187→
+   188→  // Timestamps
+   189→  createdAt   DateTime  @default(now())
+   190→  updatedAt   DateTime  @updatedAt
+   191→  lastLoginAt DateTime?
+   192→
+   193→  // Relations
+   194→  kycTestLogs      KycTestLog[]       @relation("UserKycTestLogs")
+   195→  paymentTestLogs  PaymentTestLog[]   @relation("UserPaymentTestLogs")
+   196→  profileFamily             ProfileFamily?
+   197→  profileCaregiver          ProfileCaregiver?
+   198→  adminProfile              AdminUser?
+   199→  payments                  Payment[]
+   200→  contractsAsFamily         Contract[]             @relation("FamilyContracts")
+   201→  contractsAsCaregiver      Contract[]             @relation("CaregiverContracts")
+   202→  reviewsGiven              Review[]               @relation("ReviewsGiven")
+   203→  reviewsReceived           Review[]               @relation("ReviewsReceived")
+   204→  chatMessages              ChatMessage[]
+   205→  chatParticipations        ChatParticipant[]
+   206→  notifications             Notification[]
+   207→  sessions                  Session[]
+   208→  accounts                  Account[]
+   209→  presenceConfirmationScans PresenceConfirmation[] @relation("PresenceConfirmationScans")
+   210→
+   211→  // Demands (Marketplace)
+   212→  demandsCreated      Demand[]             @relation("DemandFamily")
+   213→  demandViews         DemandView[]         @relation("DemandViewCaregiver")
+   214→  demandNotifications DemandNotification[] @relation("DemandNotifications")
+   215→  proposalsGiven      Proposal[]           @relation("ProposalsGiven")
+   216→}
+   217→
+   218→// Perfil do Familiar (contratante)
+   219→model ProfileFamily {
+   220→  id     String @id @default(cuid())
+   221→  userId String @unique
+   222→  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+   223→
+   224→  // Localização
+   225→  address    String?
+   226→  city       String?
+   227→  postalCode String?
+   228→  country    String  @default("PT")
+   229→  latitude   Float?
+   230→  longitude  Float?
+   231→
+   232→  // Informações do Idoso
+   233→  elderName         String?
+   234→  elderAge          Int?
+   235→  elderNeeds        String? // Descrição das necessidades
+   236→  medicalConditions String? // Condições médicas relevantes
+   237→  mobilityLevel     String? // Nível de mobilidade
+   238→
+   239→  // Contato de Emergência
+   240→  emergencyContactName     String?
+   241→  emergencyContactPhone    String?
+   242→  emergencyContactRelation String?
+   243→
+   244→  // Preferências
+   245→  preferredServices String? // Serviços desejados (JSON array)
+   246→  preferredSchedule String? // Horários preferidos (JSON)
+   247→  budgetRange       String? // Faixa de orçamento
+   248→
+   249→  createdAt DateTime @default(now())
+   250→  updatedAt DateTime @updatedAt
+   251→}
+   252→
+   253→// Perfil do Cuidador (profissional)
+   254→model ProfileCaregiver {
+   255→  id     String @id @default(cuid())
+   256→  userId String @unique
+   257→  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+   258→
+   259→  // Informações Profissionais
+   260→  title           String? // Ex: "Enfermeira", "Cuidadora"
+   261→  bio             String? // Descrição pessoal
+   262→  experienceYears Int?
+   263→  education       String? // Formação acadêmica
+   264→  certifications  String? // Certificações (JSON array)
+   265→  languages       String? // Idiomas falados (JSON array)
+   266→
+   267→  // Localização e Disponibilidade
+   268→  address    String?
+   269→  city       String?
+   270→  postalCode String?
+   271→  country    String  @default("PT")
+   272→  latitude   Float?
+   273→  longitude  Float?
+   274→  radiusKm   Int     @default(20) // Raio de atuação em km
+   275→
+   276→  // Serviços e Preços
+   277→  services      String? // Serviços oferecidos (JSON array de ServiceType)
+   278→  hourlyRateEur Int     @default(15) // Preço por hora em centavos
+   279→  minimumHours  Int     @default(2) // Mínimo de horas por serviço
+   280→
+   281→  // Disponibilidade
+   282→  availabilityJson String? // Disponibilidade semanal (JSON)
+   283→  availableNow     Boolean @default(false)
+   284→
+   285→  // Verificação
+   286→  verificationStatus    VerificationStatus @default(UNVERIFIED)
+   287→  documentType          String? // Tipo de documento
+   288→  documentNumber        String? // Número do documento
+   289→  documentVerified      Boolean            @default(false)
+   290→  backgroundCheckStatus String? // Status da verificação de antecedentes
+   291→
+   292→  // KYC Session (Didit)
+   293→  kycSessionId        String?
+   294→  kycSessionCreatedAt DateTime?
+   295→  kycCompletedAt      DateTime?
+   296→  kycConfidence       Int       @default(0)
+   297→
+   298→  // Estatísticas
+   299→  totalContracts   Int   @default(0)
+   300→  totalHoursWorked Int   @default(0)
+   301→  averageRating    Float @default(0)
+   302→  totalReviews     Int   @default(0)
+   303→
+   304→  // Destaque
+   305→  featured Int @default(0) // 0 = não destacado, 1 = destacado
+   306→
+   307→  // Portfolio
+   308→  profileImage    String?
+   309→  portfolioImages String? // JSON array de URLs
+   310→
+   311→  // Contacto de Emergência
+   312→  emergencyContactName     String?
+   313→  emergencyContactPhone    String?
+   314→  emergencyContactRelation String?
+   315→
+   316→  // Pagamentos / Recebimentos
+   317→  iban                        String? // IBAN para transferência SEPA
+   318→  preferredPaymentMethod      String  @default("IBAN") // IBAN, STRIPE_CONNECT, EASYPAY
+   319→  stripeConnectAccountId      String? // Stripe Connect account ID
+   320→  stripeConnectOnboardingComplete Boolean @default(false) // Whether Stripe onboarding is done
+   321→
+   322→  createdAt DateTime @default(now())
+   323→  updatedAt DateTime @updatedAt
+   324→}
+   325→
+   326→// ==================== PAYMENTS ====================
+   327→
+   328→model Payment {
+   329→  id     String @id @default(cuid())
+   330→  userId String
+   331→  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+   332→
+   333→  // Tipo e Status
+   334→  type     PaymentType
+   335→  status   PaymentStatus   @default(PENDING)
+   336→  provider PaymentProvider @default(STRIPE)
+   337→
+   338→  // Valores
+   339→  amountEurCents Int // Valor em centavos de euro
+   340→  platformFee    Int @default(0) // Taxa da plataforma em centavos
+   341→
+   342→  // Stripe
+   343→  stripeCheckoutSessionId String?
+   344→  stripePaymentIntentId   String?
+   345→  stripeCustomerId        String?
+   346→
+   347→  // Referência
+   348→  contractId String? // Se for pagamento de contrato
+   349→  contract   Contract? @relation(fields: [contractId], references: [id])
+   350→
+   351→  demandId String? // Se for pagamento de visibilidade de demanda
+   352→  demand   Demand? @relation(fields: [demandId], references: [id], onDelete: Cascade)
+   353→
+   354→  // Metadata
+   355→  description String?
+   356→  metadata    String? // JSON adicional (para visibility boost: {"package": "BASIC", "expiresAt": "..."}
+   357→
+   358→  // Approval (para mock/internal payments)
+   359→  approvedAt DateTime?
+   360→  approvedByAdminId String?
+   361→
+   362→  // Test Mode Logs
+   363→  testLogs PaymentTestLog[]
+   364→
+   365→  // Timestamps
+   366→  createdAt  DateTime  @default(now())
+   367→  paidAt     DateTime?
+   368→  refundedAt DateTime?
+   369→
+   370→  @@index([userId, status])
+   371→  @@index([status, createdAt])
+   372→  @@index([provider, status])
+   373→}
+   374→
+   375→// ==================== CONTRACTS ====================
+   376→
+   377→model Contract {
+   378→  id String @id @default(cuid())
+   379→
+   380→  // Partes
+   381→  familyUserId    String
+   382→  familyUser      User   @relation("FamilyContracts", fields: [familyUserId], references: [id])
+   383→  caregiverUserId String
+   384→  caregiverUser   User   @relation("CaregiverContracts", fields: [caregiverUserId], references: [id])
+   385→
+   386→  // Status
+   387→  status ContractStatus @default(DRAFT)
+   388→
+   389→  // Detalhes do Serviço
+   390→  title        String?
+   391→  description  String?
+   392→  tasksJson    String? // Lista de tarefas (JSON array)
+   393→  serviceTypes String? // Tipos de serviço (JSON array)
+   394→
+   395→  // Horários
+   396→  hoursPerWeek Int?
+   397→  scheduleJson String? // Horários detalhados (JSON)
+   398→
+   399→  // Valores
+   400→  hourlyRateEur  Int // Taxa por hora em centavos
+   401→  totalHours     Int // Total de horas
+   402→  totalEurCents  Int // Valor total em centavos
+   403→  platformFeePct Int @default(15) // Percentual da plataforma
+   404→
+   405→  // Datas
+   406→  startDate DateTime?
+   407→  endDate   DateTime?
+   408→
+   409→  // Taxa de contrato
+   410→  familyFeePaid    Boolean @default(false)
+   411→  caregiverFeePaid Boolean @default(false)
+   412→
+   413→  // Aceite
+   414→  acceptedByFamilyAt    DateTime?
+   415→  acceptedByCaregiverAt DateTime?
+   416→
+   417→  // Pagamentos
+   418→  totalPaidEurCents Int @default(0)
+   419→
+   420→  // Presença
+   421→  presenceConfirmationEnabled Boolean @default(false)
+   422→
+   423→  // Weekly Payment System (NEW)
+   424→  weeklyPaymentEnabled   Boolean   @default(false) // Toggle para aprovação semanal
+   425→  paymentCycleStartDate  DateTime? // Data de início do ciclo de 30 dias
+   426→  renewalContractId      String?   // Link para próximo contrato (se renovado)
+   427→
+   428→  // Timestamps
+   429→  createdAt   DateTime  @default(now())
+   430→  updatedAt   DateTime  @updatedAt
+   431→  completedAt DateTime?
+   432→  cancelledAt DateTime?
+   433→
+   434→  // Relations
+   435→  acceptance            ContractAcceptance?
+   436→  payments              Payment[]
+   437→  reviews               Review[]
+   438→  presenceConfirmations PresenceConfirmation[] @relation("presenceConfirmations")
+   439→
+   440→  @@index([familyUserId, status])
+   441→  @@index([caregiverUserId, status])
+   442→  @@index([status, createdAt])
+   443→}
+   444→
+   445→model ContractAcceptance {
+   446→  id         String   @id @default(cuid())
+   447→  contractId String   @unique
+   448→  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+   449→
+   450→  acceptedByFamilyAt DateTime?
+   451→  familyIpAddress    String?
+   452→  familyUserAgent    String?
+   453→
+   454→  acceptedByCaregiverAt DateTime?
+   455→  caregiverIpAddress    String?
+   456→  caregiverUserAgent    String?
+   457→
+   458→  createdAt DateTime @default(now())
+   459→}
+   460→
+   461→// ==================== WEEKLY PAYMENT APPROVAL ====================
+   462→
+   463→model WeeklyPaymentApproval {
+   464→  id                      String   @id @default(cuid())
+   465→  contractId              String
+   466→
+   467→  // Identificação
+   468→  weekNumber              Int // 1-4
+   469→
+   470→  // Valores (calculados: totalEurCents / 30 * diasReaisDaSemana)
+   471→  weeklyAmountCents       Int // Valor da semana em centavos
+   472→  platformFeeCents        Int // Taxa da plataforma
+   473→  caregiverAmountCents    Int // O que o cuidador recebe
+   474→
+   475→  // Timeline
+   476→  approvalDueAt           DateTime // Prazo para aprovação (ex: sexta 17h)
+   477→  createdAt               DateTime @default(now())
+   478→  approvedAt              DateTime?
+   479→  capturedAt              DateTime?
+   480→
+   481→  // Decisão da Família
+   482→  familyDecision          String? // null | "APPROVED" | "DISPUTED"
+   483→  familyDecidedAt         DateTime?
+   484→  familyNotes             String? // Motivo se disputado
+   485→
+   486→  // Integração Stripe
+   487→  stripePaymentHoldId     String? // Link a StripePaymentHold
+   488→  familyPaymentId         String? // Link a FamilyPayment
+   489→  caregiverTransferId     String? // Link a CaregiverTransfer
+   490→
+   491→  // Status
+   492→  status                  String @default("PENDING") // "PENDING" | "APPROVED" | "CAPTURED" | "DISPUTED" | "REFUNDED"
+   493→
+   494→  // Índices para performance
+   495→  @@index([contractId, weekNumber])
+   496→  @@index([familyDecision, status])
+   497→  @@index([approvalDueAt, status])
+   498→  @@unique([contractId, weekNumber])
+   499→}
+   500→
+   501→// ==================== CAREGIVER TRANSFERS ====================
+   502→
+   503→model CaregiverTransfer {
+   504→  id String @id @default(cuid())
+   505→
+   506→  caregiverId String
+   507→  contractId  String
+   508→
+   509→  // Amounts
+   510→  grossAmount        Int // Gross amount in cents
+   511→  platformFeePercent Int  @default(15)
+   512→  platformFeeCents   Int // Platform fee in cents
+   513→  netAmount          Int // Net amount to caregiver in cents
+   514→
+   515→  // Stripe
+   516→  stripeTransferId String?
+   517→
+   518→  // Status
+   519→  status String @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+   520→
+   521→  createdAt DateTime @default(now())
+   522→  updatedAt DateTime @updatedAt
+   523→
+   524→  @@index([caregiverId, status])
+   525→  @@index([contractId])
+   526→}
+   527→
+   528→// ==================== TIPS (GORJETAS) ====================
+   529→
+   530→// ==================== REVIEWS ====================
+   531→
+   532→model Review {
+   533→  id String @id @default(cuid())
+   534→
+   535→  // Contrato e Usuários
+   536→  contractId String
+   537→  contract   Contract @relation(fields: [contractId], references: [id])
+   538→  fromUserId String
+   539→  fromUser   User     @relation("ReviewsGiven", fields: [fromUserId], references: [id])
+   540→  toUserId   String
+   541→  toUser     User     @relation("ReviewsReceived", fields: [toUserId], references: [id])
+   542→
+   543→  // Avaliação
+   544→  rating  Int // 1-5
+   545→  comment String?
+   546→
+   547→  // Categorias específicas
+   548→  punctualityRating     Int? // 1-5
+   549→  professionalismRating Int? // 1-5
+   550→  communicationRating   Int? // 1-5
+   551→  careExperienceRating  Int? // 1-5 // Subjective user opinion, not Evyra quality verification
+   552→
+   553→  // Status
+   554→  isPublic    Boolean @default(true)
+   555→  isModerated Boolean @default(false)
+   556→
+   557→  createdAt DateTime @default(now())
+   558→  updatedAt DateTime @updatedAt
+   559→
+   560→  @@index([toUserId, createdAt])
+   561→}
+   562→
+   563→// ==================== CHAT ====================
+   564→
+   565→model ChatRoom {
+   566→  id String @id @default(cuid())
+   567→
+   568→  // Tipo de chat
+   569→  type String @default("direct") // direct, contract, support
+   570→
+   571→  // Referência (contrato, etc.)
+   572→  referenceType String?
+   573→  referenceId   String?
+   574→
+   575→  // Status
+   576→  isActive Boolean @default(true)
+   577→
+   578→  // Timestamps
+   579→  createdAt DateTime @default(now())
+   580→  updatedAt DateTime @updatedAt
+   581→
+   582→  // Relations
+   583→  participants ChatParticipant[]
+   584→  messages     ChatMessage[]
+   585→}
+   586→
+   587→model ChatParticipant {
+   588→  id String @id @default(cuid())
+   589→
+   590→  chatRoomId String
+   591→  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+   592→
+   593→  userId String
+   594→  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+   595→
+   596→  // Status
+   597→  lastReadAt  DateTime?
+   598→  unreadCount Int       @default(0)
+   599→
+   600→  createdAt DateTime @default(now())
+   601→
+   602→  @@unique([chatRoomId, userId])
+   603→}
+   604→
+   605→model ChatMessage {
+   606→  id String @id @default(cuid())
+   607→
+   608→  chatRoomId String
+   609→  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+   610→
+   611→  senderId String
+   612→  sender   User   @relation(fields: [senderId], references: [id])
+   613→
+   614→  // Conteúdo
+   615→  content     String
+   616→  messageType String @default("text") // text, image, file, system
+   617→
+   618→  // Metadata
+   619→  metadata String? // JSON (file url, image, etc.)
+   620→
+   621→  // Status
+   622→  isEdited  Boolean @default(false)
+   623→  isDeleted Boolean @default(false)
+   624→
+   625→  createdAt DateTime @default(now())
+   626→  updatedAt DateTime @updatedAt
+   627→
+   628→  @@index([chatRoomId, createdAt])
+   629→}
+   630→
+   631→// ==================== NOTIFICATIONS ====================
+   632→
+   633→model Notification {
+   634→  id String @id @default(cuid())
+   635→
+   636→  userId String
+   637→  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+   638→
+   639→  // Tipo e Conteúdo
+   640→  type    String // contract, payment, message, system, etc.
+   641→  title   String
+   642→  message String
+   643→
+   644→  // Referência
+   645→  referenceType String?
+   646→  referenceId   String?
+   647→
+   648→  // Status
+   649→  isRead Boolean   @default(false)
+   650→  readAt DateTime?
+   651→
+   652→  // Entrega
+   653→  emailSent Boolean @default(false)
+   654→  pushSent  Boolean @default(false)
+   655→
+   656→  createdAt DateTime @default(now())
+   657→
+   658→  @@index([userId, isRead, createdAt])
+   659→}
+   660→
+   661→// ==================== SYSTEM SETTINGS ====================
+   662→
+   663→model PlatformSettings {
+   664→  id String @id @default(cuid())
+   665→
+   666→  activationCostEurCents Int @default(3500) // €35
+   667→  contractFeeEurCents    Int @default(500) // €5
+   668→  platformFeePercent     Int @default(15) // 15%
+   669→
+   670→  // Test Mode Settings
+   671→  kycTestModeEnabled        Boolean @default(false) // Enable KYC test mode globally
+   672→  paymentTestModeEnabled    Boolean @default(false) // Enable payment test mode globally
+   673→
+   674→  updatedAt DateTime @updatedAt
+   675→}
+   676→
+   677→// ==================== AUTH (NextAuth) ====================
+   678→
+   679→model Account {
+   680→  id     String @id @default(cuid())
+   681→  userId String
+   682→  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+   683→
+   684→  type              String
+   685→  provider          String
+   686→  providerAccountId String
+   687→  refresh_token     String?
+   688→  access_token      String?
+   689→  expires_at        Int?
+   690→  token_type        String?
+   691→  scope             String?
+   692→  id_token          String?
+   693→  session_state     String?
+   694→
+   695→  createdAt DateTime @default(now())
+   696→
+   697→  @@unique([provider, providerAccountId])
+   698→  @@index([userId])
+   699→}
+   700→
+   701→model Session {
+   702→  id           String   @id @default(cuid())
+   703→  sessionToken String   @unique
+   704→  userId       String
+   705→  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+   706→  expires      DateTime
+   707→  createdAt    DateTime @default(now())
+   708→
+   709→  @@index([userId])
+   710→}
+   711→
+   712→model VerificationToken {
+   713→  identifier String
+   714→  token      String   @unique
+   715→  expires    DateTime
+   716→  createdAt  DateTime @default(now())
+   717→
+   718→  @@unique([identifier, token])
+   719→}
+   720→
+   721→// ==================== INTERVIEWS ====================
+   722→
+   723→model Interview {
+   724→  id String @id @default(cuid())
+   725→
+   726→  // Participants
+   727→  familyUserId    String
+   728→  caregiverUserId String
+   729→  contractId      String?
+   730→
+   731→  // Status
+   732→  status String @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+   733→
+   734→  // Scheduling
+   735→  scheduledAt     DateTime
+   736→  durationMinutes Int      @default(30)
+   737→
+   738→  // Video
+   739→  videoRoomUrl  String?
+   740→  videoProvider String  @default("jitsi")
+   741→
+   742→  // Questionnaire (family fills after interview)
+   743→  questionnaireJson String? // JSON with ratings and notes
+   744→  familyCompletedAt DateTime?
+   745→
+   746→  // Caregiver feedback (caregiver fills after interview)
+   747→  caregiverQuestionnaireJson String?
+   748→  caregiverNotes             String?
+   749→  caregiverCompletedAt       DateTime?
+   750→
+   751→  // Timestamps
+   752→  startedAt DateTime?
+   753→  endedAt   DateTime?
+   754→  createdAt DateTime  @default(now())
+   755→  updatedAt DateTime  @updatedAt
+   756→
+   757→  @@index([familyUserId, status])
+   758→  @@index([caregiverUserId, status])
+   759→}
+   760→
+   761→// ==================== TERMS ACCEPTANCE ====================
+   762→
+   763→model TermsAcceptance {
+   764→  id           String   @id @default(cuid())
+   765→  userId       String
+   766→  termsType    String // terms_of_use, privacy_policy, contract_template, mediation_policy
+   767→  termsVersion String   @default("1.0")
+   768→  ipAddress    String?
+   769→  userAgent    String?
+   770→  acceptedAt   DateTime @default(now())
+   771→
+   772→  @@index([userId, termsType])
+   773→}
+   774→
+   775→// ==================== GUIDE ACCEPTANCE ====================
+   776→
+   777→// ==================== ESCROW PAYMENTS ====================
+   778→
+   779→model EscrowPayment {
+   780→  id              String @id @default(cuid())
+   781→  contractId      String
+   782→  paymentIntentId String @unique // Stripe PaymentIntent ID
+   783→
+   784→  // Amounts
+   785→  totalAmountCents     Int
+   786→  platformFeeCents     Int
+   787→  caregiverAmountCents Int
+   788→
+   789→  // Status
+   790→  status String @default("HELD") // HELD, RELEASED, REFUNDED, PARTIAL_REFUND
+   791→
+   792→  // Stripe Connect
+   793→  familyCustomerId   String?
+   794→  caregiverAccountId String? // Stripe Connect account
+   795→  transferId         String? // Transfer to caregiver
+   796→  platformTransferId String? // Transfer to platform
+   797→
+   798→  // Timestamps
+   799→  capturedAt DateTime?
+   800→  releasedAt DateTime?
+   801→  refundedAt DateTime?
+   802→  createdAt  DateTime  @default(now())
+   803→  updatedAt  DateTime  @updatedAt
+   804→
+   805→  @@index([contractId])
+   806→}
+   807→
+   808→// ==================== ADMIN SYSTEM MODELS ====================
+   809→
+   810→model AdminUser {
+   811→  id     String @id @default(cuid())
+   812→  userId String @unique
+   813→  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+   814→
+   815→  role AdminRole @default(ADMIN)
+   816→
+   817→  // Permissions override (JSON)
+   818→  customPermissions String? // JSON object for specific permission overrides
+   819→
+   820→  // Access
+   821→  isActive          Boolean   @default(true)
+   822→  lastAdminActionAt DateTime?
+   823→
+   824→  // Two-Factor Authentication
+   825→  twoFactorEnabled Boolean @default(false)
+   826→  twoFactorSecret  String?
+   827→
+   828→  // Metadata
+   829→  createdAt DateTime @default(now())
+   830→  updatedAt DateTime @updatedAt
+   831→
+   832→  // Relations
+   833→  adminActions AdminAction[]
+   834→
+   835→  @@index([role])
+   836→  @@index([isActive])
+   837→}
+   838→
+   839→model AdminAction {
+   840→  id          String    @id @default(cuid())
+   841→  adminUserId String
+   842→  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+   843→
+   844→  // Action Details
+   845→  action     String // CREATE, UPDATE, DELETE, VIEW, IMPERSONATE, SUSPEND, ACTIVATE, VERIFY_KYC, etc.
+   846→  entityType String // USER, CONTRACT, PAYMENT, TOKEN, CAREGIVER, REVIEW, etc.
+   847→  entityId   String? // ID of affected entity
+   848→
+   849→  // Data (JSON strings)
+   850→  oldValue String? // JSON of previous state
+   851→  newValue String? // JSON of new state
+   852→
+   853→  // Context
+   854→  ipAddress String?
+   855→  userAgent String?
+   856→  reason    String? // Required for destructive actions
+   857→
+   858→  createdAt DateTime @default(now())
+   859→
+   860→  @@index([adminUserId, createdAt])
+   861→  @@index([entityType, entityId])
+   862→  @@index([createdAt])
+   863→}
+   864→
+   865→// ==================== SUPPORT TICKETS ====================
+   866→
+   867→model SupportTicket {
+   868→  id     String @id @default(cuid())
+   869→  userId String
+   870→
+   871→  // Ticket Info
+   872→  subject     String
+   873→  description String
+   874→  category    String @default("general") // general, payment, contract, technical, complaint
+   875→
+   876→  // Status
+   877→  status   String @default("open") // open, in_progress, waiting_user, resolved, closed
+   878→  priority String @default("normal") // low, normal, high, urgent
+   879→
+   880→  // Dispute / Contract link
+   881→  type       String? // DISPUTE, general, etc.
+   882→  contractId String? // Link to contract for dispute tickets
+   883→
+   884→  // Assignment
+   885→  assignedToId String? // Admin user ID
+   886→  assignedAt   DateTime?
+   887→
+   888→  // Resolution
+   889→  resolution   String?
+   890→  resolvedAt   DateTime?
+   891→  resolvedById String?
+   892→
+   893→  // Timestamps
+   894→  createdAt DateTime @default(now())
+   895→  updatedAt DateTime @updatedAt
+   896→
+   897→  // Relations
+   898→  messages SupportTicketMessage[]
+   899→
+   900→  @@index([userId, status])
+   901→  @@index([status, priority])
+   902→  @@index([assignedToId])
+   903→}
+   904→
+   905→model SupportTicketMessage {
+   906→  id       String        @id @default(cuid())
+   907→  ticketId String
+   908→  ticket   SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+   909→
+   910→  // Sender
+   911→  senderId   String // User ID or Admin ID
+   912→  senderType String // "user" or "admin"
+   913→  senderName String
+   914→
+   915→  // Content
+   916→  content     String
+   917→  attachments String? // JSON array of file URLs
+   918→
+   919→  // Timestamps
+   920→  createdAt DateTime @default(now())
+   921→
+   922→  @@index([ticketId, createdAt])
+   923→}
+   924→
+   925→// ==================== RECEIPTS ====================
+   926→
+   927→model Receipt {
+   928→  id String @id @default(cuid())
+   929→
+   930→  // Contract and Users
+   931→  contractId      String
+   932→  familyUserId    String
+   933→  caregiverUserId String
+   934→
+   935→  // Receipt Details
+   936→  receiptNumber        String   @unique // e.g., "RC-2026-000123"
+   937→  periodStart          DateTime
+   938→  periodEnd            DateTime
+   939→  hoursWorked          Int
+   940→  hourlyRateEurCents   Int
+   941→  totalAmountCents     Int
+   942→  platformFeeCents     Int
+   943→  caregiverAmountCents Int
+   944→
+   945→  // Tax info
+   946→  familyNif    String?
+   947→  caregiverNif String?
+   948→
+   949→  // Status
+   950→  status String @default("GENERATED") // GENERATED, SENT, DOWNLOADED
+   951→
+   952→  // Timestamps
+   953→  createdAt DateTime @default(now())
+   954→
+   955→  @@index([contractId])
+   956→  @@index([familyUserId, createdAt])
+   957→  @@index([caregiverUserId, createdAt])
+   958→}
+   959→
+   960→// ==================== RECURRING PAYMENTS ====================
+   961→
+   962→model RecurringPayment {
+   963→  id String @id @default(cuid())
+   964→
+   965→  contractId      String
+   966→  familyUserId    String
+   967→  caregiverUserId String
+   968→
+   969→  // Payment details
+   970→  amountCents          Int
+   971→  platformFeeCents     Int
+   972→  caregiverAmountCents Int
+   973→
+   974→  // Billing period
+   975→  billingDay  Int       @default(1) // Day of month
+   976→  periodStart DateTime
+   977→  periodEnd   DateTime?
+   978→
+   979→  // Status
+   980→  status         String    @default("ACTIVE") // ACTIVE, PAUSED, CANCELLED
+   981→  lastPaymentAt  DateTime?
+   982→  nextPaymentAt  DateTime?
+   983→  failedAttempts Int       @default(0)
+   984→
+   985→  // Stripe
+   986→  stripeSubscriptionId String?
+   987→  stripeCustomerId     String?
+   988→  stripePriceId        String?
+   989→
+   990→  createdAt DateTime @default(now())
+   991→  updatedAt DateTime @updatedAt
+   992→
+   993→  @@index([contractId])
+   994→  @@index([status, nextPaymentAt])
+   995→}
+   996→
+   997→// ==================== FEATURE FLAGS ====================
+   998→
+   999→// ==================== ADMIN NOTIFICATIONS ====================
+  1000→
+  1001→model AdminNotification {
+  1002→  id String @id @default(cuid())
+  1003→
+  1004→  // Type and Content
+  1005→  type    String // system, user, contract, payment, alert, etc.
+  1006→  title   String
+  1007→  message String
+  1008→
+  1009→  // Reference
+  1010→  entityType String? // User, Contract, Payment, etc.
+  1011→  entityId   String? // ID of related entity
+  1012→
+  1013→  // Severity
+  1014→  severity String @default("INFO") // INFO, WARNING, ERROR, CRITICAL
+  1015→
+  1016→  // Status
+  1017→  isRead Boolean   @default(false)
+  1018→  readAt DateTime?
+  1019→  readBy String? // Admin user ID who read it
+  1020→
+  1021→  createdAt DateTime @default(now())
+  1022→
+  1023→  @@index([isRead, createdAt])
+  1024→  @@index([type, createdAt])
+  1025→}
+  1026→
+  1027→// ==================== API KEYS ====================
+  1028→
+  1029→model ApiKey {
+  1030→  id String @id @default(cuid())
+  1031→
+  1032→  // Identification
+  1033→  name      String // Human-readable name
+  1034→  keyHash   String @unique // Hashed API key
+  1035→  keyPrefix String // First 8 chars for identification (e.g., "sk_live_")
+  1036→
+  1037→  // Permissions
+  1038→  permissions String? // JSON array of permissions
+  1039→
+  1040→  // Status
+  1041→  isActive   Boolean   @default(true)
+  1042→  lastUsedAt DateTime?
+  1043→  expiresAt  DateTime?
+  1044→
+  1045→  // Owner
+  1046→  createdBy String // Admin user ID
+  1047→
+  1048→  createdAt DateTime @default(now())
+  1049→
+  1050→  @@index([isActive])
+  1051→  @@index([createdBy])
+  1052→}
+  1053→
+  1054→// ==================== EMAIL TEMPLATES ====================
+  1055→
+  1056→model EmailTemplate {
+  1057→  id String @id @default(cuid())
+  1058→
+  1059→  // Identification
+  1060→  key String @unique // e.g., "welcome", "password_reset", "contract_created"
+  1061→
+  1062→  // Content
+  1063→  subject  String // Email subject (can use {{variables}})
+  1064→  bodyHtml String // HTML body
+  1065→  bodyText String? // Plain text version (optional)
+  1066→
+  1067→  // Variables
+  1068→  variables String? // JSON array of available variables
+  1069→
+  1070→  // Status
+  1071→  isActive Boolean @default(true)
+  1072→
+  1073→  createdAt DateTime @default(now())
+  1074→  updatedAt DateTime @updatedAt
+  1075→
+  1076→  @@index([isActive])
+  1077→}
+  1078→
+  1079→// ==================== IMPERSONATION LOGS ====================
+  1080→
+  1081→model ImpersonationLog {
+  1082→  id String @id @default(cuid())
+  1083→
+  1084→  // Participants
+  1085→  adminUserId  String // Admin who impersonated
+  1086→  targetUserId String // User being impersonated
+  1087→
+  1088→  // Reason
+  1089→  reason String? // Why impersonation was needed
+  1090→
+  1091→  // Timing
+  1092→  startedAt       DateTime  @default(now())
+  1093→  endedAt         DateTime?
+  1094→  durationSeconds Int? // Calculated duration
+  1095→
+  1096→  // Context
+  1097→  ipAddress String?
+  1098→  userAgent String?
+  1099→
+  1100→  @@index([adminUserId, startedAt])
+  1101→  @@index([targetUserId, startedAt])
+  1102→}
+  1103→
+  1104→// ==================== MODERATION QUEUE ====================
+  1105→
+  1106→model ModerationQueue {
+  1107→  id String @id @default(cuid())
+  1108→
+  1109→  // Entity being moderated
+  1110→  entityType String // Review, Profile, Message, etc.
+  1111→  entityId   String // ID of the entity
+  1112→
+  1113→  // Reporter
+  1114→  reportedBy String? // User ID who reported (null if system)
+  1115→
+  1116→  // Reason
+  1117→  reason String // Why it needs moderation
+  1118→
+  1119→  // Status
+  1120→  status String @default("PENDING") // PENDING, REVIEWING, RESOLVED, DISMISSED
+  1121→
+  1122→  // Resolution
+  1123→  reviewedBy String? // Admin user ID
+  1124→  reviewedAt DateTime?
+  1125→  action     String? // DELETE, WARN, BAN, DISMISS
+  1126→  notes      String? // Admin notes
+  1127→
+  1128→  createdAt DateTime @default(now())
+  1129→
+  1130→  @@index([status, createdAt])
+  1131→  @@index([entityType, entityId])
+  1132→}
+  1133→
+  1134→// ==================== PLATFORM METRICS ====================
+  1135→
+  1136→model PlatformMetric {
+  1137→  id String @id @default(cuid())
+  1138→
+  1139→  // Metric identification
+  1140→  metricKey   String // e.g., "total_users", "revenue_mtd", "contracts_active"
+  1141→  metricValue String // Value (stored as string for flexibility)
+  1142→
+  1143→  // Timing
+  1144→  computedAt DateTime @default(now())
+  1145→  period     String? // "daily", "weekly", "monthly", "all_time"
+  1146→
+  1147→  @@index([metricKey, computedAt])
+  1148→  @@index([period])
+  1149→}
+  1150→
+  1151→// ==================== SCHEDULED REPORTS ====================
+  1152→
+  1153→model ScheduledReport {
+  1154→  id String @id @default(cuid())
+  1155→
+  1156→  // Identification
+  1157→  name       String // Human-readable name
+  1158→  reportType String // "users", "revenue", "contracts", "analytics"
+  1159→
+  1160→  // Schedule
+  1161→  frequency  String // "daily", "weekly", "monthly"
+  1162→  recipients String // JSON array of email addresses
+  1163→
+  1164→  // Configuration
+  1165→  filters String? // JSON object with filters
+  1166→
+  1167→  // Execution tracking
+  1168→  lastRunAt DateTime?
+  1169→  nextRunAt DateTime?
+  1170→
+  1171→  // Status
+  1172→  isActive Boolean @default(true)
+  1173→
+  1174→  // Owner
+  1175→  createdBy String // Admin user ID
+  1176→
+  1177→  createdAt DateTime @default(now())
+  1178→
+  1179→  @@index([isActive, nextRunAt])
+  1180→  @@index([createdBy])
+  1181→}
+  1182→
+  1183→// ==================== PRESENCE CONFIRMATION ====================
+  1184→
+  1185→model PresenceConfirmation {
+  1186→  id         String   @id @default(cuid())
+  1187→  contractId String
+  1188→  contract   Contract @relation("presenceConfirmations", fields: [contractId], references: [id], onDelete: Cascade)
+  1189→
+  1190→  // QR Code Generation
+  1191→  qrCode        String   @unique // Random token (24h validity)
+  1192→  qrGeneratedAt DateTime @default(now())
+  1193→  qrExpiresAt   DateTime // today + 24h
+  1194→
+  1195→  // Scan Record
+  1196→  scannedAt       DateTime?
+  1197→  scannedByUserId String?
+  1198→  scannedByUser   User?     @relation("PresenceConfirmationScans", fields: [scannedByUserId], references: [id], onDelete: SetNull)
+  1199→
+  1200→  // Communication Record (voluntary scan data)
+  1201→  ipAddress String? // Anti-fraud only, not proof of presence
+  1202→  userAgent String? // Anti-fraud only, not proof of presence
+  1203→
+  1204→  // Status
+  1205→  status String @default("pending") // pending | confirmed | expired
+  1206→
+  1207→  createdAt DateTime @default(now())
+  1208→  updatedAt DateTime @updatedAt
+  1209→
+  1210→  @@index([contractId])
+  1211→  @@index([qrCode])
+  1212→  @@index([scannedByUserId])
+  1213→  @@index([qrExpiresAt])
+  1214→}
+  1215→
+  1216→// ==================== DEMANDS (MARKETPLACE) ====================
+  1217→
+  1218→model Demand {
+  1219→  id String @id @default(cuid())
+  1220→
+  1221→  // Criador (Família)
+  1222→  familyUserId String
+  1223→  familyUser   User   @relation("DemandFamily", fields: [familyUserId], references: [id], onDelete: Cascade)
+  1224→
+  1225→  // Conteúdo
+  1226→  title        String // Ex: "Cuidadora para idosa em Lisboa"
+  1227→  description  String // Descrição completa (mín. 100 chars)
+  1228→  serviceTypes String // JSON array de ServiceType
+  1229→
+  1230→  // Localização
+  1231→  address    String?
+  1232→  city       String
+  1233→  postalCode String?
+  1234→  country    String  @default("PT")
+  1235→  latitude   Float?
+  1236→  longitude  Float?
+  1237→
+  1238→  // Requisitos
+  1239→  requiredExperienceLevel ExperienceLevel @default(INTERMEDIATE)
+  1240→  requiredCertifications  String? // JSON array (CPR, FirstAid, etc)
+  1241→  careType                CareType        @default(RECURRING)
+  1242→
+  1243→  // Datas
+  1244→  desiredStartDate DateTime?
+  1245→  desiredEndDate   DateTime?
+  1246→  hoursPerWeek     Int?
+  1247→  scheduleJson     String? // JSON com horários preferidos
+  1248→
+  1249→  // Orçamento (Valores em centavos: €100 = 10000)
+  1250→  budgetEurCents       Int? // Orçamento total que a família pode gastar
+  1251→  minimumHourlyRateEur Int? // Taxa horária mínima (negociável)
+  1252→
+  1253→  // Visibilidade
+  1254→  visibilityPackage   VisibilityPackage @default(NONE)
+  1255→  visibilityExpiresAt DateTime?
+  1256→
+  1257→  // Status
+  1258→  status DemandStatus @default(ACTIVE)
+  1259→
+  1260→  // Analytics (calculados via API)
+  1261→  // viewCount: COUNT(DemandView WHERE demandId = X)
+  1262→  // proposalCount: COUNT(Proposal WHERE demandId = X)
+  1263→  // visibilitySpent: SUM(VisibilityPurchase.amount WHERE demandId = X)
+  1264→
+  1265→  // Timestamps
+  1266→  createdAt DateTime  @default(now())
+  1267→  updatedAt DateTime  @updatedAt
+  1268→  closedAt  DateTime?
+  1269→  closedReason String?
+  1270→  deletedAt DateTime?
+  1271→  deletionReason String?
+  1272→
+  1273→  // Relations
+  1274→  demandViews         DemandView[]
+  1275→  visibilityPurchases VisibilityPurchase[]
+  1276→  proposals           Proposal[]
+  1277→  demandNotifications DemandNotification[]
+  1278→  payments            Payment[]
+  1279→
+  1280→  @@index([familyUserId, status, createdAt])
+  1281→  @@index([status, visibilityPackage, visibilityExpiresAt])
+  1282→  @@index([city, status])
+  1283→  @@index([createdAt])
+  1284→}
+  1285→
+  1286→model DemandView {
+  1287→  id String @id @default(cuid())
+  1288→
+  1289→  demandId String
+  1290→  demand   Demand @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  1291→
+  1292→  caregiverId String
+  1293→  caregiver   User   @relation("DemandViewCaregiver", fields: [caregiverId], references: [id], onDelete: Cascade)
+  1294→
+  1295→  viewedAt DateTime @default(now())
+  1296→
+  1297→  @@unique([demandId, caregiverId, viewedAt]) // Evitar contagem dupla do mesmo cuidador no mesmo dia
+  1298→  @@index([demandId, viewedAt])
+  1299→  @@index([caregiverId, viewedAt])
+  1300→}
+  1301→
+  1302→model VisibilityPurchase {
+  1303→  id String @id @default(cuid())
+  1304→
+  1305→  demandId String
+  1306→  demand   Demand @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  1307→
+  1308→  familyUserId String // Para referência rápida
+  1309→
+  1310→  package        VisibilityPackage
+  1311→  amountEurCents Int // Valor em centavos (€3 = 300, €8 = 800, €15 = 1500)
+  1312→
+  1313→  // Stripe
+  1314→  stripePaymentIntentId   String?
+  1315→  stripeCheckoutSessionId String?
+  1316→
+  1317→  // Status
+  1318→  status String @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  1319→
+  1320→  purchasedAt DateTime  @default(now())
+  1321→  expiresAt   DateTime // Package duration
+  1322→  completedAt DateTime?
+  1323→
+  1324→  // Metadata
+  1325→  metadata String? // JSON adicional
+  1326→
+  1327→  // Timestamps
+  1328→  createdAt DateTime @default(now())
+  1329→  updatedAt DateTime @updatedAt
+  1330→
+  1331→  @@index([demandId, status])
+  1332→  @@index([familyUserId, createdAt])
+  1333→  @@index([expiresAt])
+  1334→  @@index([status, completedAt])
+  1335→}
+  1336→
+  1337→model DemandNotification {
+  1338→  id String @id @default(cuid())
+  1339→
+  1340→  demandId String
+  1341→  demand   Demand @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  1342→
+  1343→  caregiverId String
+  1344→  caregiver   User   @relation("DemandNotifications", fields: [caregiverId], references: [id], onDelete: Cascade)
+  1345→
+  1346→  // Tipo de notificação
+  1347→  type String // "new_demand", "demand_updated", "proposal_reminder"
+  1348→
+  1349→  // Status
+  1350→  sentAt    DateTime  @default(now())
+  1351→  readAt    DateTime?
+  1352→  emailSent Boolean   @default(false)
+  1353→  pushSent  Boolean   @default(false)
+  1354→
+  1355→  createdAt DateTime @default(now())
+  1356→
+  1357→  @@unique([demandId, caregiverId, type, sentAt])
+  1358→  @@index([caregiverId, readAt])
+  1359→  @@index([demandId])
+  1360→}
+  1361→
+  1362→// ==================== PROPOSALS (para Demandas) ====================
+  1363→
+  1364→model Proposal {
+  1365→  id String @id @default(cuid())
+  1366→
+  1367→  demandId String
+  1368→  demand   Demand @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  1369→
+  1370→  caregiverId String
+  1371→  caregiver   User   @relation("ProposalsGiven", fields: [caregiverId], references: [id], onDelete: Cascade)
+  1372→
+  1373→  // Conteúdo
+  1374→  message            String // Mensagem da proposta
+  1375→  proposedHourlyRate Int? // Taxa horária proposta (em centavos)
+  1376→  estimatedStartDate DateTime?
+  1377→
+  1378→  // Status
+  1379→  status String @default("PENDING") // PENDING, ACCEPTED, REJECTED, EXPIRED
+  1380→
+  1381→  acceptedAt DateTime?
+  1382→  rejectedAt DateTime?
+  1383→
+  1384→  // Timestamps
+  1385→  createdAt DateTime @default(now())
+  1386→  updatedAt DateTime @updatedAt
+  1387→
+  1388→  @@index([demandId, status])
+  1389→  @@index([caregiverId, status])
+  1390→  @@index([createdAt])
+  1391→}
+  1392→
+  1393→// ==================== TEST MODE LOGGING ====================
+  1394→
+  1395→model KycTestLog {
+  1396→  id            String   @id @default(cuid())
+  1397→  userId        String
+  1398→  user          User     @relation("UserKycTestLogs", fields: [userId], references: [id], onDelete: Cascade)
+  1399→
+  1400→  // Test Session
+  1401→  testSessionId String?
+  1402→  testData      String? // JSON with test configuration and data
+  1403→
+  1404→  // KYC Response
+  1405→  kycResponse   String? // JSON with KYC provider response
+  1406→  confidence    Int?
+  1407→
+  1408→  // Status
+  1409→  status        String   @default("PENDING") // PENDING, COMPLETED, FAILED, APPROVED
+  1410→  errorMessage  String?
+  1411→
+  1412→  // Timestamps
+  1413→  createdAt     DateTime @default(now())
+  1414→  completedAt   DateTime?
+  1415→
+  1416→  @@index([userId, createdAt])
+  1417→  @@index([status])
+  1418→  @@index([testSessionId])
+  1419→}
+  1420→
+  1421→model PaymentTestLog {
+  1422→  id            String   @id @default(cuid())
+  1423→  userId        String
+  1424→  user          User     @relation("UserPaymentTestLogs", fields: [userId], references: [id], onDelete: Cascade)
+  1425→
+  1426→  // Payment Reference
+  1427→  paymentId     String?
+  1428→  payment       Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  1429→
+  1430→  // Test Details
+  1431→  testAmount    Int // Test amount in cents
+  1432→  testCurrency  String   @default("EUR")
+  1433→  testProvider  String   // STRIPE, EASYPAY, BANK_TRANSFER, INTERNAL
+  1434→  testScenario  String? // success, failure_insufficient_funds, failure_timeout, etc.
+  1435→
+  1436→  // Response
+  1437→  testResponse  String? // JSON with simulated provider response
+  1438→  status        String   @default("PENDING") // PENDING, COMPLETED, FAILED, APPROVED
+  1439→  errorMessage  String?
+  1440→
+  1441→  // Timestamps
+  1442→  createdAt     DateTime @default(now())
+  1443→  completedAt   DateTime?
+  1444→
+  1445→  @@index([userId, createdAt])
+  1446→  @@index([status])
+  1447→  @@index([paymentId])
+  1448→  @@index([testScenario])
+  1449→}
+  1450→
+  1451→// ==================== PAYMENT ARCHITECTURE REFACTOR ====================
+  1452→// NOTE: These models are commented out temporarily due to schema validation issues.
+  1453→// They will be properly integrated in Phase 2 of the payment system.
+  1454→// Currently using string IDs in WeeklyPaymentApproval to reference their data.
+  1455→
+  1456→// // ============ CAREGIVER WALLET (Saldo Permanente) ============
+  1457→// model CaregiverWallet {
+  1458→//   userId String @id
+  1459→//   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  1460→//
+  1461→//   // Saldos
+  1462→//   totalEarned      Int @default(0) // Total ganho (centavos)
+  1463→//   totalWithdrawn   Int @default(0) // Total sacado (centavos)
+  1464→//   pendingPayments  Int @default(0) // Aguardando aprovação
+  1465→//   availableBalance Int @default(0) // Pode sacar agora
+  1466→//
+  1467→//   // Stripe Connect
+  1468→//   stripeConnectAccountId String?
+  1469→//
+  1470→//   // Auditoria
+  1471→//   lastWithdrawalAt DateTime?
+  1472→//   createdAt        DateTime @default(now())
+  1473→//   updatedAt        DateTime @updatedAt
+  1474→//
+  1475→//   // Relations
+  1476→//   transfers   CaregiverTransfer[]
+  1477→//   withdrawals CaregiverWithdrawal[]
+  1478→//
+  1479→//   @@index([userId])
+  1480→// }
+  1481→//
+  1482→// // ============ CAREGIVER TRANSFER (Histórico de Recebimentos) ============
+  1483→// model CaregiverTransfer {
+  1484→//   id String @id @default(cuid())
+  1485→//
+  1486→//   caregiverId String
+  1487→//   caregiver   User            @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+  1488→//   contractId  String?
+  1489→//   contract    Contract? @relation("CaregiverTransfers", fields: [contractId], references: [id], onDelete: SetNull)
+  1490→//
+  1491→//   // Valores
+  1492→//   grossAmount        Int // Antes de comissão (centavos)
+  1493→//   platformFeePercent Int @default(15) // Percentual comissão
+  1494→//   platformFeeCents   Int // Comissão calculada (centavos)
+  1495→//   netAmount          Int // O que caregiver recebe (centavos)
+  1496→//
+  1497→//   // Stripe
+  1498→//   stripeTransferId String?
+  1499→//
+  1500→//   // Status
+  1501→//   status String @default("PENDING") // PENDING, COMPLETED, FAILED
+  1502→//
+  1503→//   createdAt   DateTime  @default(now())
+  1504→//   completedAt DateTime?
+  1505→//
+  1506→//   @@index([caregiverId, status])
+  1507→//   @@index([contractId])
+  1508→// }
+  1509→//
+  1510→// // ============ CAREGIVER WITHDRAWAL (Saques) ============
+  1511→// model CaregiverWithdrawal {
+  1512→//   id String @id @default(cuid())
+  1513→//
+  1514→//   caregiverId String
+  1515→//   caregiver   User   @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+  1516→//
+  1517→//   // Valores
+  1518→//   amount      Int // Solicitado (centavos)
+  1519→//   stripeFee   Int @default(0) // Taxa Stripe (2.5%)
+  1520→//   netAmount   Int // Vai receber de verdade (centavos)
+  1521→//
+  1522→//   // Banco
+  1523→//   bankAccountLast4 String? // Privacidade
+  1524→//
+  1525→//   // Stripe
+  1526→//   stripePayoutId String?
+  1527→//
+  1528→//   // Status
+  1529→//   status String @default("PENDING") // PENDING, IN_TRANSIT, COMPLETED, FAILED
+  1530→//
+  1531→//   requestedAt DateTime
+  1532→//   arrivedAt   DateTime?
+  1533→//
+  1534→//   @@index([caregiverId, status])
+  1535→// }
+  1536→//
+  1537→// // ============ FAMILY PAYMENT (Histórico de Pagamentos) ============
+  1538→// model FamilyPayment {
+  1539→//   id String @id @default(cuid())
+  1540→//
+  1541→//   familyUserId String
+  1542→//   family       User   @relation("FamilyPayments", fields: [familyUserId], references: [id], onDelete: Cascade)
+  1543→//
+  1544→//   // O que foi pago
+  1545→//   type String // VISIBILITY_BOOST, SERVICE_PAYMENT, CONTRACT_FEE
+  1546→//   amount Int
+  1547→//
+  1548→//   // Referência
+  1549→//   demandId  String?
+  1550→//   demand    Demand? @relation("FamilyPayments", fields: [demandId], references: [id], onDelete: SetNull)
+  1551→//   contractId String?
+  1552→//   contract  Contract? @relation("FamilyPayments", fields: [contractId], references: [id], onDelete: SetNull)
+  1553→//
+  1554→//   // Stripe
+  1555→//   stripePaymentIntentId String?
+  1556→//   stripeChargeId        String?
+  1557→//
+  1558→//   // Status
+  1559→//   status String @default("PENDING") // PENDING, COMPLETED, FAILED
+  1560→//
+  1561→//   createdAt   DateTime  @default(now())
+  1562→//   completedAt DateTime?
+  1563→//
+  1564→//   @@index([familyUserId, type])
+  1565→//   @@index([contractId])
+  1566→// }
+  1567→//
+  1568→// // ============ FAMILY CREDIT (Créditos Temporários) ============
+  1569→// model FamilyCredit {
+  1570→//   id String @id @default(cuid())
+  1571→//
+  1572→//   familyUserId String
+  1573→//   family       User   @relation("FamilyCredits", fields: [familyUserId], references: [id], onDelete: Cascade)
+  1574→//
+  1575→//   // Tipo de crédito
+  1576→//   type String // PROMOTIONAL, REFUND, CASHBACK
+  1577→//   amount Int
+  1578→//
+  1579→//   // Como foi ganho
+  1580→//   reason   String? // Ex: "First boost free"
+  1581→//   sourceId String? // Ex: promoId
+  1582→//
+  1583→//   // Uso
+  1584→//   usedAt           DateTime?
+  1585→//   spentOnDemandId  String?
+  1586→//   spentOnDemand    Demand? @relation("FamilyCreditsSpent", fields: [spentOnDemandId], references: [id], onDelete: SetNull)
+  1587→//
+  1588→//   // Validade
+  1589→//   expiresAt DateTime
+  1590→//
+  1591→//   createdAt DateTime @default(now())
+  1592→//
+  1593→//   @@index([familyUserId, expiresAt])
+  1594→// }
+  1595→//
+  1596→// // ============ STRIPE PAYMENT HOLD (Escrow-like) ============
+  1597→// model StripePaymentHold {
+  1598→//   id String @id @default(cuid())
+  1599→//
+  1600→//   contractId String
+  1601→//   contract   Contract @relation("PaymentHolds", fields: [contractId], references: [id], onDelete: Cascade)
+  1602→//
+  1603→//   familyPaymentId String?
+  1604→//   familyPayment   FamilyPayment? @relation(fields: [familyPaymentId], references: [id], onDelete: SetNull)
+  1605→//
+  1606→//   // Stripe
+  1607→//   paymentIntentId String
+  1608→//
+  1609→//   // Valores
+  1610→//   amount Int // Centavos
+  1611→//
+  1612→//   // Status
+  1613→//   status String @default("AUTHORIZED") // AUTHORIZED, CAPTURED, VOIDED, FAILED
+  1614→//
+  1615→//   createdAt   DateTime
+  1616→//   expiresAt   DateTime
+  1617→//   capturedAt  DateTime?
+  1618→//   voidedAt    DateTime?
+  1619→//
+  1620→//   @@index([contractId, status])
+  1621→// }
+  1622→
+  1623→// ==================== SITE SETTINGS ====================
+  1624→
+  1625→model SiteSettings {
+  1626→  id           String   @id @default(cuid())
+  1627→  logoUrl      String   @default("")
+  1628→  logoDarkUrl  String   @default("")
+  1629→  iconUrl      String   @default("")
+  1630→  faviconUrl   String   @default("")
+  1631→  heroImageUrl String   @default("")
+  1632→  updatedAt    DateTime @updatedAt
+  1633→}
+  1634→
+  1635→// ============ UPDATE RELATIONS ==============
+  1636→
+  1637→// Adicionar a User model:
+  1638→// - caregiver  Wallet
+  1639→// - familyPayments FamilyPayment[]
+  1640→// - familyCredits FamilyCredit[]
+  1641→// - caregiverTransfers CaregiverTransfer[]
+  1642→// - caregiverWithdrawals CaregiverWithdrawal[]
+  1643→
+  1644→// Adicionar a Contract model:
+  1645→// - transfers CaregiverTransfer[] (relation "CaregiverTransfers")
+  1646→// - paymentHolds StripePaymentHold[] (relation "PaymentHolds")
+  1647→
+  1648→// Adicionar a Demand model:
+  1649→// - familyPayments FamilyPayment[]
+  1650→// - familyCreditsSpent FamilyCredit[] (relation "FamilyCreditsSpent")
+  1651→
