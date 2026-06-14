@@ -2,10 +2,20 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Loader2, Mail, Lock, Heart, Users, Check, User } from 'lucide-react';
 import { toast } from 'sonner';
 
-const LOGO = () => (
-  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto">
-    {/* Logo is loaded dynamically from admin uploads via EvyraLogoMark */}
-    {/* No fallback icon is shown when no logo is uploaded */}
+const EvyraMark = ({ size = 56 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="EVYRA">
+    <path d="M32 6a26 26 0 1 0 22.5 39H46a18 18 0 1 1 0-26h8.5A26 26 0 0 0 32 6Z" fill="#00E6C3"/>
+    <path d="M14 34c4-6 8-6 12 0s8 6 12 0 8-6 12 0" stroke="#00E6C3" strokeWidth="3.2" strokeLinecap="round" fill="none"/>
+  </svg>
+);
+
+const LogoHeader = () => (
+  <div className="flex items-center justify-center gap-3">
+    <EvyraMark size={56} />
+    <div className="text-left">
+      <h1 className="text-4xl font-display font-black uppercase tracking-tighter text-white leading-none">EVYRA</h1>
+      <p className="text-[11px] text-[#00E6C3] font-medium tracking-wide mt-1 italic">Saúde que vem até si</p>
+    </div>
   </div>
 );
 
