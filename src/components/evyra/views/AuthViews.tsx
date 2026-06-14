@@ -55,7 +55,7 @@ export const LoginView = ({
       <div className="w-full max-w-md space-y-8">
         {/* Logo */}
         <div className="text-center space-y-3">
-          <LOGO />
+          <LogoHeader />
           <div>
             <h1 className="text-3xl font-display font-black uppercase tracking-tighter text-white">EVYRA</h1>
             <p className="text-sm text-zinc-400 font-medium mt-1 italic">Saúde que vem até si</p>
@@ -176,7 +176,7 @@ export const RegisterView = ({
     <div className="min-h-screen bg-black flex flex-col items-center justify-center px-5 py-10">
       <div className="w-full max-w-lg space-y-6">
         <div className="text-center space-y-3">
-          <LOGO />
+          <LogoHeader />
           <h1 className="text-3xl font-display font-black uppercase tracking-tighter text-white">Criar Conta</h1>
         </div>
 
