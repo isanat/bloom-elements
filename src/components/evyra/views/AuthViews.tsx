@@ -51,8 +51,8 @@ export const LoginView = ({
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-5 py-4">
-      <div className="w-full max-w-md space-y-4">
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-5 py-10">
+      <div className="w-full max-w-md space-y-8">
         {/* Logo */}
         <div className="text-center space-y-3">
           <LogoHeader />
@@ -63,7 +63,7 @@ export const LoginView = ({
         </div>
 
         {/* Card */}
-        <div className="bg-[#1a1a1a] rounded-2xl p-5 sm:p-6 space-y-4">
+        <div className="bg-[#1a1a1a] rounded-2xl p-6 sm:p-8 space-y-6">
           <div>
             <h2 className="text-xl font-display font-black uppercase tracking-tighter text-white">Entrar na Conta</h2>
             <p className="text-sm text-zinc-400 mt-1">Bem-vindo de volta</p>
@@ -173,8 +173,8 @@ export const RegisterView = ({
   ];
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-5 py-4">
-      <div className="w-full max-w-lg space-y-4">
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-5 py-10">
+      <div className="w-full max-w-lg space-y-6">
         <div className="text-center space-y-3">
           <LogoHeader />
           <h1 className="text-3xl font-display font-black uppercase tracking-tighter text-white">Criar Conta</h1>
@@ -192,7 +192,7 @@ export const RegisterView = ({
           ))}
         </div>
 
-        <div className="bg-[#1a1a1a] rounded-2xl p-5 sm:p-6 space-y-4">
+        <div className="bg-[#1a1a1a] rounded-2xl p-6 sm:p-8 space-y-6">
           {/* Step 1: Role */}
           {step === 1 && (
             <div className="space-y-5">
