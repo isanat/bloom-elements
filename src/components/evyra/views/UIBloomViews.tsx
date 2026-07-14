@@ -16,24 +16,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
 /* ───────────────── 1. COLORS ───────────────── */
+/* EVYRA Organic Green Palette — ported from careapp (evyra.site).
+   Hex values shown are the DARK-mode brand colors (Evyra identity). */
 const swatches = [
-  { name: 'Primary',     varName: '--primary',     hex: '#2563EB' },
-  { name: 'Secondary',   varName: '--secondary',   hex: '#F1F5F9' },
-  { name: 'Accent',      varName: '--accent',      hex: '#F1F5F9' },
-  { name: 'Warning',     varName: '--warning',     hex: '#F59E0B' },
-  { name: 'Background',  varName: '--background',  hex: '#F8FAFC' },
-  { name: 'Foreground',  varName: '--foreground',  hex: '#111827' },
-  { name: 'Muted',       varName: '--muted',       hex: '#F1F5F9' },
-  { name: 'Card',        varName: '--card',        hex: '#FFFFFF' },
-  { name: 'Border',      varName: '--border',      hex: '#E1E7EF' },
-  { name: 'Destructive', varName: '--destructive', hex: '#EF4444' },
-  { name: 'Success',     varName: '--success',     hex: '#10B981' },
-  { name: 'Info',        varName: '--info',        hex: '#0EA5E9' },
+  { name: 'Primary',     varName: '--primary',     hex: '#5AE4A0' },
+  { name: 'Secondary',   varName: '--secondary',   hex: '#1A231B' },
+  { name: 'Accent',      varName: '--accent',      hex: '#1A231B' },
+  { name: 'Warning',     varName: '--warning',     hex: '#C9A96E' },
+  { name: 'Background',  varName: '--background',  hex: '#0D110E' },
+  { name: 'Foreground',  varName: '--foreground',  hex: '#EAE8E0' },
+  { name: 'Muted',       varName: '--muted',       hex: '#1A231B' },
+  { name: 'Card',        varName: '--card',        hex: '#131A14' },
+  { name: 'Border',      varName: '--border',      hex: 'rgba(234,232,224,.12)' },
+  { name: 'Destructive', varName: '--destructive', hex: '#F23D3D' },
+  { name: 'Success',     varName: '--success',     hex: '#1F8A4D' },
+  { name: 'Info',        varName: '--info',        hex: '#3FA67D' },
 ];
 
 export const UIColorsView = () => (
   <div className="space-y-12 animate-fade-in">
-    <SectionHeader title="Paleta de Cores" desc="Tokens semânticos HSL do design system Bloom/EVYRA. Primary: azul #2563EB — usar sempre via classes Tailwind." />
+    <SectionHeader title="Paleta de Cores" desc="Tokens semânticos HSL do design system Bloom/EVYRA. Paleta verde-orgânica (mint green #5AE4A0 sobre #0D110E) — igual ao careapp/evyra.site. Usar sempre via classes Tailwind." />
     <DocCard title="Tokens Principais">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {swatches.map(s => (
@@ -52,9 +54,10 @@ export const UIColorsView = () => (
       <pre className="text-xs bg-muted p-4 rounded-2xl overflow-x-auto font-mono">{`<div className="bg-primary text-primary-foreground" />
 <div className="bg-success text-success-foreground" />
 <div className="bg-warning text-warning-foreground" />
-// HSL no index.css:  --primary: 221 83% 53%;  → #2563EB
-//                    --success: 160 84% 39%;  → #10B981
-//                    --warning:  38 92% 50%;  → #F59E0B`}</pre>
+// HSL no index.css (dark):  --primary: 153 69% 62%;  → #5AE4A0 (mint green)
+//                            --background: 140 13% 6%; → #0D110E (moss black)
+//                            --success: 153 69% 30%;  → #1F8A4D
+//                            --warning:  38 52% 60%;  → #C9A96E (gold)`}</pre>
     </DocCard>
   </div>
 );
